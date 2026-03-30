@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Swarm Simulator - PRO RPG</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap');
+        
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; user-select: none; font-family: 'Nunito', sans-serif; }
+        canvas { display: block; }
+        
+        /* UI GLOBAL */
+        #ui-layer { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;}
+        
+        /* TOP HUD */
+        .top-hud { display: flex; justify-content: space-between; padding: 15px; width: 100%; box-sizing: border-box;}
+        
+        .resource-group { display: flex; flex-direction: column; align-items: flex-start; text-shadow: 2px 2px 0 #000; }
+        .honey-box { display: flex; align-items: center; gap: 10px; font-family: 'Fredoka One', cursive; font-size: 32px; color: #ffeb3b; padding: 5px 20px; background: rgba(0,0,0,0.5); border-radius: 30px; border: 3px solid #ffa000;}
+        
+        .progress-container { width: 350px; height: 25px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 3px solid #4CAF50; margin-top: 10px; position: relative; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #8bc34a, #cddc39); transition: width 0.1s; }
+        .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: white; font-size: 14px; text-shadow: 1px 1px 0 #000; font-weight: bold;}
+
+        /* PERFIL DO JOGADOR & SETTINGS */
+        .profile-container { display: flex; gap: 10px; pointer-events: auto; align-items: flex-start;}
+        .settings-btn { background: #333; border: 2px solid #555; color: white; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; display: none; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;}
+        .settings-btn:hover { background: #E91E63; border-color: #fff; transform: rotate(90deg); }
+
+        .profile-group { background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 15px; border: 2px solid #2196F3; color: white; text-align: right; display: none; flex-direction: column;}
+        .profile-name { font-family: 'Fredoka One', cursive; font-size: 20px; color: #64b5f6; }
+        .logout-btn { background: #f44336; border: none; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 12px;}
+
+        /* BOTTOM HUD */
+        .bottom-hud { display: flex; justify-content: flex-end; padding: 20px; pointer-events: auto; gap: 15px; }
+        button { font-family: 'Fredoka One', cursive; background: #2196F3; border: 4px solid #0b7dda; border-radius: 12px; color: white; font-size: 20px; padding: 10px 25px; cursor: pointer; text-shadow: 1px 1px 0 #000; transition: transform 0.1s; box-shadow: 0 4px 0 #0b7dda; }
+        button:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        button:hover { filter: brightness(1.1); }
+        .btn-shop { background: #E91E63; border-color: #c2185b; box-shadow: 0 4px 0 #c2185b; }
+        .btn-lead { background: #9C27B0; border-color: #7b1fa2; box-shadow: 0 4px 0 #7b1fa2; }
+
+        /* FLOATING TEXT */
+        #floating-texts { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; overflow: hidden; z-index: 5;}
+        .dmg-text { position: absolute; font-family: 'Fredoka One', cursive; font-size: 22px; color: #a8ffb2; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; animation: floatUpVanish 1s cubic-bezier(0.2,0.8,0.2,1) forwards; transform: translate(-50%, -50%); }
+        @keyframes floatUpVanish { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 20% { transform: translate(-50%, -80%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(1); } }
+
+        /* TOAST NOTIFICACOES */
+        #toast-container { position: absolute; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; pointer-events: none;}
+        .toast { padding: 12px 20px; border-radius: 10px; color: white; font-family: 'Fredoka One'; font-size: 14px; text-shadow: 1px 1px 0 #000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); animation: slideInToast 0.3s cubic-bezier(0.2,0.8,0.2,1) forwards, fadeOutToast 0.5s 2.5s forwards; border: 2px solid rgba(255,255,255,0.3);}
+        @keyframes slideInToast { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOutToast { from { opacity: 1; } to { opacity: 0; } }
+
+        /* TELA DE LOGIN (Autenticação) */
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); pointer-events: auto;}
+        .login-box { background: rgba(20, 25, 40, 0.95); border: 4px solid #2196F3; border-radius: 20px; padding: 40px; text-align: center; color: white; width: 350px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);}
+        .login-box h1 { font-family: 'Fredoka One'; color: #ffca28; margin-top: 0;}
+        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid #555; background: #222; color: white; font-size: 16px; box-sizing: border-box; outline: none; font-family: 'Nunito';}
+        .login-input:focus { border-color: #ffeb3b; }
+        .login-btn { width: 100%; background: #4CAF50; border-color: #388E3C; box-shadow: 0 4px 0 #388E3C; padding: 15px; font-size: 18px; margin-top: 10px;}
+
+        /* WRAPPERS DE MODAIS */
+        .modal-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; display: none; justify-content: center; align-items: center; pointer-events: auto; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+
+        /* MODAIS CONTEÚDO */
+        .modal-content { background: rgba(20, 20, 40, 0.95); border: 5px solid #E91E63; border-radius: 20px; width: 780px; padding: 20px; color: white; display: flex; flex-direction: column; align-items: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .modal-content h1 { margin: 0 0 20px 0; font-family: 'Fredoka One', cursive; color: #ffeb3b; text-align: center;}
+        .close-btn { position: absolute; top: 15px; right: 20px; background: #e53935; border: none; font-size: 20px; padding: 5px 15px; box-shadow: none; border-radius: 8px;}
+        
+        .shop-tabs { display: flex; gap: 8px; margin-bottom: 15px; width: 100%; justify-content: center; flex-wrap: wrap;}
+        .shop-tab { background: #333; border: 2px solid #555; padding: 8px 12px; font-size: 13px; box-shadow: none; margin-bottom: 5px; cursor: pointer; color: white;}
+        .shop-tab.active { background: #E91E63; border-color: #ffeb3b; }
+        
+        .shop-section { display: none; width: 100%; height: 480px; overflow-y: auto; justify-content: center; align-content: flex-start; flex-wrap: wrap; gap: 15px; padding-right: 5px;}
+        .shop-section.active { display: flex; }
+        
+        .shop-section::-webkit-scrollbar { width: 8px; }
+        .shop-section::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 4px; }
+        .shop-section::-webkit-scrollbar-thumb { background: #E91E63; border-radius: 4px; }
+
+        .egg-card { background: rgba(0,0,0,0.5); border: 2px solid #555; border-radius: 12px; padding: 15px; text-align: center; width: 150px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; position: relative; overflow: hidden;}
+        .egg-card h3 { margin: 0 0 5px 0; font-size: 14px; }
+        .egg-card .price { color: #ffeb3b; font-weight: bold; margin-bottom: 10px; font-size: 13px;}
+        .egg-card button { width: 100%; font-size: 13px; padding: 8px; margin-top: auto;}
+
+        /* ACH CARD */
+        .ach-card { width: 45%; background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 10px; display: flex; align-items: center; padding: 10px; position: relative;}
+        .ach-icon { font-size: 35px; margin-right: 15px;}
+        .ach-info { display: flex; flex-direction: column; flex-grow: 1;}
+        .ach-title { font-family: 'Fredoka One'; font-size: 15px; color: #ffca28; margin: 0;}
+        .ach-desc { font-size: 12px; color: #ccc; margin: 3px 0 5px 0;}
+        .ach-bar-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; position: relative;}
+        .ach-bar-fill { height: 100%; background: linear-gradient(90deg, #bbdefb, #2196f3); width: 0%;}
+        .ach-tier { position: absolute; top: 10px; right: 10px; font-weight: bold; font-size: 12px; color: #ffca28; background: #333; padding: 2px 5px; border-radius: 5px; border: 1px solid #555;}
+
+        /* GERENCIADOR DE ABELHA (Menu RPG) */
+        #bee-manage-modal { width: 450px; border-color: #ff9800; text-align: center;}
+        .bee-manage-btns { display: flex; gap: 15px; margin-top: 20px; width: 100%; justify-content: center;}
+        .bee-manage-btns button { font-size: 16px; padding: 10px 20px;}
+        .stat-line { display: flex; justify-content: space-between; background: #333; padding: 8px; border-radius: 5px; margin: 5px 0;}
+
+        /* PAINEL ADMIN E SETTINGS */
+        .adm-box { background: #222; padding: 15px; border-radius: 8px; width: 100%; margin-bottom: 15px;}
+        .adm-input { width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; border-radius: 5px; outline: none;}
+        .player-row { display: flex; justify-content: space-between; background: #444; padding: 10px; margin-bottom: 5px; border-radius: 5px;}
+
+        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: rgba(255,255,255,0.8); border-radius: 50%; pointer-events: none; mix-blend-mode: difference; z-index: 5;}
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>Bee Swarm World</h1>
+            <p style="color:#ccc; font-size: 14px; margin-bottom:20px;">Crie seu perfil global na nuvem.</p>
+            <input type="text" id="log-user" class="login-input" placeholder="Nome de Jogador" autocomplete="off">
+            <input type="password" id="log-pass" class="login-input" placeholder="Sua Senha" autocomplete="off">
+            <button class="login-btn" onclick="attemptLogin()">Jogar / Entrar</button>
+        </div>
+    </div>
+
+    <div id="ui-layer">
+        <div class="top-hud">
+            <div class="resource-group">
+                <div class="honey-box">🍯 <span id="honey-val">0</span></div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="pollen-bar"></div>
+                    <div class="progress-text" id="pollen-val">0 / 200</div>
+                </div>
+            </div>
+            
+            <div class="profile-container">
+                <button class="settings-btn" id="btn-settings" onclick="openSettings()">⚙️</button>
+                <div class="profile-group" id="profile-panel">
+                    <div class="profile-name" id="hud-username">Jogador</div>
+                    <button class="logout-btn" onclick="logout()">Sair</button>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-hud">
+            <button class="btn-lead" onclick="openLeaderboard()">🏆 Leaderboard</button>
+            <button class="btn-shop" onclick="openShop()">🛒 Loja Global</button>
+            <button onclick="makeHoneyBtn()" style="background:#ff9800; border-color:#f57c00; box-shadow: 0 4px 0 #f57c00;">🐝 Fazer Mel (E)</button>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <div id="floating-texts"></div>
+    <div id="crosshair"></div>
+
+    <!-- WRAPPER CONFIGURACOES -->
+    <div id="settings-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 450px; text-align:center;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color:#2196F3;">Configurações</h1>
+            
+            <div style="background:#222; padding:15px; border-radius:10px; width:100%; box-sizing:border-box; margin-bottom:15px; text-align:left;">
+                <h3 style="margin-top:0;">Como Jogar</h3>
+                <p style="font-size:13px; color:#aaa; line-height:1.5;">Ande com <strong>WASD</strong>. Colete pólen se aproximando das flores coloridas na grama e segurando o <strong>MOUSE ESQUERDO</strong>.<br>As suas abelhas ajudarão automaticamente nos campos em que você estiver! Converta pólen em mel clicando em "Fazer Mel" no centro da placa flutuante azul da sua colmeia nas costas.<br>Compre mais abelhas, atualize o nível delas e destrave as recompensas!</p>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#333; padding:10px; border-radius:8px;">
+                <span style="font-weight:bold;">Efeitos Sonoros (Volume):</span>
+                <input type="range" min="0" max="1" step="0.1" value="0.5" id="vol-slider" onchange="adjustVolume(this.value)">
+            </div>
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#333; padding:10px; border-radius:8px;">
+                <span style="font-weight:bold;">Exibir Notificações Pop-up:</span>
+                <input type="checkbox" checked id="notif-toggle" onchange="toggleNotifs(this.checked)" style="transform: scale(1.5);">
+            </div>
+            <hr style="border-color:#555; width:100%; margin:20px 0;">
+            <button style="background:#f44336; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c; width:100%; font-size:16px;" onclick="hardResetAccount()">🚨 DELETAR MEU SALVAMENTO</button>
+        </div>
+    </div>
+
+    <!-- LOJA GLOBAL WRAPPER -->
+    <div id="shop-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1>Loja Global & RPG</h1>
+            
+            <div class="shop-tabs" id="shop-tabs-container">
+                <button class="shop-tab active" onclick="switchShopTab('tab-tools', event)">Apanhadores</button>
+                <button class="shop-tab" onclick="switchShopTab('tab-packs', event)">Mochilas (Extensas)</button>
+                <button class="shop-tab" onclick="switchShopTab('tab-eggs', event)">Incubadora Surpresa</button>
+                <button class="shop-tab" onclick="switchShopTab('tab-bees', event)">Catálogo Instantâneo</button>
+                <button class="shop-tab" onclick="switchShopTab('tab-hive', event)">Melhorias (Favos/Global)</button>
+                <button class="shop-tab" style="background:#FFD700; color:black;" onclick="switchShopTab('tab-achievements', event)">🏆 Conquistas Totais</button>
+            </div>
+
+            <!-- APANHADORES -->
+            <div id="tab-tools" class="shop-section active">
+                <div class="egg-card" style="border-color:#4CAF50;"><div style="font-size:40px;">✂️</div><h3>Tesoura Podadoura</h3><div class="price">200 Mel</div><div style="font-size:12px;color:#aaa;">+5 Poder</div><button onclick="buyTool(200, 5, 'Tesoura Podadoura', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#2196F3;"><div style="font-size:40px;">🧹</div><h3>Aspirador Turbinado</h3><div class="price">8.000 Mel</div><div style="font-size:12px;color:#aaa;">+100 Poder</div><button onclick="buyTool(8000, 100, 'Aspirador Turbinado', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#E91E63;"><div style="font-size:40px;">🧲</div><h3>Ímã Floral</h3><div class="price">45.000 Mel</div><div style="font-size:12px;color:#aaa;">+1.500 Poder</div><button onclick="buyTool(45000, 1500, 'Ímã Floral', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#aa00fa;"><div style="font-size:40px;">⚡</div><h3>Extrator N.5</h3><div class="price">200.000 Mel</div><div style="font-size:12px;color:#aaa;">+5.000 Poder</div><button onclick="buyTool(200000, 5000, 'Extrator N.5', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#ffeb3b;"><div style="font-size:40px;">🌞</div><h3>Trator Solar</h3><div class="price">5.000.000 Mel</div><div style="font-size:12px;color:#aaa;">+100.000 Poder</div><button onclick="buyTool(5000000, 100000, 'Trator Solar', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#ff0000;"><div style="font-size:40px;">🔥</div><h3>Feixe Alpha</h3><div class="price">50.000.000 Mel</div><div style="font-size:12px;color:#aaa;">+1.000.000 Poder</div><button onclick="buyTool(50000000, 1000000, 'Feixe Alpha', this)">Incrementar</button></div>
+                
+                <!-- Novas Ferramentas Master-Tier -->
+                <div class="egg-card" style="border-color:#8e24aa;"><div style="font-size:40px;">🌌</div><h3>Matéria Escura</h3><div class="price">500 Milhões Mel</div><div style="font-size:12px;color:#aaa;">+10 Milhões Pod</div><button onclick="buyTool(500000000, 10000000, 'Matéria Escura', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#00b0ff;"><div style="font-size:40px;">🌀</div><h3>Anomalia Quântica</h3><div class="price">5 Bilhões Mel</div><div style="font-size:12px;color:#aaa;">+100 Milhões Pod</div><button onclick="buyTool(5000000000, 100000000, 'Anomalia Quântica', this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#ffd600;"><div style="font-size:40px;">⚡</div><h3>Poder Divino</h3><div class="price">50 Bilhões Mel</div><div style="font-size:12px;color:#aaa;">+1 Bilhão Poder</div><button onclick="buyTool(50000000000, 1000000000, 'Poder Divino', this)">Incrementar</button></div>
+            </div>
+
+            <!-- MOCHILAS (+ 9 Adicionais gigantes) CLARAMENTE CENTRALIZADAS AGORA -->
+            <div id="tab-packs" class="shop-section">
+                <div class="egg-card"><div style="font-size:40px;">🎒</div><h3>Pote Celofane</h3><div class="price">500 Mel</div><div style="font-size:12px;color:#aaa;">+500 Cap</div><button onclick="buyBackpack(500, 500, this)">Incrementar</button></div>
+                <div class="egg-card"><div style="font-size:40px;">🛢️</div><h3>Barril Básico</h3><div class="price">2.500 Mel</div><div style="font-size:12px;color:#aaa;">+1.500 Cap</div><button onclick="buyBackpack(2500, 1500, this)">Incrementar</button></div>
+                <div class="egg-card"><div style="font-size:40px;">📦</div><h3>Contêiner A2</h3><div class="price">15.000 Mel</div><div style="font-size:12px;color:#aaa;">+10.000 Cap</div><button onclick="buyBackpack(15000, 10000, this)">Incrementar</button></div>
+                <div class="egg-card"><div style="font-size:40px;">🚀</div><h3>Tanque Quantum</h3><div class="price">50.000 Mel</div><div style="font-size:12px;color:#aaa;">+100.000 Cap</div><button onclick="buyBackpack(50000, 100000, this)">Incrementar</button></div>
+                <div class="egg-card"><div style="font-size:40px;">🌌</div><h3>Buraco Negro</h3><div class="price">2.000.000 Mel</div><div style="font-size:12px;color:#aaa;">+10 Milhões Cap</div><button onclick="buyBackpack(2000000, 10000000, this)">Incrementar</button></div>
+                <div class="egg-card"><div style="font-size:40px;">♾️</div><h3>Mochila Insana</h3><div class="price">150.000.000 Mel</div><div style="font-size:12px;color:#aaa;">+1 Bilhão Cap</div><button onclick="buyBackpack(150000000, 1000000000, this)">Incrementar</button></div>
+                
+                <!-- Novos 9 Tiers -->
+                <div class="egg-card" style="border-color:#bcaaa4;"><div style="font-size:40px;">🕳️</div><h3>Vácuo Pessoal</h3><div class="price">1 Bilhão Mel</div><div style="font-size:12px;color:#aaa;">+10 Bilhões Cap</div><button onclick="buyBackpack(1000000000, 10000000000, this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#81d4fa;"><div style="font-size:40px;">🌟</div><h3>Sifão Estelar</h3><div class="price">5 Bilhões Mel</div><div style="font-size:12px;color:#aaa;">+50 Bilhões Cap</div><button onclick="buyBackpack(5000000000, 50000000000, this)">Incrementar</button></div>
+                <div class="egg-card" style="border-color:#ce93d8;"><div style="font-size:40px;">🛸</div><h3>Bolsa Galáctica</h3><div class="price">20 Bilhões Mel</div><div style="font-size:12px;color:#aaa;">+250 Bilhões Cap</div><button onclick="buyBackpack(20000000000, 250000000000, this)">Incrementar</button></div>
+                <!-- <div class="egg-card" style="border-color:#f48fb1;"><div style="font-size:40px;">🌀</div><h3>Saco Domínio</h3><div class="price">100 Bilhões Mel</div><div style="font-size:12px;color:#aaa;">+1 Trilhão Cap</div><button onclick="buyBackpack(100000000000, 1000000000000, this)">Incrementar</button></div> -->
+                <!-- <div class="egg-card" style="border-color:#ef9a9a;"><div style="font-size:40px;">🗜️</div><h3>Compressor X</h3><div class="price">500 Bilhões Mel</div><div style="font-size:12px;color:#aaa;">+10 Trilhões Cap</div><button onclick="buyBackpack(500000000000, 10000000000000, this)">Incrementar</button></div> -->
+                <!-- <div class="egg-card" style="border-color:#90caf9;"><div style="font-size:40px;">⚫</div><h3>Singularidade</h3><div class="price">2 Trilhões Mel</div><div style="font-size:12px;color:#aaa;">+50 Trilhões Cap</div><button onclick="buyBackpack(2000000000000, 50000000000000, this)">Incrementar</button></div> -->
+                <!-- <div class="egg-card" style="border-color:#a5d6a7;"><div style="font-size:40px;">🚀</div><h3>Motor Dobra</h3><div class="price">10 Trilhões Mel</div><div style="font-size:12px;color:#aaa;">+250 Trilhões Cap</div><button onclick="buyBackpack(10000000000000, 250000000000000, this)">Incrementar</button></div> -->
+                <!-- <div class="egg-card" style="border-color:#fff59d;"><div style="font-size:40px;">🌌</div><h3>Receptáculo Uni</h3><div class="price">50 Trilhões Mel</div><div style="font-size:12px;color:#aaa;">+1 Quatrilhão Cap</div><button onclick="buyBackpack(50000000000000, 1000000000000000, this)">Incrementar</button></div> -->
+                <!-- <div class="egg-card" style="border-color:#ffab91;"><div style="font-size:40px;">👑</div><h3>Mochila ÔMEGA</h3><div class="price">250 Trilhões Mel</div><div style="font-size:12px;color:#aaa;">+10 Quatrilhões Cap</div><button onclick="buyBackpack(250000000000000, 10000000000000000, this)">Incrementar</button></div> --> 
+            </div>
+
+            <!-- OVOS -->
+            <div id="tab-eggs" class="shop-section">
+                <div class="egg-card" style="border-color:#CD7F32;"><div style="font-size:40px;">🥚</div><h3>Ovo Cobre Básico</h3><div class="price">200 Mel</div><button style="background:#CD7F32;" onclick="buyRandomEgg('basic', 200)">Comprar Ovo</button></div>
+                <div class="egg-card" style="border-color:#C0C0C0;"><div style="font-size:40px;">🥈</div><h3>Ovo Prata Incomum</h3><div class="price">1.500 Mel</div><button style="background:#C0C0C0;" onclick="buyRandomEgg('rare', 1500)">Comprar Ovo</button></div>
+                <div class="egg-card" style="border-color:#FFD700;"><div style="font-size:40px;">🌟</div><h3>Ovo Ouro Épico</h3><div class="price">10.000 Mel</div><button style="background:#FFD700;" onclick="buyRandomEgg('epic', 10000)">Comprar Ovo</button></div>
+                <div class="egg-card" style="border-color:#aa00fa;"><div style="font-size:40px;">🔮</div><h3>Ovo Magia Mítico</h3><div class="price">50.000 Mel</div><button style="background:#aa00fa;" onclick="buyRandomEgg('mythic', 50000)">Comprar Ovo</button></div>
+                <div class="egg-card" style="border-color:#ff4500;"><div style="font-size:40px;">🐉</div><h3>Ovo Mestre Lendário</h3><div class="price">500.000 Mel</div><button style="background:#ff4500;" onclick="buyRandomEgg('legendary', 500000)">Comprar Ovo</button></div>
+            </div>
+
+            <!-- ABELHAS DIRETAS CENTRALIZADAS -->
+            <div id="tab-bees" class="shop-section">
+                <!-- Gerado Via DB Virtual Dinâmico -->
+            </div>
+
+            <!-- HIVE E UPGRADE GLOBAL PERFEITAMENTE CENTRALIZADOS -->
+            <div id="tab-hive" class="shop-section" style="flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 40px; padding: 20px 0;">
+                <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
+                    <h2 style="color: #4CAF50; margin-top:0;">🎓 Treinar Exército Total</h2>
+                    <p style="color:#ccc; text-align:center;">Aumenta +1 Nível de TODAS as suas abelhas de forma instantânea na colmeia.<br>O mel será debitado automaticamente em massa dependendo dos níveis individuais!</p>
+                    <button style="background: #4CAF50; padding: 15px 40px; font-size: 20px; border-color:#2E7D32;" onclick="upgradeAllBeesGlobal()">Subir Nível do Enxame Todo</button>
+                </div>
+
+                <div style="width: 80%; height: 2px; background: #555;"></div>
+
+                <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
+                    <h2 style="color: #ffca28; margin-top:0;">Expansão Base Favo</h2>
+                    <p style="text-align:center;">Compre gavetas vazias espaciais. O preço sobe a cada unidade.</p>
+                    <div style="font-size: 60px; margin: 10px 0;">⬡</div>
+                    <h3 style="margin-top:0;">Investimento Favo: <span id="slot-price-txt" style="color:#ffeb3b;">100.000</span> Mel</h3>
+                    <button style="background: #ff9800; padding: 10px 30px; font-size: 20px;" onclick="buyHiveSlot()">Adquirir Novo Buraco</button>
+                </div>
+            </div>
+
+            <!-- CONQUISTAS RPG -->
+            <div id="tab-achievements" class="shop-section">
+                <!-- Preenchimento Automático dos 50 Cards -->
+            </div>
+            
+            <div id="tab-admin" class="shop-section" style="flex-direction: column; align-items: center; justify-content: flex-start;">
+                <h2 style="color:#f44336; margin-top:0;">🔧 Server Console (Atlas)</h2>
+                <div class="adm-box" style="display:flex; flex-direction:column; align-items:center; width: 100%; max-width: 400px; padding: 20px;">
+                    <input type="number" id="adm-mel" class="adm-input" placeholder="Injetar Mel Direto" style="text-align:center;">
+                    <button style="width:100%; margin-bottom:15px;" onclick="adminAction('honey')">Hackeamento de Mel</button>
+                    <input type="number" id="adm-polen" class="adm-input" placeholder="Injetar Pólen Máximo" style="text-align:center;">
+                    <button style="width:100%; margin-bottom:15px;" onclick="adminAction('pollen')">Hackeamento de Pólen</button>
+                    <input type="number" id="adm-slots" class="adm-input" placeholder="Atribuir Vários Slots Reais" style="text-align:center;">
+                    <button style="width:100%; margin-bottom:15px;" onclick="adminAction('slots')">Burlar Casulos (Slots)</button>
+                    
+                    <button style="width:100%; background:#2196F3; border-color:#0b7dda; margin-top: 15px;" onclick="adminLoadUsers()">Carregar Contas Servidor</button>
+                </div>
+                <!-- Div onde exibiremos os usuários com opção de Wipe -->
+                <div id="db-viewer" style="width:100%; max-width: 600px; display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOX DE GERENCIAR CLIQUE UNICO ABELHA -->
+    <div id="bee-manage-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" id="bee-manage-modal">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h2 id="bm-title" style="margin-top:0; color:#ffca28;">Painel Tático da Abelha</h2>
+            <div style="font-size:80px;" id="bm-icon">🐝</div>
+            <h3 style="color:#fff; margin:5px 0;">Ranking Nível <span id="bm-lvl" style="color:#2196F3;">1</span></h3>
+            
+            <div style="width: 100%; text-align: left; margin-top:15px; border:2px solid #555; padding:10px; border-radius:10px; box-sizing:border-box;">
+                <div class="stat-line"><span>Força Arrasto Biológico:</span><strong id="bm-pow" style="color:#a8ffb2;">10</strong></div>
+                <div class="stat-line"><span>Síntese de Néctar p/ Mel:</span><strong id="bm-conv" style="color:#ffeb3b;">5</strong></div>
+            </div>
+            
+            <div class="bee-manage-btns">
+                <button style="background: #4CAF50; width:60%;" onclick="confirmUpgradeBee()" id="btn-upgrade">Eletrizar Nível (+)</button>
+                <button style="background: #f44336; width:40%;" onclick="confirmSellBee()">Aposentar/Venda</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD RANK -->
+    <div id="leaderboard-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 500px;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color: #64b5f6; text-align:center; width:100%;">🏆 Elite Global de Caçadores</h1>
+            <p style="text-align:center; color:#aaa; font-size:12px; margin-top:-10px;">Comunicação em tempo real c/ servidor Nuvem - 10s.</p>
+            <div id="lb-content" style="width: 100%; display:flex; flex-direction:column; gap:10px; margin-top:20px; max-height:450px; overflow-y:auto; padding-right:10px;">
+                <!-- Carregado Cloud via Supabase -->
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/+esm"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { createClient } from '@supabase/supabase-js';
+
+        // =====================================
+        // CORE DB, ACCOUNT & STATUS GLOBAIS
+        // =====================================
+        let currentUser = null;
+        let isGameActive = false;
+
+        const SUPABASE_URL = "https://xjgdtwevqrrnorgzelrz.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZ2R0d2V2cXJybm9yZ3plbHJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMzk3ODAsImV4cCI6MjA4OTYxNTc4MH0.XGmwAxTNWghMRzTDMZvu5IXHmHy_7Xw54RjdPzqa-Dw";
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const state = {
+            honey: 0,
+            pollen: 0,
+            capacity: 200,
+            mouseHold: false,
+            hiveConvertMode: false,
+            honeyZoneAnim: null,
+            slotPriceBase: 100000,
+            slotMultiplier: 1.005,
+            extraSlotsBought: 0,
+            targetBeeRef: null,
+            // Tracking pra 50 Tiers Achievements
+            achTracking: { totalPollen: 0, totalHoney: 0 },
+            achProgress: [], 
+            volGlobal: 0.5,
+            notifsEnabled: true
+        };
+
+        const fN = (n) => {
+            if(n < 1000) return Math.floor(n).toString();
+            if(n >= 1e18) return (n/1e18).toFixed(2) + " Qi";
+            if(n >= 1e15) return (n/1e15).toFixed(2) + " Qa";
+            if(n >= 1e12) return (n/1e12).toFixed(2) + " Tri";
+            return Math.floor(n).toLocaleString('pt-BR');
+        };
+
+        // =====================================
+        // AUDIO SYSTEM ENGINE AVANÇADA
+        // =====================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration, volBase=0.1, slideFreq=null) {
+            if(state.volGlobal === 0) return;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; 
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            if(slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, audioCtx.currentTime + duration);
+            
+            const finalVol = volBase * (state.volGlobal * 2);
+            gain.gain.setValueAtTime(finalVol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }
+
+        const SFX = {
+            step: () => playTone(120, 'triangle', 0.1, 0.01),
+            jump: () => playTone(300, 'sine', 0.3, 0.05, 600),
+            collectPlayer: () => playTone(800, 'square', 0.1, 0.02),
+            collectBee: () => playTone(1500, 'sine', 0.05, 0.01),
+            honey: () => playTone(500, 'sine', 0.1, 0.05, 800),
+            buy: () => playTone(1000, 'triangle', 0.5, 0.1, 2000),
+            error: () => playTone(150, 'sawtooth', 0.3, 0.08, 100),
+            click: () => playTone(900, 'square', 0.05, 0.04),
+            upgrade: () => playTone(1200, 'sine', 0.6, 0.1, 3000)
+        };
+
+        document.querySelectorAll('button').forEach(btn => { btn.addEventListener('pointerdown', () => SFX.click()); });
+        window.addEventListener('mousedown', () => { if(audioCtx.state === 'suspended') audioCtx.resume(); });
+        window.addEventListener('keydown', () => { if(audioCtx.state === 'suspended') audioCtx.resume(); });
+
+        window.adjustVolume = (val) => { state.volGlobal = parseFloat(val); SFX.click(); }
+        window.toggleNotifs = (val) => { state.notifsEnabled = val; SFX.click(); }
+
+        // =====================================
+        // DATA DAS ABELHAS (50 Variantes RNG)
+        // =====================================
+        const BeeCategories = ['basic', 'rare', 'epic', 'mythic', 'legendary'];
+        const CatStats = {
+            basic:     { minPow: 1, maxPow: 3, minConv: 1, maxConv: 2, cols: [0xFFF176, 0xFFE082, 0xFFCC80], icon: '🐝', cName: 'Básica', cost: 1000, baseLvl: 1000 },
+            rare:      { minPow: 5, maxPow: 12, minConv: 4, maxConv: 8, cols: [0x4FC3F7, 0x29B6F6, 0x03A9F4], icon: '🌀', cName: 'Rara Prata', cost: 5000, baseLvl: 2500 },
+            epic:      { minPow: 20, maxPow: 45, minConv: 15, maxConv: 30, cols: [0xBA68C8, 0xAB47BC, 0x9C27B0], icon: '🌸', cName: 'Épica Ouro', cost: 25000, baseLvl: 5000 },
+            mythic:    { minPow: 80, maxPow: 150, minConv: 60, maxConv: 90, cols: [0x7E57C2, 0x673AB7, 0x512DA8], icon: '🌌', cName: 'Mítica Sagrada', cost: 150000, baseLvl: 15000 },
+            legendary: { minPow: 300, maxPow: 600, minConv: 200, maxConv: 450, cols: [0xFF5722, 0xF44336, 0xD32F2F], icon: '🔥', cName: 'Criatura Lendária', cost: 1000000, baseLvl: 50000 }
+        };
+
+        const BeeTypes = {};
+        const NamesDB = ["Zangão","Operária","Ventania","Brisa","Cristalina","Zumbido","Sombra Alada","Aura","Folha Viva","Lâmina Rápida"];
+        
+        const catalogDiv = document.getElementById('tab-bees');
+        
+        BeeCategories.forEach(cat => {
+            for(let i=0; i<10; i++) {
+                const id = `${cat}_${i}`;
+                const st = CatStats[cat];
+                const rColor = st.cols[i % st.cols.length];
+                const pow = Math.floor(st.minPow + (st.maxPow - st.minPow) * (i / 9.0));
+                const conv = Math.floor(st.minConv + (st.maxConv - st.minConv) * (i / 9.0));
+                const beeCost = st.cost + (i * st.cost * 0.1);
+                
+                const bParams = { id: id, category: cat, name: `${NamesDB[i]} ${st.cName}`, color: rColor, convertSpeed: conv, collectPow: pow, speed: 10 + (i*2), icon: st.icon, specificCost: beeCost, lvlBasePrc: st.baseLvl };
+                BeeTypes[id] = bParams;
+                
+                catalogDiv.innerHTML += `
+                    <div class="egg-card" style="border-color:#${bParams.color.toString(16).padStart(6, '0')};">
+                        <div style="font-size:35px;">${bParams.icon}</div>
+                        <h3 style="font-size:12px; margin-top:5px;">${bParams.name}</h3>
+                        <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Poder:${fN(bParams.collectPow)} / Mel:${fN(bParams.convertSpeed)}</div>
+                        <div class="price" style="font-size:11px;">$ ${fN(bParams.specificCost)}</div>
+                        <button onclick="buySpecificBee('${bParams.id}', ${bParams.specificCost})" style="font-size:12px; padding:5px;">Assinar Contrato</button>
+                    </div>
+                `;
+            }
+        });
+
+        // =====================================
+        // ENGINE DE CONQUISTAS RPG (50 Tiers Complexos)
+        // =====================================
+        const achTemplates = [];
+        const TitlesP = ["Acumulador Cobre", "Rei da Flora", "Dominante da Relva", "Ceifador de Matérias", "Deus do Canteiro", "Arauto do Substrato", "Entidade Coletora", "Astro do Pólen", "Mestre Botânico", "O Quatrilionário do Pólen"];
+        const TitlesH = ["Calouro do Nectar", "Líquido Dourado", "Gestor Fabril", "Fábrica Viva", "Magnata Melado", "Senhor da Geleia", "Arquimago Culinário", "Titã Hexagonal", "Emperador do Açúcar", "Divindade Enzimiática"];
+        const TitlesB = ["Iniciante Solitário", "Pequeno Enxame", "Bando Barulhento", "Sociedade Armada", "Nação Zumbidora", "Exército Aéreo", "Legião Hexagonal", "Regimento Alfa", "Ordem Alada", "Deus das Espécies"];
+        const TitlesL = ["Mascote Aprovado", "Batedor Sênior", "Operário Especialista", "Comandante Aéreo", "Patriarca Celular", "Anomalia Genética", "Mitologia Evoluída", "Lendário Ascensionado", "Transcendente Nv.90", "Omega Absoluto Max."];
+        const TitlesS = ["Pedreiro Básico", "Arquiteto Amador", "Engenheiro Expandido", "Proprietário Pleno", "Magnata do Lote", "Senhor Domiciliar", "Urbanista Hex", "Monopolista de Favos", "Domínio Geométrico", "Matriz Infinita"];
+
+        for(let i=0; i<10; i++) {
+            achTemplates.push({ id:`poll_${i}`, name: TitlesP[i], desc: `Rastreio Total de Pólen Farmado`, type: 'pollen', base: Math.pow(10, i+3), cur:0 });
+            achTemplates.push({ id:`hon_${i}`, name: TitlesH[i], desc: `Acúmulo Biológico Total de Mel Feito`, type: 'honey', base: Math.pow(10, i+3), cur:0 });
+            achTemplates.push({ id:`bee_${i}`, name: TitlesB[i], desc: `Exército Físico Existente Simultâneo`, type: 'beeCount', base: (i+1)*5, cur:0 });
+            achTemplates.push({ id:`lvl_${i}`, name: TitlesL[i], desc: `Registrar Nível Massivo em Abelha Única`, type: 'maxLevel', base: (i+1)*10, cur:0 });
+            achTemplates.push({ id:`slt_${i}`, name: TitlesS[i], desc: `Quantidade Final de Espaços (Favos)`, type: 'slots', base: 21 + (i*10), cur:0 });
+        } // 5*10 = 50 templates totais incrustrados
+
+        // Start Array Progress local c/ Zeroes safe
+        for(let a=0; a<50; a++) { state.achProgress.push(0); }
+
+        function renderAchievements() {
+            let html = "";
+            let globalLevels = Array.from(bees).map(b => b.level);
+            let maxBLevel = globalLevels.length > 0 ? Math.max(...globalLevels) : 0;
+            
+            achTemplates.forEach((ach, index) => {
+                let tierProg = state.achProgress[index] || 0;
+                let reqTotal = ach.base * Math.pow(1.5, tierProg); // Escala para até 20 tiers invisiveis por card
+                let varCompare = 0;
+                
+                if(ach.type === 'pollen') varCompare = state.achTracking.totalPollen;
+                if(ach.type === 'honey') varCompare = state.achTracking.totalHoney;
+                if(ach.type === 'beeCount') varCompare = bees.length;
+                if(ach.type === 'maxLevel') varCompare = maxBLevel;
+                if(ach.type === 'slots') varCompare = hiveSlots.length;
+                
+                // Valida Check e Evolui
+                while(varCompare >= reqTotal && tierProg < 20) {
+                    tierProg++;
+                    state.achProgress[index] = tierProg;
+                    reqTotal = ach.base * Math.pow(1.5, tierProg);
+                    showToast(`⭐ Conquista Elevada: [${ach.name}] - TIER ${tierProg}!`, 'info');
+                    SFX.upgrade();
+                }
+
+                let pct = (varCompare / reqTotal) * 100;
+                if(pct > 100) pct = 100; if(tierProg>=20) pct = 100;
+
+                const ico = ach.type==='pollen'?'🏵️': (ach.type==='honey'?'🍯':'🥇');
+                const lockOpacity = tierProg === 0 && pct < 5 ? 0.4 : 1; 
+                
+                html += `
+                    <div class="ach-card" style="opacity: ${lockOpacity}">
+                        <div class="ach-tier">${tierProg}/20 Nvs</div>
+                        <div class="ach-icon">${ico}</div>
+                        <div class="ach-info">
+                            <h4 class="ach-title">${ach.name}</h4>
+                            <p class="ach-desc">${ach.desc} (Proximo: ${fN(reqTotal)})</p>
+                            <div class="ach-bar-bg"><div class="ach-bar-fill" style="width:${pct}%;"></div></div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('tab-achievements').innerHTML = html;
+        }
+
+        // =====================================
+        // BACKEND UI & TOAST NOTIFS
+        // =====================================
+        function showToast(msg, type='info') {
+            if(!state.notifsEnabled) return;
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.style.background = type==='error'? 'linear-gradient(135deg, #f44336, #b71c1c)' : (type==='success'?'linear-gradient(135deg, #4CAF50, #1B5E20)':'linear-gradient(135deg, #2196F3, #0D47A1)');
+            t.innerText = msg;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => { if(t.parentNode) t.remove(); }, 3500);
+        }
+
+        window.attemptLogin = async () => {
+            const user = document.getElementById('log-user').value.trim();
+            const pass = document.getElementById('log-pass').value.trim();
+            if(!user || !pass) return showToast("Por favor, preencha todos os campos!", "error");
+
+            const btn = document.querySelector('.login-btn');
+            btn.innerText = "Sincronizando Nuvem..."; btn.disabled = true;
+
+            try {
+                const { data: existing, error } = await supabase.from('bss_players').select('*').eq('username', user).single();
+                let p;
+                if (existing) {
+                    if (existing.password !== pass) {
+                        showToast("Senha de acesso criptografada negada!", "error");
+                        btn.innerText = "Jogar / Entrar"; btn.disabled = false;
+                        return;
+                    }
+                    p = existing.data;
+                } else {
+                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], tracking: {totalPollen:0, totalHoney:0}, achv: Array(50).fill(0) };
+                    const { error: insErr } = await supabase.from('bss_players').insert([{ username: user, password: pass, data: p }]);
+                    if (insErr) { showToast("Crie a tabela 'bss_players' (username, password, data jsonb) no Supabase!", "error"); btn.disabled=false; return; }
+                    showToast(`Credenciais novas aceitas: ${user}`, "success");
+                }
+
+                currentUser = user;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('profile-panel').style.display = 'flex';
+                document.getElementById('btn-settings').style.display = 'flex';
+                document.getElementById('hud-username').innerText = currentUser;
+                
+                if (currentUser === 'Atlas' && pass === '2203') {
+                    const aT = document.createElement('button');
+                    aT.className = 'shop-tab'; aT.style.background = '#f44336'; aT.innerText = 'Admin Painel';
+                    aT.onclick = (e) => switchShopTab('tab-admin', e);
+                    document.getElementById('shop-tabs-container').appendChild(aT);
+                }
+
+                applyLoadedData(p);
+                isGameActive = true; SFX.buy(); showToast(`Nuvem Carregada. Preparar turbinas!`);
+            } catch (err) {
+                showToast("Falha global. Verifique console e as Rules do Supabase.", "error");
+                btn.innerText = "Jogar / Entrar"; btn.disabled = false;
+            }
+        }
+
+        window.hardResetAccount = async () => {
+            if(confirm("TEM CERTEZA ABSOLUTA? Seus trilhões vão pro saco, sua conta começa do zero permanentemente!")) {
+                state.honey = 0; state.pollen = 0; state.capacity = 200; state.extraSlotsBought = 0;
+                state.achTracking.totalPollen=0; state.achTracking.totalHoney=0; state.achProgress.fill(0);
+                player.power = 10;
+                bees.forEach(b => scene.remove(b.group)); bees.length = 0;
+                hiveSlots.forEach(s => { s.occupied = false; s.beeRef = null; s.hexMesh.material.opacity = 0.25; s.hexMesh.material.transparent = true; });
+                hiveSlots.length = 0; hiveGroup.clear();
+                
+                buildHiveBase(); spawnStarterBee(); updateUI();
+                await saveGameToLocal();
+                showToast("A Memória foi oblidterada. Bom recomeço.", "error");
+                window.closeAllModals();
+            }
+        }
+
+        window.logout = async () => { await saveGameToLocal(); location.reload(); }
+
+        async function saveGameToLocal() {
+            if(!currentUser) return;
+            const updatedData = {
+                honey: state.honey, pollen: state.pollen, capacity: state.capacity,
+                power: player.power, extraSlots: state.extraSlotsBought,
+                tracking: state.achTracking, achv: state.achProgress,
+                bees: bees.map(b => ({ id: b.type.id, index: b.slot.index, level: b.level }))
+            };
+            await supabase.from('bss_players').update({ data: updatedData }).eq('username', currentUser);
+        }
+
+        function applyLoadedData(p) {
+            state.honey = p.honey || 0; state.pollen = p.pollen || 0; state.capacity = p.capacity || 200;
+            player.power = p.power || 10; state.extraSlotsBought = p.extraSlots || 0;
+            state.achTracking = p.tracking || {totalPollen:0, totalHoney:0};
+            if(p.achv) state.achProgress = p.achv;
+
+            bees.forEach(b => scene.remove(b.group)); bees.length = 0;
+            hiveSlots.forEach(s => { s.occupied = false; s.beeRef = null; s.hexMesh.material.opacity = 0.25; s.hexMesh.material.transparent = true; });
+            while(hiveSlots.length < 21 + state.extraSlotsBought) { addHexSlot(hiveSlots.length); }
+
+            if(p.bees) {
+                p.bees.forEach(bData => {
+                    let slot = hiveSlots.find(s => s.index === bData.index);
+                    if(slot) bees.push(new Bee(BeeTypes[bData.id], slot, bData.level));
+                });
+            }
+            if(bees.length === 0) spawnStarterBee();
+            updateUI(); renderAchievements();
+        }
+
+        setInterval(async () => {
+            if(isGameActive && currentUser) {
+                await saveGameToLocal();
+                if(document.getElementById('leaderboard-modal-wrapper').style.display === 'flex') populateLeaderboard();
+            }
+        }, 10000);
+
+        // =====================================
+        // THREE.JS CONFIGURAÇÃO DO MUNDO
+        // =====================================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.FogExp2(0x87CEEB, 0.005);
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffee, 1.2);
+        dirLight.position.set(100, 150, 50); dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048; dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.far = 150; dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.left = -60; dirLight.shadow.camera.right = 60;
+        dirLight.shadow.camera.top = 60; dirLight.shadow.camera.bottom = -60;
+        scene.add(dirLight);
+
+        const mats = {
+            grass: new THREE.MeshStandardMaterial({ color: 0x5cb85c, roughness: 1 }),
+            hive: new THREE.MeshStandardMaterial({ color: 0xFFCA28, roughness: 0.4 }),
+            hiveDark: new THREE.MeshStandardMaterial({ color: 0xFF8F00 }),
+            flowerCap: {
+                white: new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.3 }),
+                blue: new THREE.MeshStandardMaterial({ color: 0x4fc3f7, roughness: 0.3 }),
+                red: new THREE.MeshStandardMaterial({ color: 0xe53935, roughness: 0.3 })
+            }
+        };
+
+        const worldGroup = new THREE.Group(); scene.add(worldGroup);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(350, 350), mats.grass);
+        floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; worldGroup.add(floor);
+
+        const hivePos = new THREE.Vector3(0, 0, -40);
+        const hiveSlots = []; let hiveGroup = new THREE.Group(); worldGroup.add(hiveGroup);
+        const hexRadius = 1.2; const hexGeo = new THREE.CylinderGeometry(hexRadius, hexRadius, 1.5, 6);
+        hexGeo.rotateX(Math.PI/2); hexGeo.rotateZ(Math.PI/2);
+
+        function addHexSlot(index) {
+            const cols = 7; const row = Math.floor(index / cols); const col = index % cols;
+            const xOffset = (col * (hexRadius * 1.8)) - (((cols-1) * (hexRadius * 1.8)) / 2);
+            const yPos = 6 + (row * (hexRadius * 1.5));
+            const hexMat = (row+col)%2==0 ? mats.hive.clone() : mats.hiveDark.clone();
+            hexMat.transparent = true; hexMat.opacity = 0.25;
+            const hex = new THREE.Mesh(hexGeo, hexMat);
+            hex.position.set(xOffset, yPos, 0); hex.castShadow = true; hex.receiveShadow = true;
+            hex.userData = { isHex: true, hexIndex: index };
+            hiveGroup.add(hex);
+            const worldP = new THREE.Vector3(); worldP.set(xOffset, yPos, 0).add(hivePos);
+            hiveSlots.push({ pos: worldP, occupied: false, hexMesh: hex, index: index, beeRef: null });
+        }
+        
+        function buildHiveBase() {
+            hiveGroup.position.copy(hivePos); for(let i=0; i<21; i++) { addHexSlot(i); }
+            const zoneGroup = new THREE.Group(); zoneGroup.position.y = 0;
+            const ringGeo = new THREE.RingGeometry(8.5, 9, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffa000, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; zoneGroup.add(ring);
+
+            const cylGeo = new THREE.CylinderGeometry(9, 9, 5, 32, 1, true); const colors = [];
+            const posAttr = cylGeo.attributes.position;
+            for(let i=0; i < posAttr.count; i++) { const y = posAttr.getY(i); colors.push(1.0, 0.6, 0.0, ((2.5 - y)/5.0)*0.5); }
+            cylGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4));
+            const cylMat = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+            const cyl = new THREE.Mesh(cylGeo, cylMat); cyl.position.y = 2.5; 
+            zoneGroup.add(cyl); hiveGroup.add(zoneGroup); state.honeyZoneAnim = zoneGroup; 
+        }
+        buildHiveBase();
+
+        const flowers = [];
+        function buildField(cx, cz, countSq, typeMat) {
+            const spacing = 3; const distFromHive = new THREE.Vector2(cx, cz).distanceTo(new THREE.Vector2(0, 0));
+            const fieldMulti = Math.max(1, Math.ceil(distFromHive / 18) - 1);
+            const pad = new THREE.Mesh(new THREE.BoxGeometry(countSq*spacing+2, 0.2, countSq*spacing+2), mats.grass);
+            pad.position.set(cx, 0.1, cz); const darkFactor = Math.max(0.3, 1.0 - (distFromHive*0.005));
+            pad.material = mats.grass.clone(); pad.material.color.setRGB(0.3 * darkFactor, 0.7 * darkFactor, 0.3 * darkFactor);
+            pad.receiveShadow = true; worldGroup.add(pad);
+            const startX = cx - ((countSq-1) * spacing)/2; const startZ = cz - ((countSq-1) * spacing)/2;
+            for(let r=0; r<countSq; r++) {
+                for(let c=0; c<countSq; c++) {
+                    const fw = new THREE.Group();
+                    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1, 1), new THREE.MeshStandardMaterial({ color: 0x388E3C })); stem.position.y = 0.5;
+                    const cap = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.4, 1.5), typeMat); cap.position.y = 1.0; cap.castShadow = true; cap.receiveShadow = true;
+                    fw.add(stem); fw.add(cap); fw.position.set(startX + c*spacing + (Math.random()*0.5-0.25), 0, startZ + r*spacing + (Math.random()*0.5-0.25));
+                    fw.userData = { maxScaleY: cap.scale.y, maxPos: cap.position.y, health: 1.0, cap: cap, multi: fieldMulti };
+                    flowers.push(fw); worldGroup.add(fw);
+                }
+            }
+            const dummyAnchor = new THREE.Object3D(); dummyAnchor.position.set(cx, 1, cz); worldGroup.add(dummyAnchor);
+            const el = document.createElement('div'); el.className = 'dmg-text';
+            el.innerHTML = `<span style="color:#FFF; font-size:16px;">[${fieldMulti}x Pólen]</span>`; el.style.opacity = '0.9'; el.style.animation = 'none'; el.style.transform = 'translate(-50%, -50%)';
+            document.getElementById('floating-texts').appendChild(el);
+            dummyAnchor.userData = { isAnchor: true, htmlEl: el, originX: cx, originZ: cz, size: countSq*spacing }; flowers.push(dummyAnchor); 
+        }
+
+        const ringRadii = [35, 60, 95, 130]; const fieldsPerRing = [6, 12, 14, 18]; 
+        const typeMatsRot = [mats.flowerCap.white, mats.flowerCap.red, mats.flowerCap.blue];
+        buildField(0, 5, 4, typeMatsRot[0]);
+        for(let ri=0; ri<ringRadii.length; ri++) {
+            const rad = ringRadii[ri]; const numF = fieldsPerRing[ri];
+            for(let i=0; i<numF; i++) {
+                const ang = (i / numF) * Math.PI * 2;
+                buildField(Math.cos(ang)*rad, Math.sin(ang)*rad, 3+Math.floor(ri/2), typeMatsRot[(ri+i)%3]);
+            }
+        }
+
+        // =====================================
+        // ANIMAÇÕES VISUAIS (TEXTOS FLUTUANTES)
+        // =====================================
+        function spawnFloatingText(text, pos3D, color) {
+            if(!isGameActive) return;
+            const el = document.createElement('div');
+            el.className = 'dmg-text';
+            el.innerText = text;
+            el.style.color = color;
+            document.getElementById('floating-texts').appendChild(el);
+            
+            // Fazer projeção da coordenada 3D do mundo para coordenada 2D da tela visual
+            const p = pos3D.clone().project(camera);
+            if(p.z < 1) {
+                el.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
+                el.style.top = `${(p.y * -0.5 + 0.5) * window.innerHeight}px`;
+            } else {
+                el.style.display = 'none';
+            }
+            // Auto destruição do elemento HTML após animação de 1s
+            setTimeout(() => { if(el.parentNode) el.remove(); }, 1000);
+        }
+
+        // =====================================
+        // CLASSES DAS ENTIDADES FÍSICAS
+        // =====================================
+        class Player {
+            constructor() {
+                this.group = new THREE.Group(); this.group.position.set(0, 5, 0); scene.add(this.group);
+                this.body = new THREE.Group(); this.group.add(this.body);
+                const torso = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1), new THREE.MeshStandardMaterial({color: 0x1976D2})); torso.position.y = 1.5; torso.castShadow = true; this.body.add(torso);
+                const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); head.position.y = 3.1; head.castShadow = true; this.body.add(head);
+                const pack = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.8), new THREE.MeshStandardMaterial({color: 0x8D6E63})); pack.position.set(0, 1.5, -0.7); pack.castShadow = true; this.body.add(pack);
+                this.toolGroup = new THREE.Group(); this.toolGroup.position.set(1.0, 1.5, 0.6); this.body.add(this.toolGroup);
+                const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1, 2.5), new THREE.MeshStandardMaterial({color:0xbdbdbd})); stick.rotation.x = Math.PI/2; stick.position.z = 1;
+                const shovel = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.2), new THREE.MeshStandardMaterial({color:0x757575})); shovel.position.z = 2.2; shovel.castShadow = true;
+                this.toolGroup.add(stick); this.toolGroup.add(shovel);
+
+                this.velocity = new THREE.Vector3(); this.speed = 25; this.jumpPwr = 20; this.yVel = 0;
+                this.grounded = false; this.swingTimer = 0; this.stepTimer = 0; this.power = 10; 
+            }
+            update(dt, input, camParams) {
+                if(!isGameActive) return;
+                const fw = new THREE.Vector3(0,0,-1).applyQuaternion(camParams.quaternion); fw.y = 0; fw.normalize();
+                const rt = new THREE.Vector3(1,0,0).applyQuaternion(camParams.quaternion); rt.y = 0; rt.normalize();
+                const mv = new THREE.Vector3(); if(input.w) mv.add(fw); if(input.s) mv.sub(fw); if(input.a) mv.sub(rt); if(input.d) mv.add(rt);
+
+                if(mv.length() > 0) {
+                    mv.normalize();
+                    this.body.rotation.y = THREE.MathUtils.lerp(this.body.rotation.y, Math.atan2(mv.x, mv.z), 10 * dt);
+                    
+                    if(this.grounded) { this.stepTimer -= dt; if(this.stepTimer <= 0) { SFX.step(); this.stepTimer = 0.3; } }
+                }
+                this.velocity.x = mv.x * this.speed * dt; this.velocity.z = mv.z * this.speed * dt; this.yVel -= 60 * dt; 
+                this.group.position.x += this.velocity.x; this.group.position.z += this.velocity.z; this.group.position.y += this.yVel * dt;
+                if(this.group.position.y <= 0) { this.group.position.y = 0; this.yVel = 0; this.grounded = true; } else { this.grounded = false; }
+                if(input.space && this.grounded) { this.yVel = this.jumpPwr; this.grounded = false; input.space = false; SFX.jump(); }
+
+                if(state.mouseHold) {
+                    this.swingTimer += dt * 12; this.toolGroup.rotation.x = Math.sin(this.swingTimer) * 0.8;
+                    this.collectTimer = (this.collectTimer || 0) - dt;
+                    if (this.collectTimer <= 0) {
+                        this.attemptCollect();
+                        this.collectTimer = 0.25; // O jogador raspa pólen 4 vezes por segundo
+                    }
+                } else { 
+                    this.toolGroup.rotation.x = THREE.MathUtils.lerp(this.toolGroup.rotation.x, 0, dt*10); 
+                    this.collectTimer = 0;
+                }
+            }
+            attemptCollect() {
+                if(state.pollen >= state.capacity) return;
+                const cp = this.group.position; let hA = false;
+                for(let f of flowers) {
+                    if(!f.userData.cap || f.userData.health <= 0) continue; 
+                    // [CORREÇÃO]: Medição em eixo 2D X e Z elimina problemas de salto e declive do terreno! Raio 6m.
+                    if(Math.hypot(f.position.x - cp.x, f.position.z - cp.z) < 6.0) {
+                        f.userData.health = 0; f.userData.cap.scale.set(0.1, 0.1, 0.1);
+                        let amt = Math.min(this.power * (f.userData.multi||1), state.capacity - state.pollen);
+                        state.pollen += amt; state.achTracking.totalPollen += amt; hA = true;
+                        spawnFloatingText(`+${fN(amt)}`, f.position.clone().add(new THREE.Vector3(0,2,0)), '#a8ffb2');
+                        if (state.pollen >= state.capacity) break;
+                    }
+                }
+                if(hA) { SFX.collectPlayer(); updateUI(); }
+            }
+        }
+
+        class Bee {
+            constructor(typeObj, slotData, level = 1) {
+                this.type = typeObj; this.slot = slotData; this.level = level; slotData.occupied = true; slotData.beeRef = this; 
+                this.slot.hexMesh.material = new THREE.MeshStandardMaterial({ color: this.type.color }); this.slot.hexMesh.material.transparent = false; this.slot.hexMesh.material.opacity = 1;
+                this.group = new THREE.Group();
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.8), new THREE.MeshStandardMaterial({color: this.type.color}));
+                body.castShadow = true; body.userData = { isBeeBody: true, parentBee: this }; this.group.add(body); this.bodyMesh = body;
+                const eyM = new THREE.MeshBasicMaterial({color: 0x000000}); const ey1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), eyM); ey1.position.set(0.2, 0.1, 0.4);
+                const ey2 = ey1.clone(); ey2.position.set(-0.2, 0.1, 0.4); body.add(ey1); body.add(ey2);
+                const wgM = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
+                this.wing1 = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), wgM); this.wing1.rotation.x = Math.PI/2; this.wing1.position.set(0.6, 0.35, 0);
+                this.wing2 = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), wgM); this.wing2.rotation.x = Math.PI/2; this.wing2.position.set(-0.6, 0.35, 0);
+                this.group.add(this.wing1); this.group.add(this.wing2); this.group.position.copy(slotData.pos); this.group.position.z += 2; scene.add(this.group);
+                this.state = 'follow'; this.animTimer = Math.random() * 10; this.aiTimer = 0; this.targetFlower = null; this.calcStats();
+            }
+            calcStats() {
+                const lvlMulti = 1 + ((this.level - 1) * 0.2);
+                this.curPow = Math.floor(this.type.collectPow * lvlMulti);
+                this.curConv = Math.floor(this.type.convertSpeed * lvlMulti);
+            }
+            update(dt, playerObj) {
+                this.animTimer += dt * 20; this.wing1.rotation.z = Math.sin(this.animTimer); this.wing2.rotation.z = -Math.sin(this.animTimer);
+
+                let tg = new THREE.Vector3();
+
+                // Lógica de Criação de Mel na Colmeia Melhorada
+                if(state.hiveConvertMode) {
+                    this.state = 'converting'; tg.copy(this.slot.pos); tg.z += 1.5; 
+                    // [CORREÇÃO]: Raio generoso para absorver entrada da rota de voo da abelha
+                    if(Math.hypot(this.group.position.x - tg.x, this.group.position.z - tg.z) < 5.0) {
+                        if(state.pollen > 0) {
+                            if(Math.random() < 0.2) { // 20% de chance constante a cada frame para fluidez
+                                const cnv = Math.min(this.curConv, state.pollen);
+                                if(cnv > 0) { 
+                                    state.pollen -= cnv; state.honey += cnv; state.achTracking.totalHoney += cnv;
+                                    spawnFloatingText(`+${fN(cnv)}`, this.group.position, '#ffd700'); SFX.honey(); updateUI();
+                                }
+                            }
+                        } else {
+                            // Se zerou certinho, ela volta patrulhar e emite aviso que terminamos!
+                            if (state.hiveConvertMode) {
+                                state.hiveConvertMode = false;
+                                showToast("Todo o pólen foi convertido em mel puro!", "success");
+                            }
+                        }
+                    }
+                } else {
+                    this.aiTimer -= dt;
+                    if(this.state !== 'collecting' && this.aiTimer <= 0 && state.pollen < state.capacity) {
+                        this.aiTimer = 0.5;
+                        let insideField = false;
+                        for(let f of flowers) {
+                            // Limite mais maleável da distância em campo
+                            if(f.userData.isAnchor && f.position.distanceTo(playerObj.group.position) < 40) { insideField = true; break; }
+                        }
+                        
+                        if(insideField) {
+                            // Sorteia flor ao redor e pega
+                            const rF = flowers[Math.floor(Math.random() * flowers.length)];
+                            if(rF.userData.cap && rF.userData.health > 0 && playerObj.group.position.distanceTo(rF.position) < 45) {
+                                this.targetFlower = rF; this.state = 'collecting';
+                            } else { this.state = 'follow'; }
+                        } else {
+                            this.state = 'follow';
+                        }
+                    }
+
+                    if(this.state === 'collecting' && this.targetFlower) {
+                        if(this.targetFlower.userData.health <= 0 || state.pollen >= state.capacity || playerObj.group.position.distanceTo(this.targetFlower.position) > 55) {
+                            this.state = 'follow'; this.targetFlower = null;
+                        } else {
+                            tg.copy(this.targetFlower.position); tg.y = this.targetFlower.userData.maxPos + 1.2; 
+                            // [CORREÇÃO]: Ignora Eixo Y usando hypot e aumenta a margem do hit!
+                            if(Math.hypot(this.group.position.x - tg.x, this.group.position.z - tg.z) < 4.0) {
+                                if(Math.random() < 0.1) { 
+                                    this.targetFlower.userData.health = 0; this.targetFlower.userData.cap.scale.set(0.1,0.1,0.1);
+                                    let amt = Math.min(this.curPow * (this.targetFlower.userData.multi||1), state.capacity - state.pollen);
+                                    state.pollen += amt; state.achTracking.totalPollen += amt;
+                                    spawnFloatingText(`+${fN(amt)}`, this.group.position, '#a8ffb2'); SFX.collectBee(); updateUI();
+                                    this.state = 'follow'; this.targetFlower = null;
+                                }
+                            }
+                        }
+                    } 
+                    if(this.state === 'follow') {
+                        const oX = Math.cos(this.animTimer*0.2)*3; const oZ = Math.sin(this.animTimer*0.2)*3;
+                        tg.copy(playerObj.group.position).add(new THREE.Vector3(oX, 4 + Math.sin(this.animTimer*0.5)*0.5, oZ));
+                    }
+                }
+                this.group.position.lerp(tg, dt * this.type.speed * 0.2); const lT = tg.clone(); lT.y = this.group.position.y;
+                if(lT.distanceTo(this.group.position) > 0.1) this.bodyMesh.lookAt(lT);
+            }
+        }
+        const player = new Player(); const bees = [];
+        function spawnStarterBee() { const s = hiveSlots.find(s=>!s.occupied); if(s) bees.push(new Bee(BeeTypes['basic_0'], s)); }
+
+        // =====================================
+        // CONTROLES E EVENTOS DE ENTRADA
+        // =====================================
+        const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+        const inputState = { w:false, a:false, s:false, d:false, space:false };
+        
+        window.addEventListener('keydown', e => {
+            if(!isGameActive) return;
+            let k = e.key.toLowerCase(); if(k==='w') inputState.w=true; if(k==='a') inputState.a=true; if(k==='s') inputState.s=true; if(k==='d') inputState.d=true;
+            if(k==='e') window.makeHoneyBtn(); if(e.code==='Space') inputState.space=true;
+        });
+        window.addEventListener('keyup', e => {
+            let k = e.key.toLowerCase(); if(k==='w') inputState.w=false; if(k==='a') inputState.a=false; if(k==='s') inputState.s=false; if(k==='d') inputState.d=false;
+        });
+        window.addEventListener('mousedown', e => { if(e.button===0) state.mouseHold=true; if(e.button===2) isDraggingCam=true; });
+        window.addEventListener('mouseup', e => { if(e.button===0) state.mouseHold=false; if(e.button===2) isDraggingCam=false; });
+        window.addEventListener('contextmenu', e => e.preventDefault());
+        
+        let camHeading = 0; let camPitch = 0.5; let camDist = 25; let isDraggingCam = false;
+        window.addEventListener('mousemove', e => { if(isDraggingCam) { camHeading+=e.movementX*0.005; camPitch+=e.movementY*0.005; camPitch=Math.max(0.1,Math.min(1.4, camPitch)); } });
+        window.addEventListener('wheel', e => { camDist += e.deltaY * 0.05; camDist = Math.max(10, Math.min(60, camDist)); });
+
+        window.closeAllModals = () => { document.querySelectorAll('.modal-wrapper').forEach(el => el.style.display = 'none'); state.targetBeeRef = null; SFX.error(); renderAchievements(); }
+        window.addEventListener('click', e => { if(e.target.classList.contains('modal-wrapper')) window.closeAllModals(); });
+        window.openSettings = () => { document.getElementById('settings-modal-wrapper').style.display='flex'; SFX.click(); }
+
+        window.addEventListener('click', e => {
+            if(!isGameActive) return;
+            for(let w of document.querySelectorAll('.modal-wrapper')) { if(w.style.display === 'flex') return; } // Ignora Clicks 3D se UX aberta
+            mouse.x = (e.clientX/window.innerWidth)*2-1; mouse.y = -(e.clientY/window.innerHeight)*2+1; raycaster.setFromCamera(mouse, camera);
+            const aM = []; bees.forEach(b => aM.push(b.bodyMesh)); hiveSlots.forEach(s => {if(s.occupied) aM.push(s.hexMesh);});
+            let hits = raycaster.intersectObjects(aM);
+            if(hits.length > 0) {
+                const cb = hits[0].object.userData; let tb = null;
+                if(cb.isBeeBody) tb = cb.parentBee; else if(cb.isHex) tb = hiveSlots[cb.hexIndex].beeRef;
+                if(tb) { state.targetBeeRef = tb; refreshBeeManageModal(); document.getElementById('bee-manage-modal-wrapper').style.display = 'flex'; SFX.click(); }
+            }
+        });
+
+        // =====================================
+        // TABELAS E LÓGICAS DE VENDA/COMPRA MODAL
+        // =====================================
+        function updateUI() {
+            document.getElementById('honey-val').innerText = fN(state.honey); document.getElementById('pollen-val').innerText = `${fN(state.pollen)} / ${fN(state.capacity)}`;
+            document.getElementById('pollen-bar').style.width = `${(state.pollen/state.capacity)*100}%`;
+            document.getElementById('pollen-bar').style.background = state.pollen>=state.capacity?'#e53935':'linear-gradient(90deg, #8bc34a, #cddc39)';
+        }
+
+        window.switchShopTab = (tabId, evt) => {
+            if(tabId === 'tab-achievements') renderAchievements(); 
+            document.querySelectorAll('.shop-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.shop-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active'); evt.currentTarget.classList.add('active');
+        };
+
+        window.openShop = () => {
+             document.getElementById('slot-price-txt').innerText = fN(state.slotPriceBase * Math.pow(state.slotMultiplier, state.extraSlotsBought));
+             document.getElementById('shop-modal-wrapper').style.display = 'flex'; SFX.click();
+        };
+
+        window.buyHiveSlot = () => {
+            const pr = Math.floor(state.slotPriceBase * Math.pow(state.slotMultiplier, state.extraSlotsBought));
+            if(state.honey >= pr) {
+                state.honey -= pr; state.extraSlotsBought++; addHexSlot(hiveSlots.length); SFX.buy(); updateUI();
+                document.getElementById('slot-price-txt').innerText = fN(Math.floor(state.slotPriceBase * Math.pow(state.slotMultiplier, state.extraSlotsBought)));
+                showToast("Favo espacial anexado com sucesso na base matriz!", "success");
+            } else { SFX.error(); showToast("Estoque Doce Insuficiente!", "error"); }
+        };
+
+        window.upgradeAllBeesGlobal = () => {
+            let upgd = 0; let cstTotal = 0;
+            for(let b of bees) {
+                if(b.level >= 100) continue;
+                let uC = Math.floor(b.type.lvlBasePrc * Math.pow(1.5, b.level - 1));
+                if(state.honey >= uC) { state.honey -= uC; b.level++; b.calcStats(); cstTotal += uC; upgd++; }
+            }
+            if(upgd > 0) {
+                SFX.upgrade(); updateUI(); showToast(`Onda Elevada! ${upgd} abelhas upadas por -${fN(cstTotal)} Mel!`, 'success');
+            } else { SFX.error(); showToast("Nenhuma abelha evoluída (Limites de Mel ou todas no Max).", 'error'); }
+        };
+
+        window.buyRandomEgg = (cat, cst) => {
+            if(state.honey >= cst) {
+                const emp = hiveSlots.find(s => !s.occupied); if(!emp) return showToast("Sem Espaço. Liberte gavetas na Arquitetura.", "error");
+                const bId = `${cat}_${Math.floor(Math.random()*10)}`; state.honey -= cst; SFX.buy(); bees.push(new Bee(BeeTypes[bId], emp));
+                updateUI(); showToast(`Sorteio! Chocou um(a) ${BeeTypes[bId].name}!`, "success");
+            } else { SFX.error(); showToast("Créditos Carentes...", "error"); }
+        };
+
+        window.buySpecificBee = (id, cst) => {
+            if(state.honey >= cst) {
+                 const emp = hiveSlots.find(s => !s.occupied); if(!emp) return showToast("Sua Colmeia atingiu superlotação!", "error");
+                state.honey -= cst; SFX.buy(); bees.push(new Bee(BeeTypes[id], emp)); updateUI(); showToast(`Negociação Direta: ${BeeTypes[id].name} adquirida!`, "success");
+            } else { SFX.error(); showToast("Boleto negado...", "error"); }
+        };
+
+        window.buyBackpack = (cst, eC, btn) => {
+            if(state.honey >= cst) {
+                state.honey -= cst; state.capacity += eC; SFX.buy(); updateUI();
+                btn.style.background = "#555"; btn.disabled = true; btn.innerText = "Incrementado"; showToast(`Pólen Limite Aumentado em +${fN(eC)}!`, "success");
+            } else { SFX.error(); showToast("Fundos Indisponíveis!", "error"); }
+        };
+
+        window.buyTool = (cst, pw, n, btn) => {
+            if(state.honey >= cst) {
+                state.honey -= cst; player.power += pw; SFX.buy(); updateUI();
+                btn.style.background = "#555"; btn.disabled = true; btn.innerText = "Incrementado"; showToast(`Foice Aprimorada: ${n} (+${fN(pw)} Pd)!`, "success");
+            } else { SFX.error(); showToast("Pobreza Aparente...", "error"); }
+        };
+
+        window.makeHoneyBtn = () => {
+            if(player.group.position.distanceTo(hivePos) < 25) { // Escala Generosa
+                if(state.pollen <= 0) {
+                    SFX.error(); showToast("Mochila Vazia! Nada de pólen para converter.", "error"); 
+                } else {
+                    state.hiveConvertMode = !state.hiveConvertMode; SFX.click(); 
+                }
+            } 
+            else { SFX.error(); showToast("Chegue mais perto da Colmeia (Base Holográfica)!", "error"); }
+        };
+
+        // ABELHA INDIVIDUAL
+        function refreshBeeManageModal() {
+            const b = state.targetBeeRef; if(!b) return;
+            document.getElementById('bm-title').innerText = b.type.name; document.getElementById('bm-icon').innerText = b.type.icon;
+            document.getElementById('bm-lvl').innerText = b.level; document.getElementById('bm-pow').innerText = fN(b.curPow);
+            document.getElementById('bm-conv').innerText = fN(b.curConv);
+            const bt = document.getElementById('btn-upgrade');
+            if(b.level >= 100) { bt.innerText = "Limites Genéticos (NV 100)"; bt.disabled=true; bt.style.background="#555"; } 
+            else { const c = Math.floor(b.type.lvlBasePrc*Math.pow(1.5, b.level-1)); bt.innerText = `Bombear Nível (-${fN(c)} Mel)`; bt.disabled=false; bt.style.background="#4CAF50"; }
+        }
+
+        window.confirmUpgradeBee = () => {
+            const b = state.targetBeeRef; if(!b || b.level >= 100) return;
+            const cst = Math.floor(b.type.lvlBasePrc * Math.pow(1.5, b.level - 1));
+            if(state.honey >= cst) { state.honey -= cst; b.level++; b.calcStats(); SFX.upgrade(); updateUI(); refreshBeeManageModal(); showToast(`Nível Ascendido!`, "success"); spawnFloatingText(`UP!`, b.group.position.clone().add(new THREE.Vector3(0,2,0)), '#4CAF50'); }
+            else { SFX.error(); showToast("Necessidade de fundos não suprida!", "error"); }
+        };
+
+        window.confirmSellBee = () => {
+            const t = state.targetBeeRef; if(!t) return;
+            const rt = Math.floor(t.type.specificCost * 0.2); state.honey += rt; scene.remove(t.group);
+            bees.splice(bees.indexOf(t), 1); t.slot.occupied = false; t.slot.beeRef = null;
+            t.slot.hexMesh.material = (Math.floor(t.slot.index/7)+t.slot.index%7)%2==0 ? mats.hive.clone() : mats.hiveDark.clone();
+            t.slot.hexMesh.material.transparent = true; t.slot.hexMesh.material.opacity = 0.25;
+            updateUI(); showToast(`Mercadoria Vendida por ${fN(rt)} Mel! Rota Hex Limpa.`, "info"); SFX.buy(); window.closeAllModals();
+        };
+
+        // ADMIN LEADERBOARD E LOOP MAIN
+        window.adminLoadUsers = async () => {
+            const { data } = await supabase.from('bss_players').select('*');
+            let html = "";
+            data?.forEach(r => {
+                html += `
+                <div class="player-row" style="align-items:center;">
+                    <div style="display:flex; flex-direction:column; font-size:13px;">
+                        <span style="color:#64b5f6; font-weight:bold;">Usr: ${r.username}</span>
+                        <span style="color:#ffeb3b;">Mel DB: ${fN(r.data?.honey||0)}</span>
+                    </div>
+                    <button style="background:#f44336; border-color:#b71c1c; font-size:12px; padding:5px 12px; box-shadow:none; text-shadow:none; height:30px;" onclick="wipePlayer('${r.username}')">APAGAR/RESETAR</button>
+                </div>`;
+            });
+            document.getElementById('db-viewer').innerHTML = html;
+        }
+
+        window.adminAction = async (tp) => {
+            if(tp==='honey') { state.honey += parseInt(document.getElementById('adm-mel').value)||0;  SFX.upgrade(); }
+            if(tp==='pollen') { state.pollen += parseInt(document.getElementById('adm-polen').value)||0; SFX.upgrade(); }
+            if(tp==='slots') { let am = parseInt(document.getElementById('adm-slots').value)||0; for(let i=0; i<am; i++){state.extraSlotsBought++; addHexSlot(hiveSlots.length);} SFX.upgrade(); }
+            updateUI(); await saveGameToLocal(); 
+            window.adminLoadUsers(); // Refresh the list
+            showToast("Admin Bypass Executado", "success");
+        }
+
+        window.wipePlayer = async (usr) => {
+            if(confirm(`NÍVEL CRÍTICO: Tem certeza ABSOLUTA que deseja DELETAR todos os dados de "${usr}"? Eles começarão do 0 no próximo login.`)) {
+                await supabase.from('bss_players').delete().eq('username', usr);
+                showToast(`Dados de [${usr}] obliterados da nuvem.`, "error");
+                window.adminLoadUsers();
+            }
+        }
+
+        window.openLeaderboard = () => {
+             document.getElementById('leaderboard-modal-wrapper').style.display = 'flex';
+             document.getElementById('lb-content').innerHTML = "<p style='text-align:center;'>Estabelecendo Link Nuvem...</p>";
+             populateLeaderboard(); SFX.click();
+        }
+        
+        async function populateLeaderboard() {
+             const lb = document.getElementById('lb-content'); const { data } = await supabase.from('bss_players').select('username, data'); let list = [];
+             data?.forEach(d => list.push({n: d.username, h: d.username===currentUser?state.honey:(d.data?.honey||0)}));
+             list.sort((a,b) => b.h - a.h); let h = '';
+             list.forEach((u, i) => {
+                 let cl;
+                 if (i === 0) cl = '#FFD700';
+                 else if (i === 1) cl = '#C0C0C0';
+                 else if (i === 2) cl = '#CD7F32';
+                 else cl = '#fff';
+
+                 let ic;
+                 if (i === 0) ic = '👑';
+                 else if (i === 1) ic = '🥈';
+                 else if (i === 2) ic = '🥉';
+                 else ic = `#${i + 1}`;
+                 h += `<div style="display:flex; justify-content:space-between; background:#222; padding:15px; border-radius:10px; border-left:4px solid ${cl}"><div style="font-size:18px; font-weight:bold; color:${cl}">${ic} ${u.n}</div><div style="font-size:18px; color:#ffeb3b; font-family:'Fredoka One'">${fN(u.h)} 🍯</div></div>`;
+             }); lb.innerHTML = h;
+        }
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            if(!isGameActive) {
+                camera.position.set(Math.sin(Date.now()*0.0005)*50, 40, Math.cos(Date.now()*0.0005)*50); camera.lookAt(0,0,0); renderer.render(scene, camera); return;
+            }
+            const dt = Math.min(clock.getDelta(), 0.1); 
+            camera.position.lerp(new THREE.Vector3(player.group.position.x + camDist*Math.cos(camPitch)*Math.sin(camHeading), Math.max(player.group.position.y+camDist*Math.sin(camPitch), 1), player.group.position.z + camDist*Math.cos(camPitch)*Math.cos(camHeading)), dt*10); 
+            camera.lookAt(player.group.position);
+            player.update(dt, inputState, camera);
+            if(state.honeyZoneAnim) state.honeyZoneAnim.rotation.y -= dt * 0.5; 
+            
+            // Distancia Expandida Cancelamento Automatico Converta de mel
+            if(state.hiveConvertMode && player.group.position.distanceTo(hivePos) > 25) state.hiveConvertMode = false;
+
+            flowers.forEach(f => {
+                if(f.userData.cap) { 
+                    if(f.userData.health < 1.0) { f.userData.health+=dt*0.1; if(f.userData.health>1.0)f.userData.health=1.0; f.userData.cap.scale.set(1, Math.max(0.1, f.userData.health*f.userData.maxScaleY), 1); }
+                } else if(f.userData.isAnchor && f.userData.htmlEl) { 
+                    const p = f.position.clone().project(camera);
+                    if(p.z<1 && f.position.distanceTo(player.group.position)<80) { 
+                        f.userData.htmlEl.style.left = `${(p.x*.5+.5)*window.innerWidth}px`; f.userData.htmlEl.style.top = `${(p.y*-.5+.5)*window.innerHeight}px`; f.userData.htmlEl.style.display='block';
+                    } else f.userData.htmlEl.style.display='none';
+                }
+            });
+            bees.forEach(b => b.update(dt, player)); renderer.render(scene, camera);
+        }
+
+        updateUI(); animate();
+        window.addEventListener("beforeunload", function(){ saveGameToLocal(); });
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    </script>
+</body>
+</html>
