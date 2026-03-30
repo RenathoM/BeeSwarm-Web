@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐝 Bee</title>
+    <title>Web Swarm Simulator - PRO RPG</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap');
         
@@ -104,6 +104,18 @@
         .adm-input { width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; border-radius: 5px; outline: none;}
         .player-row { display: flex; justify-content: space-between; background: #444; padding: 10px; margin-bottom: 5px; border-radius: 5px;}
 
+        /* CHAT UI */
+        #chat-container { position: absolute; bottom: 120px; left: 15px; width: 320px; height: 220px; background: rgba(0,0,0,0.5); border: 2px solid #555; border-radius: 10px; display: flex; flex-direction: column; pointer-events: auto; z-index: 50; overflow: hidden; backdrop-filter: blur(2px);}
+        .chat-messages { flex-grow: 1; overflow-y: auto; padding: 10px; font-family: 'Nunito'; color: white; display: flex; flex-direction: column; text-shadow: 1px 1px 0 #000; font-size: 13px;}
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #2196F3; border-radius: 3px; }
+        .chat-input-area { display: flex; border-top: 1px solid #555; background: rgba(0,0,0,0.8); height: 40px;}
+        .chat-input { flex-grow: 1; background: transparent; border: none; color: white; padding: 8px 10px; outline: none; font-family: 'Nunito'; font-size: 14px; }
+        .chat-btn { background: #2196F3; border: none; color: white; font-weight: bold; cursor: pointer; padding: 0 15px; border-radius: 0; box-shadow: none; font-size: 14px;}
+        .chat-btn:hover { background: #1976D2; filter: brightness(1); transform: none;}
+        
+        .mobile-mode #chat-container { width: 250px; height: 160px; bottom: 150px; }
+
         #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: rgba(255,255,255,0.8); border-radius: 50%; pointer-events: none; mix-blend-mode: difference; z-index: 5;}
         
         /* ================= MOBILE RESPONSIVE OVERRIDES ================= */
@@ -161,6 +173,15 @@
         </div>
     </div>
 
+    <!-- CHAT DA SALA -->
+    <div id="chat-container">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Digite no chat..." autocomplete="off" onkeydown="if(event.key==='Enter') sendChat()">
+            <button class="chat-btn" onclick="sendChat()">Enviar</button>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
     <div id="floating-texts"></div>
     <div id="crosshair"></div>
@@ -200,6 +221,11 @@
             <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#4b0082; padding:10px; border-radius:8px;">
                 <span style="font-weight:bold;">Habilitar Modo Mobile <br><span style="font-size:11px;color:#aaa;">(Controles de Toque e Tela Menor)</span></span>
                 <input type="checkbox" id="mobile-toggle" onchange="toggleMobileMode(this.checked)" style="transform: scale(1.5);">
+            </div>
+
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#e65100; padding:10px; border-radius:8px;">
+                <span style="font-weight:bold;">Exibir Abelhas de Terceiros <br><span style="font-size:11px;color:#aaa;">(Pode causar lag)</span></span>
+                <input type="checkbox" id="other-bees-toggle" onchange="toggleOtherBeesVisibility(this.checked)" style="transform: scale(1.5);">
             </div>
 
             <hr style="border-color:#555; width:100%; margin:20px 0;">
@@ -273,7 +299,7 @@
             </div>
 
             <!-- HIVE E UPGRADE GLOBAL PERFEITAMENTE CENTRALIZADOS -->
-            <div id="tab-hive" class="shop-section" style="flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 40px; padding: 20px 0;">
+            <div id="tab-hive" class="shop-section" style="flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; gap: 40px; padding: 20px 0;">
                 <div style="display:flex; flex-direction:column; align-items:center; width: 100%;">
                     <h2 style="color: #4CAF50; margin-top:0;">🎓 Treinar Exército Total</h2>
                     <p style="color:#ccc; text-align:center;">Aumenta +1 Nível de TODAS as suas abelhas de forma instantânea na colmeia.<br>O mel será debitado automaticamente em massa dependendo dos níveis individuais!</p>
@@ -354,6 +380,10 @@
             }
         }
     </script>
+    <!-- Injeção do Engine React e Babel para JSX Automático -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="module">
         import * as THREE from 'three';
@@ -384,7 +414,8 @@
             achTracking: { totalPollen: 0, totalHoney: 0 },
             achProgress: [], 
             volGlobal: 0.5,
-            notifsEnabled: true
+            notifsEnabled: true,
+            showOtherBees: false
         };
 
         const fN = (n) => {
@@ -436,6 +467,12 @@
         window.adjustVolume = (val) => { state.volGlobal = parseFloat(val); SFX.click(); }
         window.toggleNotifs = (val) => { state.notifsEnabled = val; SFX.click(); }
         
+        window.toggleOtherBeesVisibility = (val) => {
+            state.showOtherBees = val;
+            SFX.click();
+            updateAllOtherBees();
+        }
+
         window.toggleMobileMode = (val) => {
             if(val) document.body.classList.add('mobile-mode');
             else document.body.classList.remove('mobile-mode');
@@ -624,6 +661,11 @@
                     showToast(`Credenciais novas aceitas: ${user}`, "success");
                 }
 
+                // Gerador de Index Fixo Inteligente para Servidor baseado no Username
+                let hash = 0;
+                for(let i=0; i<user.length; i++) hash += user.charCodeAt(i);
+                playerHiveIndex = hash % 5; 
+
                 currentUser = user;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('profile-panel').style.display = 'flex';
@@ -661,7 +703,11 @@
             }
         }
 
-        window.logout = async () => { await saveGameToLocal(); location.reload(); }
+        window.logout = async () => { 
+            if(currentUser && serverChannel) serverChannel.send({ type: 'broadcast', event: 'quit', payload: { user: currentUser } });
+            await saveGameToLocal(); 
+            location.reload(); 
+        }
 
         async function saveGameToLocal() {
             if(!currentUser) return;
@@ -681,7 +727,11 @@
             if(p.achv) state.achProgress = p.achv;
 
             bees.forEach(b => scene.remove(b.group)); bees.length = 0;
-            hiveSlots.forEach(s => { s.occupied = false; s.beeRef = null; s.hexMesh.material.opacity = 0.25; s.hexMesh.material.transparent = true; });
+            
+            // Re-Posicionar matriz de Favos de acordo com o index de Servidor Multijogador
+            hiveGroup.clear(); hiveSlots.length = 0;
+            buildHiveBase();
+
             while(hiveSlots.length < 21 + state.extraSlotsBought) { addHexSlot(hiveSlots.length); }
 
             if(p.bees) {
@@ -691,6 +741,10 @@
                 });
             }
             if(bees.length === 0) spawnStarterBee();
+            
+            // Transportar o jogador nativamente direto para as redondezas da conta dele
+            player.group.position.set(hivePos.x, 5, hivePos.z + 20);
+
             updateUI(); renderAchievements();
         }
 
@@ -743,6 +797,14 @@
         const hexRadius = 1.2; const hexGeo = new THREE.CylinderGeometry(hexRadius, hexRadius, 1.5, 6);
         hexGeo.rotateX(Math.PI/2); hexGeo.rotateZ(Math.PI/2);
 
+        // Sistema Multijogador: Cada jogador logado recebe um Offset local based na sua "sala"
+        let currentServerId = "S1-Alpha";
+        let playerHiveIndex = 0; // Vai de 0 a 4 (5 players)
+        
+        function getHiveOffset(playerIdx) {
+            return new THREE.Vector3((playerIdx * 35) - 70, 0, -40); // Espaçamento de 35 metros entre colmeias
+        }
+
         function addHexSlot(index) {
             const cols = 7; const row = Math.floor(index / cols); const col = index % cols;
             const xOffset = (col * (hexRadius * 1.8)) - (((cols-1) * (hexRadius * 1.8)) / 2);
@@ -758,6 +820,7 @@
         }
         
         function buildHiveBase() {
+            hivePos.copy(getHiveOffset(playerHiveIndex));
             hiveGroup.position.copy(hivePos); for(let i=0; i<21; i++) { addHexSlot(i); }
             const zoneGroup = new THREE.Group(); zoneGroup.position.y = 0;
             const ringGeo = new THREE.RingGeometry(8.5, 9, 32);
@@ -835,22 +898,32 @@
         }
 
         // =====================================
-        // CLASSES DAS ENTIDADES FÍSICAS
+        // CLASSES DAS ENTIDADES FÍSICAS (REALISMO)
         // =====================================
         class Player {
             constructor() {
                 this.group = new THREE.Group(); this.group.position.set(0, 5, 0); scene.add(this.group);
                 this.body = new THREE.Group(); this.group.add(this.body);
-                const torso = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1), new THREE.MeshStandardMaterial({color: 0x1976D2})); torso.position.y = 1.5; torso.castShadow = true; this.body.add(torso);
-                const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); head.position.y = 3.1; head.castShadow = true; this.body.add(head);
+                
+                // Realismo: Personagem Articulado
+                const torso = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.8, 1), new THREE.MeshStandardMaterial({color: 0x1976D2})); torso.position.y = 1.6; torso.castShadow = true; this.body.add(torso);
+                const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); head.position.y = 3.2; head.castShadow = true; this.body.add(head);
+                
+                this.armL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0x1976D2})); this.armL.position.set(-1.1, 1.6, 0); this.armL.castShadow = true; this.body.add(this.armL);
+                this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0x1976D2})); this.armR.position.set(1.1, 1.6, 0); this.armR.castShadow = true; this.body.add(this.armR);
+                
+                // Anexar as pernas DIRETAMENTE ao corpo (this.body) para herdar a rotação sem quebrar a posição local
+                this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legL.position.set(-0.4, 0.9, 0); this.legL.castShadow = true; this.body.add(this.legL);
+                this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legR.position.set(0.4, 0.9, 0); this.legR.castShadow = true; this.body.add(this.legR);
+
                 const pack = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.8), new THREE.MeshStandardMaterial({color: 0x8D6E63})); pack.position.set(0, 1.5, -0.7); pack.castShadow = true; this.body.add(pack);
-                this.toolGroup = new THREE.Group(); this.toolGroup.position.set(1.0, 1.5, 0.6); this.body.add(this.toolGroup);
+                this.toolGroup = new THREE.Group(); this.toolGroup.position.set(0, -0.5, 0.6); this.armR.add(this.toolGroup);
                 const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1, 2.5), new THREE.MeshStandardMaterial({color:0xbdbdbd})); stick.rotation.x = Math.PI/2; stick.position.z = 1;
                 const shovel = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.2), new THREE.MeshStandardMaterial({color:0x757575})); shovel.position.z = 2.2; shovel.castShadow = true;
                 this.toolGroup.add(stick); this.toolGroup.add(shovel);
 
                 this.velocity = new THREE.Vector3(); this.speed = 25; this.jumpPwr = 20; this.yVel = 0;
-                this.grounded = false; this.swingTimer = 0; this.stepTimer = 0; this.power = 10; 
+                this.grounded = false; this.swingTimer = 0; this.stepTimer = 0; this.power = 10; this.walkAnim = 0;
             }
             update(dt, input, camParams) {
                 if(!isGameActive) return;
@@ -861,32 +934,49 @@
                 if(mv.length() > 0) {
                     mv.normalize();
                     this.body.rotation.y = THREE.MathUtils.lerp(this.body.rotation.y, Math.atan2(mv.x, mv.z), 10 * dt);
+                    this.walkAnim += dt * 15;
                     
+                    // Animação Procedural dos Membros
+                    this.legL.rotation.x = Math.sin(this.walkAnim) * 0.6;
+                    this.legR.rotation.x = Math.sin(this.walkAnim + Math.PI) * 0.6;
+                    this.armL.rotation.x = Math.sin(this.walkAnim + Math.PI) * 0.5;
+                    if(!state.mouseHold) this.armR.rotation.x = Math.sin(this.walkAnim) * 0.5;
+
                     if(this.grounded) { this.stepTimer -= dt; if(this.stepTimer <= 0) { SFX.step(); this.stepTimer = 0.3; } }
+                } else {
+                    this.legL.rotation.x = THREE.MathUtils.lerp(this.legL.rotation.x, 0, dt*10);
+                    this.legR.rotation.x = THREE.MathUtils.lerp(this.legR.rotation.x, 0, dt*10);
+                    this.armL.rotation.x = THREE.MathUtils.lerp(this.armL.rotation.x, 0, dt*10);
+                    if(!state.mouseHold) this.armR.rotation.x = THREE.MathUtils.lerp(this.armR.rotation.x, 0, dt*10);
                 }
+
+                // RECUPERAR FÍSICA E GRAVIDADE
                 this.velocity.x = mv.x * this.speed * dt; this.velocity.z = mv.z * this.speed * dt; this.yVel -= 60 * dt; 
                 this.group.position.x += this.velocity.x; this.group.position.z += this.velocity.z; this.group.position.y += this.yVel * dt;
+                
                 if(this.group.position.y <= 0) { this.group.position.y = 0; this.yVel = 0; this.grounded = true; } else { this.grounded = false; }
                 if(input.space && this.grounded) { this.yVel = this.jumpPwr; this.grounded = false; input.space = false; SFX.jump(); }
 
                 if(state.mouseHold) {
-                    this.swingTimer += dt * 12; this.toolGroup.rotation.x = Math.sin(this.swingTimer) * 0.8;
+                    this.swingTimer += dt * 12; 
+                    this.armR.rotation.x = Math.sin(this.swingTimer) * 0.8 - 0.5; // Braço golpeia
+                    
+                    // REATIVAÇÃO DA LOGICA DE COLETAR E DANO DAS FLORES P/ JOGADOR
                     this.collectTimer = (this.collectTimer || 0) - dt;
-                    if (this.collectTimer <= 0) {
+                    if(this.collectTimer <= 0) {
                         this.attemptCollect();
-                        this.collectTimer = 0.25; // O jogador raspa pólen 4 vezes por segundo
+                        this.collectTimer = 0.25; 
                     }
-                } else { 
-                    this.toolGroup.rotation.x = THREE.MathUtils.lerp(this.toolGroup.rotation.x, 0, dt*10); 
+                } else {
                     this.collectTimer = 0;
                 }
-            }
+            } // Fechamento do laço Update principal
+
             attemptCollect() {
                 if(state.pollen >= state.capacity) return;
                 const cp = this.group.position; let hA = false;
                 for(let f of flowers) {
                     if(!f.userData.cap || f.userData.health <= 0) continue; 
-                    // [CORREÇÃO]: Medição em eixo 2D X e Z elimina problemas de salto e declive do terreno! Raio 6m.
                     if(Math.hypot(f.position.x - cp.x, f.position.z - cp.z) < 6.0) {
                         f.userData.health = 0; f.userData.cap.scale.set(0.1, 0.1, 0.1);
                         let amt = Math.min(this.power * (f.userData.multi||1), state.capacity - state.pollen);
@@ -984,8 +1074,11 @@
                         }
                     } 
                     if(this.state === 'follow') {
-                        const oX = Math.cos(this.animTimer*0.2)*3; const oZ = Math.sin(this.animTimer*0.2)*3;
-                        tg.copy(playerObj.group.position).add(new THREE.Vector3(oX, 4 + Math.sin(this.animTimer*0.5)*0.5, oZ));
+                        // Voo Dinâmico Assíncrono para afastar o Swarm
+                        const offsetNoise = (this.slot.index % 5) * 1.5;
+                        const oX = Math.cos(this.animTimer*0.2 + this.slot.index) * (3 + offsetNoise); 
+                        const oZ = Math.sin(this.animTimer*0.2 + (this.slot.index*0.5)) * (3 + offsetNoise);
+                        tg.copy(playerObj.group.position).add(new THREE.Vector3(oX, 4 + Math.sin(this.animTimer*0.5 + this.slot.index)*1.5, oZ));
                     }
                 }
                 this.group.position.lerp(tg, dt * this.type.speed * 0.2); const lT = tg.clone(); lT.y = this.group.position.y;
@@ -1014,7 +1107,10 @@
         window.addEventListener('contextmenu', e => e.preventDefault());
         
         let camHeading = 0; let camPitch = 0.5; let camDist = 25; let isDraggingCam = false;
-        window.addEventListener('mousemove', e => { if(isDraggingCam) { camHeading+=e.movementX*0.005; camPitch+=e.movementY*0.005; camPitch=Math.max(0.1,Math.min(1.4, camPitch)); } });
+        
+        // CÂMERA PADRÃO RESPONSIVA: O cursor para direita move tudo para direita; para cima sobe ângulo
+        window.addEventListener('mousemove', e => { if(isDraggingCam) { camHeading += e.movementX*0.005; camPitch += e.movementY*0.005; camPitch=Math.max(0.1,Math.min(1.4, camPitch)); } });
+        
         window.addEventListener('wheel', e => { camDist += e.deltaY * 0.05; camDist = Math.max(10, Math.min(60, camDist)); });
 
         window.closeAllModals = () => { document.querySelectorAll('.modal-wrapper').forEach(el => el.style.display = 'none'); state.targetBeeRef = null; SFX.error(); renderAchievements(); }
@@ -1203,6 +1299,154 @@
              }); lb.innerHTML = h;
         }
 
+        // =====================================
+        // MULTIPLAYER SYNC (SUPABASE REALTIME)
+        // =====================================
+        const otherPlayersGroup = new THREE.Group();
+        worldGroup.add(otherPlayersGroup);
+        const peers = {};
+
+        const serverChannel = supabase.channel('room-s1-alpha');
+        
+        // Função de Limpeza de Jogador (Desconectado/Timeout)
+        function removePeer(user) {
+            let pr = peers[user];
+            if(pr) {
+                if(pr.group) otherPlayersGroup.remove(pr.group);
+                if(pr.hiveGroup) worldGroup.remove(pr.hiveGroup);
+                if(pr.tag && pr.tag.parentNode) pr.tag.parentNode.removeChild(pr.tag);
+                delete peers[user];
+            }
+        }
+
+        // CHAT SYNC
+        window.sendChat = () => {
+            const inp = document.getElementById('chat-input');
+            const txt = inp.value.trim();
+            if(!txt || !isGameActive) return;
+            inp.value = '';
+            appendChatMessage(currentUser, txt, true);
+            serverChannel.send({ type: 'broadcast', event: 'chat', payload: { user: currentUser, text: txt } });
+            SFX.click();
+        }
+        function appendChatMessage(user, msg, isSelf) {
+            const list = document.getElementById('chat-messages');
+            const c = isSelf ? '#a8ffb2' : '#ffca28';
+            list.innerHTML += `<div style="margin-bottom:5px;"><strong style="color:${c}">${user}:</strong> ${msg}</div>`;
+            list.scrollTop = list.scrollHeight;
+        }
+        serverChannel.on('broadcast', { event: 'chat' }, payload => {
+            if(payload.payload.user === currentUser) return;
+            appendChatMessage(payload.payload.user, payload.payload.text, false);
+            SFX.step();
+        });
+
+        // DESCONEXÃO EXPLICITA SYNC
+        serverChannel.on('broadcast', { event: 'quit' }, payload => {
+            removePeer(payload.payload.user);
+        });
+
+        // MOVIMENTACAO SYNC
+        serverChannel.on('broadcast', { event: 'mv' }, payload => {
+            if(payload.payload.user === currentUser) return;
+            let d = payload.payload;
+            
+            if(!peers[d.user]) {
+                const pG = new THREE.Group();
+                const m = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.8, 1), new THREE.MeshStandardMaterial({color: 0xE91E63})); m.position.y=1.6; pG.add(m);
+                const h = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); h.position.y=3.2; pG.add(h);
+                
+                // Target UI flutuante dos Rivais
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'dmg-text'; nameDiv.innerText = d.user;
+                nameDiv.style.color = '#E91E63'; nameDiv.style.opacity = '1'; nameDiv.style.animation = 'none';
+                document.getElementById('floating-texts').appendChild(nameDiv);
+
+                otherPlayersGroup.add(pG);
+                peers[d.user] = { group: pG, targetX: d.x, targetY: d.y, targetZ: d.z, tRY: d.ry, tag: nameDiv, slots: 0, beeData: [], lastSeen: Date.now() };
+            } else {
+                // Buffer de interpolação passiva
+                peers[d.user].targetX = d.x; peers[d.user].targetY = d.y; peers[d.user].targetZ = d.z; peers[d.user].tRY = d.ry;
+                peers[d.user].lastSeen = Date.now();
+            }
+        });
+        
+        // STATUS DE COLMEIA E ABELHAS SYNC
+        serverChannel.on('broadcast', { event: 'sync' }, payload => {
+            if(payload.payload.user === currentUser) return;
+            let d = payload.payload;
+            if(!peers[d.user]) return; 
+            
+            let pr = peers[d.user];
+            // Construir ou Reconstruir Favos (Colmeia é sempre visível)
+            if(pr.slots !== d.slots) {
+                pr.slots = d.slots;
+                if(pr.hiveGroup) worldGroup.remove(pr.hiveGroup);
+                pr.hiveGroup = buildDummyHive(d.hiveIndex, d.slots);
+                worldGroup.add(pr.hiveGroup);
+            }
+            
+            // Dados das abelhas (Só visível se checado nas configurações)
+            pr.beeData = d.bees;
+            if(state.showOtherBees) rebuildDummyBees(pr);
+            else if(pr.beesGroup) { pr.beesGroup.clear(); }
+            
+            pr.lastSeen = Date.now();
+        });
+        serverChannel.subscribe();
+
+        function buildDummyHive(idx, count) {
+            const hg = new THREE.Group();
+            hg.position.copy(getHiveOffset(idx));
+            for(let i=0; i<count; i++) {
+                const c = 7; const r = Math.floor(i / c); const cl = i % c;
+                const xO = (cl * (hexRadius * 1.8)) - (((c-1) * (hexRadius * 1.8)) / 2);
+                const yO = 6 + (r * (hexRadius * 1.5));
+                const mat = (r+cl)%2==0 ? mats.hive.clone() : mats.hiveDark.clone();
+                mat.opacity = 0.6; mat.transparent = true;
+                const m = new THREE.Mesh(hexGeo, mat); m.position.set(xO, yO, 0); hg.add(m);
+            }
+            return hg;
+        }
+
+        function rebuildDummyBees(peer) {
+            if(!peer.beesGroup) { peer.beesGroup = new THREE.Group(); peer.group.add(peer.beesGroup); }
+            peer.beesGroup.clear();
+            if(!peer.beeData) return;
+            peer.beeData.forEach((catId, countIdx) => {
+                const clr = CatStats[catId]?.cols[0] || 0xFFF176;
+                const bm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.5), new THREE.MeshBasicMaterial({color: clr}));
+                bm.position.set(Math.cos(countIdx)*4, Math.random()*2 + 1, Math.sin(countIdx)*4);
+                bm.userData.idx = countIdx;
+                peer.beesGroup.add(bm);
+            });
+        }
+        function updateAllOtherBees() {
+            for(let k in peers) {
+                if(state.showOtherBees) rebuildDummyBees(peers[k]);
+                else if (peers[k].beesGroup) peers[k].beesGroup.clear();
+            }
+        }
+        
+        // Emissão Continua de sua Posição Servidor
+        setInterval(() => {
+            if(isGameActive && currentUser && serverChannel) {
+                serverChannel.send({ type: 'broadcast', event: 'mv', payload: {
+                    user: currentUser, x: player.group.position.x, y: player.group.position.y, z: player.group.position.z, ry: player.body.rotation.y
+                }});
+            }
+        }, 100);
+        
+        // Emissão Esporádica do Status Colmeia/Abelhas
+        setInterval(() => {
+            if(isGameActive && currentUser && serverChannel && serverChannel.state === 'joined') {
+                serverChannel.send({ type: 'broadcast', event: 'sync', payload: {
+                    user: currentUser, hiveIndex: playerHiveIndex, slots: hiveSlots.length, bees: bees.map(b => b.type.category)
+                }});
+            }
+        }, 3000);
+
+
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
@@ -1228,11 +1472,44 @@
                     } else f.userData.htmlEl.style.display='none';
                 }
             });
+            
+            // Multijogador Visual: Interpolação Lerp Assíncrona para não engasgar ping e desenhar nomes
+            for(let key in peers) {
+                let pr = peers[key];
+                
+                // Timeout de Limpeza caso jogador tenha crachado/fechado janela abruptamente (Inativo > 5s)
+                if(Date.now() - pr.lastSeen > 5000) {
+                    removePeer(key);
+                    continue;
+                }
+
+                pr.group.position.lerp(new THREE.Vector3(pr.targetX, pr.targetY, pr.targetZ), dt*10);
+                pr.group.rotation.y = THREE.MathUtils.lerp(pr.group.rotation.y, pr.tRY, dt*10);
+                
+                const p2 = pr.group.position.clone().add(new THREE.Vector3(0, 4.5, 0)).project(camera);
+                if(p2.z < 1) {
+                    pr.tag.style.left = `${(p2.x * 0.5 + 0.5) * window.innerWidth}px`;
+                    pr.tag.style.top = `${(p2.y * -0.5 + 0.5) * window.innerHeight}px`;
+                    pr.tag.style.display = 'block';
+                } else { pr.tag.style.display = 'none'; }
+                
+                // Animação boba e super leve de voo nas abelhas dummy do jogador remoto, se habilitado
+                if(state.showOtherBees && pr.beesGroup) {
+                    pr.beesGroup.children.forEach(b => {
+                        b.position.y = Math.sin(Date.now()*0.005 + b.userData.idx) * 1.5 + 2;
+                        b.rotation.y += dt*2;
+                    });
+                }
+            }
+
             bees.forEach(b => b.update(dt, player)); renderer.render(scene, camera);
         }
 
         updateUI(); animate();
-        window.addEventListener("beforeunload", function(){ saveGameToLocal(); });
+        window.addEventListener("beforeunload", function(){ 
+            if(currentUser && serverChannel) serverChannel.send({ type: 'broadcast', event: 'quit', payload: { user: currentUser } });
+            saveGameToLocal(); 
+        });
         window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     </script>
 </body>
