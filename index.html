@@ -105,6 +105,23 @@
         .player-row { display: flex; justify-content: space-between; background: #444; padding: 10px; margin-bottom: 5px; border-radius: 5px;}
 
         #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: rgba(255,255,255,0.8); border-radius: 50%; pointer-events: none; mix-blend-mode: difference; z-index: 5;}
+        
+        /* ================= MOBILE RESPONSIVE OVERRIDES ================= */
+        .mobile-mode .top-hud { flex-direction: column; gap: 10px; align-items: center; }
+        .mobile-mode .bottom-hud { flex-wrap: wrap; justify-content: center; padding: 10px; }
+        .mobile-mode button { font-size: 14px; padding: 8px 15px; }
+        .mobile-mode .modal-content { width: 95% !important; padding: 15px; max-height: 90vh; overflow-y: auto;}
+        .mobile-mode .shop-section { height: auto; max-height: 50vh; }
+        .mobile-mode .egg-card { width: 120px; padding: 10px; }
+        .mobile-mode .ach-card { width: 100%; }
+        .mobile-mode .progress-container { width: 280px; }
+        .mobile-mode .honey-box { font-size: 24px; padding: 5px 15px; }
+        
+        #mobile-controls { display: none; position: absolute; bottom: 90px; left: 0; width: 100%; pointer-events: none; z-index: 6; justify-content: space-between; padding: 0 15px; box-sizing: border-box; }
+        .mobile-mode #mobile-controls { display: flex; }
+        .mob-act-group { display: flex; flex-direction: column; gap: 10px; justify-content: flex-end; align-items: flex-end; }
+        .mob-btn { pointer-events: auto; background: rgba(20,25,40,0.8); border: 2px solid #2196F3; border-radius: 50%; width: 55px; height: 55px; font-size: 20px; display: flex; justify-content: center; align-items: center; color: white; user-select: none; font-family: 'Fredoka One'; box-shadow: 0 4px 0 #0D47A1; touch-action: none; }
+        .mob-btn:active { background: rgba(33,150,243,0.9); transform: translateY(4px); box-shadow: none; }
     </style>
 </head>
 <body>
@@ -148,6 +165,18 @@
     <div id="floating-texts"></div>
     <div id="crosshair"></div>
 
+    <!-- CONTROLES MOBILE DA TELA DE JOGO -->
+    <div id="mobile-controls">
+        <div style="display: grid; grid-template-columns: 55px 55px 55px; gap: 5px; pointer-events: none;">
+            <div></div><div class="mob-btn" id="m-w">W</div><div></div>
+            <div class="mob-btn" id="m-a">A</div><div class="mob-btn" id="m-s">S</div><div class="mob-btn" id="m-d">D</div>
+        </div>
+        <div class="mob-act-group">
+            <div class="mob-btn" id="m-jump" style="width: 70px; border-radius: 15px;">PULO</div>
+            <div class="mob-btn" id="m-farm" style="width: 100px; height: 60px; border-radius: 15px; background: #4CAF50; border-color: #1B5E20; box-shadow: 0 4px 0 #1B5E20; line-height:1.2;">FOICE<br><span style="font-size:12px">(Segurar)</span></div>
+        </div>
+    </div>
+
     <!-- WRAPPER CONFIGURACOES -->
     <div id="settings-modal-wrapper" class="modal-wrapper">
         <div class="modal-content" style="width: 450px; text-align:center;">
@@ -167,6 +196,12 @@
                 <span style="font-weight:bold;">Exibir Notificações Pop-up:</span>
                 <input type="checkbox" checked id="notif-toggle" onchange="toggleNotifs(this.checked)" style="transform: scale(1.5);">
             </div>
+            
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#4b0082; padding:10px; border-radius:8px;">
+                <span style="font-weight:bold;">Habilitar Modo Mobile <br><span style="font-size:11px;color:#aaa;">(Controles de Toque e Tela Menor)</span></span>
+                <input type="checkbox" id="mobile-toggle" onchange="toggleMobileMode(this.checked)" style="transform: scale(1.5);">
+            </div>
+
             <hr style="border-color:#555; width:100%; margin:20px 0;">
             <button style="background:#f44336; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c; width:100%; font-size:16px;" onclick="hardResetAccount()">🚨 DELETAR MEU SALVAMENTO</button>
         </div>
@@ -400,6 +435,48 @@
 
         window.adjustVolume = (val) => { state.volGlobal = parseFloat(val); SFX.click(); }
         window.toggleNotifs = (val) => { state.notifsEnabled = val; SFX.click(); }
+        
+        window.toggleMobileMode = (val) => {
+            if(val) document.body.classList.add('mobile-mode');
+            else document.body.classList.remove('mobile-mode');
+            SFX.click();
+        }
+
+        // BINDING DE TOUCH/INPUTS PARA MOBILE
+        const bindMobBtn = (id, key) => {
+            let el = document.getElementById(id);
+            if(!el) return;
+            el.addEventListener('touchstart', e => { e.preventDefault(); inputState[key] = true; });
+            el.addEventListener('touchend', e => { e.preventDefault(); inputState[key] = false; });
+        };
+        bindMobBtn('m-w', 'w'); bindMobBtn('m-a', 'a'); bindMobBtn('m-s', 's'); bindMobBtn('m-d', 'd'); bindMobBtn('m-jump', 'space');
+
+        const farmBtn = document.getElementById('m-farm');
+        if(farmBtn) {
+            farmBtn.addEventListener('touchstart', e => { e.preventDefault(); state.mouseHold = true; });
+            farmBtn.addEventListener('touchend', e => { e.preventDefault(); state.mouseHold = false; });
+        }
+
+        // ARRASTAR A CAMERA VIA TOUCH NA TELA DO MOBILE (QUANDO FORA DE UI)
+        let touchCamActive = false; let lastTouchX = 0, lastTouchY = 0;
+        window.addEventListener('touchstart', e => {
+            if(!isGameActive) return;
+            // Só movimenta visão de não estiver apertando nada na interface (botão mobile ou HUD)
+            if(e.target.tagName !== 'BUTTON' && !e.target.closest('#ui-layer') && !e.target.closest('#mobile-controls') && !e.target.closest('.modal-wrapper')) {
+                touchCamActive = true;
+                lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+            }
+        }, { passive: false });
+        
+        window.addEventListener('touchmove', e => {
+            if(touchCamActive && isGameActive) {
+                const dx = e.touches[0].clientX - lastTouchX; const dy = e.touches[0].clientY - lastTouchY;
+                camHeading += dx * 0.005; camPitch += dy * 0.005;
+                camPitch = Math.max(0.1, Math.min(1.4, camPitch));
+                lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+            }
+        }, { passive: false });
+        window.addEventListener('touchend', () => touchCamActive = false);
 
         // =====================================
         // DATA DAS ABELHAS (50 Variantes RNG)
