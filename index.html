@@ -107,6 +107,53 @@
         .adm-input { width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; border-radius: 5px; outline: none;}
         .player-row { display: flex; justify-content: space-between; background: #444; padding: 10px; margin-bottom: 5px; border-radius: 5px;}
 
+        /* REBIRTH MODAL */
+        .rebirth-flow { width: 100%; display: flex; justify-content: center; align-items: center; gap: 18px; margin: 20px 0 16px; flex-wrap: wrap; }
+        .rebirth-step { min-width: 180px; background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.18)); border: 2px solid rgba(255,255,255,0.15); border-radius: 18px; padding: 18px; text-align: center; }
+        .rebirth-step small { display: block; color: #9fb0cf; font-size: 11px; margin-bottom: 8px; }
+        .rebirth-step strong { display: block; font-family: 'Fredoka One', cursive; font-size: 34px; color: #ffeb3b; }
+        .rebirth-arrow { font-size: 38px; color: #ff7043; text-shadow: 0 0 15px rgba(255,112,67,0.5); }
+        .rebirth-cta { width: 100%; max-width: 280px; margin: 10px auto 0; background: linear-gradient(180deg, #ff7043, #d84315); border-color: #bf360c; box-shadow: 0 4px 0 #bf360c; }
+        .rebirth-cta:disabled { background: #555; border-color: #333; box-shadow: 0 4px 0 #333; cursor: not-allowed; filter: none; }
+
+        /* TRILHA CRONOLOGICA */
+        .trail-shell { width: 100%; display: flex; flex-direction: column; gap: 18px; }
+        .trail-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; }
+        .trail-stat { background: linear-gradient(160deg, rgba(5,20,40,0.92), rgba(18,42,72,0.88)); border: 2px solid rgba(255,255,255,0.12); border-radius: 18px; padding: 14px; min-height: 92px; box-sizing: border-box; }
+        .trail-stat-label { display: block; color: #8db4db; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .trail-stat-value { display: block; font-family: 'Fredoka One', cursive; font-size: 24px; color: #fff176; }
+        .trail-stat-note { display: block; margin-top: 8px; color: #cfd8dc; font-size: 11px; line-height: 1.4; }
+        .trail-progress-card { width: 100%; background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.18)); border: 2px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 16px 18px 18px; box-sizing: border-box; }
+        .trail-progress-top { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 12px; flex-wrap: wrap; }
+        .trail-progress-title { font-family: 'Fredoka One', cursive; font-size: 20px; color: #80deea; }
+        .trail-progress-rank { padding: 6px 12px; border-radius: 999px; background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.35); color: #ffd54f; font-size: 12px; }
+        .trail-main-progress { position: relative; width: 100%; height: 16px; border-radius: 999px; background: rgba(0,0,0,0.4); overflow: hidden; border: 2px solid rgba(255,255,255,0.08); }
+        .trail-main-fill { height: 100%; background: linear-gradient(90deg, #00e5ff, #76ff03, #ffd54f); width: 0%; transition: width 0.25s ease; }
+        .trail-progress-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; color: #d7e6f5; font-size: 12px; flex-wrap: wrap; }
+        .trail-rows { display: flex; flex-direction: column; gap: 18px; width: 100%; }
+        .trail-row { width: 100%; background: linear-gradient(180deg, rgba(8,15,30,0.95), rgba(19,25,48,0.92)); border: 2px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 16px 18px 22px; box-sizing: border-box; }
+        .trail-row.locked { border-color: rgba(244,67,54,0.45); }
+        .trail-row-head { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+        .trail-row-title { font-family: 'Fredoka One', cursive; color: #ffca28; font-size: 18px; }
+        .trail-row-note { color: #b0bec5; font-size: 12px; }
+        .trail-lane { position: relative; width: 100%; min-height: 220px; overflow-x: auto; overflow-y: hidden; padding: 8px 0 12px; }
+        .trail-lane-inner { position: relative; width: 1180px; min-height: 200px; }
+        .trail-center-line { position: absolute; left: 35px; right: 35px; top: 96px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.04); }
+        .trail-center-fill { position: absolute; left: 35px; top: 96px; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #00e5ff, #00c853, #ffee58); width: 0%; box-shadow: 0 0 20px rgba(0,229,255,0.35); }
+        .trail-tick { position: absolute; top: 88px; width: 2px; height: 24px; background: rgba(255,255,255,0.22); }
+        .trail-node { position: absolute; width: 170px; transform: translateX(-50%); }
+        .trail-node.top { top: 0; }
+        .trail-node.bottom { top: 108px; }
+        .trail-node-card { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.22)); border: 2px solid rgba(255,255,255,0.14); border-radius: 18px; padding: 12px; min-height: 72px; box-sizing: border-box; }
+        .trail-node-dot { position: absolute; left: 50%; width: 18px; height: 18px; border-radius: 50%; transform: translateX(-50%); border: 3px solid #0b1024; box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
+        .trail-node.top .trail-node-dot { top: 82px; background: #29b6f6; }
+        .trail-node.bottom .trail-node-dot { top: -14px; background: #ff7043; }
+        .trail-node-level { font-family: 'Fredoka One', cursive; color: #fff176; font-size: 14px; margin-bottom: 6px; }
+        .trail-node-rank { font-size: 10px; color: #80deea; margin-bottom: 8px; text-transform: uppercase; }
+        .trail-rewards { display: flex; flex-direction: column; gap: 4px; }
+        .trail-reward { font-size: 11px; color: #eceff1; line-height: 1.35; }
+        .trail-row-lock { width: 100%; background: rgba(244,67,54,0.12); border: 2px dashed rgba(244,67,54,0.4); border-radius: 18px; padding: 14px; color: #ffcdd2; font-size: 13px; text-align: center; box-sizing: border-box; }
+
         /* CHAT UI */
         #chat-container { position: absolute; bottom: 120px; left: 15px; width: 320px; height: 220px; background: rgba(0,0,0,0.5); border: 2px solid #555; border-radius: 10px; display: flex; flex-direction: column; pointer-events: auto; z-index: 50; overflow: hidden; backdrop-filter: blur(2px);}
         .chat-messages { flex-grow: 1; overflow-y: auto; padding: 10px; font-family: 'Nunito'; color: white; display: flex; flex-direction: column; text-shadow: 1px 1px 0 #000; font-size: 13px;}
@@ -131,6 +178,9 @@
         .mobile-mode .ach-card { width: 100%; }
         .mobile-mode .progress-container { width: 280px; }
         .mobile-mode .honey-box { font-size: 24px; padding: 5px 15px; }
+        .mobile-mode .trail-overview { grid-template-columns: 1fr 1fr; }
+        .mobile-mode .trail-lane-inner { width: 980px; }
+        .mobile-mode .trail-node { width: 150px; }
         
         #mobile-controls { display: none; position: absolute; bottom: 90px; left: 0; width: 100%; pointer-events: none; z-index: 6; justify-content: space-between; padding: 0 15px; box-sizing: border-box; }
         .mobile-mode #mobile-controls { display: flex; }
@@ -155,6 +205,7 @@
         <div class="top-hud">
             <div class="resource-group">
                 <div class="honey-box">🍯 <span id="honey-val">0</span></div>
+                <div id="rebirth-box" style="display:none; font-family:'Fredoka One',cursive; font-size:16px; color:#ff6b6b; padding:4px 15px; background:rgba(0,0,0,0.55); border-radius:20px; border:2px solid #e53935; margin-top:5px; text-shadow:1px 1px 0 #000;">🔄 <span id="rebirth-val">0</span> Rebirths &bull; <span id="rebirth-mult">1.00</span>x Mel</div>
                 <div class="progress-container">
                     <div class="progress-bar" id="pollen-bar"></div>
                     <div class="progress-text" id="pollen-val">0 / 200</div>
@@ -173,6 +224,7 @@
             <button class="btn-lead" onclick="openLeaderboard()">🏆 Leaderboard</button>
             <button class="btn-shop" onclick="openShop()">🛒 Loja Global</button>
             <button onclick="makeHoneyBtn()" style="background:#ff9800; border-color:#f57c00; box-shadow: 0 4px 0 #f57c00;">🐝 Fazer Mel (E)</button>
+            <button id="btn-rebirth" onclick="openRebirthModal()" style="display:none; background:#e53935; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c;">🔄 Rebirth (<span id="rebirth-count-hud">0</span>)</button>
         </div>
     </div>
 
@@ -213,6 +265,8 @@
                 <p><strong>Compras na Loja:</strong> <span id="st-shop"></span></p>
                 <p><strong>Mensagens no Servidor:</strong> <span id="st-chat"></span></p>
                 <p><strong>Exército Total (Colmeia):</strong> <span id="st-bees" style="color: #ffeb3b;"></span> abelhas</p>
+                <p><strong>Rebirths Realizados:</strong> <span id="st-rebirths" style="color:#ff6b6b;">0</span></p>
+                <p><strong>Multiplicador de Mel:</strong> <span id="st-multiplier" style="color:#4CAF50;">1.00</span>x</p>
             </div>
         </div>
     </div>
@@ -271,6 +325,7 @@
                 <button class="shop-tab" onclick="switchShopTab('tab-eggs', event)">Incubadora Surpresa</button>
                 <button class="shop-tab" onclick="switchShopTab('tab-bees', event)">Catálogo Instantâneo</button>
                 <button class="shop-tab" onclick="switchShopTab('tab-hive', event)">Melhorias (Favos/Global)</button>
+                <button class="shop-tab" style="background:#00BCD4; color:#000;" onclick="switchShopTab('tab-gamepasses', event)">🎫 Gamepasses</button>
                 <button class="shop-tab" style="background:#FFD700; color:black;" onclick="switchShopTab('tab-achievements', event)">🏆 Conquistas Totais</button>
             </div>
 
@@ -343,6 +398,11 @@
                 </div>
             </div>
 
+            <!-- GAMEPASSES -->
+            <div id="tab-gamepasses" class="shop-section">
+                <!-- Preenchido dinamicamente por renderGamepassTab() -->
+            </div>
+
             <!-- CONQUISTAS RPG -->
             <div id="tab-achievements" class="shop-section">
                 <!-- Preenchimento Automático dos 50 Cards -->
@@ -363,6 +423,31 @@
                 <!-- Div onde exibiremos os usuários com opção de Wipe -->
                 <div id="db-viewer" style="width:100%; max-width: 600px; display:flex; flex-direction:column; gap:8px;"></div>
             </div>
+        </div>
+    </div>
+
+    <div id="rebirth-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 560px; border-color:#ff7043; text-align:center;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color:#ff7043;">Ascensão de Rebirth</h1>
+            <p style="margin:0; color:#cfd8dc; max-width:460px; line-height:1.6;">Ao concluir o rebirth você perde apenas suas abelhas totais atuais, mas sobe seu multiplicador permanente de mel e acelera a evolução da conta.</p>
+            <div class="rebirth-flow">
+                <div class="rebirth-step">
+                    <small>Multiplicador Atual</small>
+                    <strong><span id="rebirth-current-mult">1.00</span>x</strong>
+                </div>
+                <div class="rebirth-arrow">➜</div>
+                <div class="rebirth-step" style="border-color:rgba(255,235,59,0.35); box-shadow:0 0 18px rgba(255,235,59,0.12);">
+                    <small>Próxima Evolução</small>
+                    <strong style="color:#76ff03;"><span id="rebirth-next-mult">1.25</span>x</strong>
+                </div>
+            </div>
+            <div style="width:100%; background:#1f2438; border-radius:18px; padding:14px; box-sizing:border-box; text-align:left; line-height:1.7; margin-bottom:16px;">
+                <p style="margin:0;"><strong>Custo do Rebirth:</strong> <span id="rebirth-cost-txt" style="color:#ffeb3b;">0</span> Mel</p>
+                <p style="margin:0;"><strong>Abelhas que serão resetadas:</strong> <span id="rebirth-bees-lost" style="color:#ff6b6b;">0</span></p>
+                <p style="margin:0;"><strong>Rebirth após confirmar:</strong> #<span id="rebirth-next-count">1</span></p>
+            </div>
+            <button id="rebirth-confirm-btn" class="rebirth-cta" onclick="confirmRebirthAction()">REALIZAR REBIRTH</button>
         </div>
     </div>
 
@@ -451,7 +536,9 @@
             sfxEnabled: true,
             vfxEnabled: true,
             notifsEnabled: true,
-            showOtherBees: false
+            showOtherBees: false,
+            rebirths: 0,
+            gamepasses: { trailRewardCursor: 0 }
         };
 
         const fN = (n) => {
@@ -461,6 +548,65 @@
             if(n >= 1e12) return (n/1e12).toFixed(2) + " Tri";
             return Math.floor(n).toLocaleString('pt-BR');
         };
+
+        const MAX_TRAIL_LEVEL = 50050;
+        const TRAIL_HONEY_BASE = 50000;
+        const TRAIL_RANKS = ['Broto', 'Pólen', 'Zangão', 'Mel Real', 'Áureo', 'Místico', 'Celestial', 'Hexa Prime', 'Omega', 'Cosmos'];
+        const GAMEPASS_LABELS = {
+            gp_power: 'Ferrão de Aço',
+            gp_honey: 'Néctar Divino',
+            gp_speed: 'Asas Sônicas',
+            gp_range: 'Campo de Visão',
+            gp_cap: 'Apicultor Supremo',
+            gp_auto: 'Colmeia Autônoma'
+        };
+
+        function normalizeGamepassState(raw = {}) {
+            return {
+                gp_power: !!raw.gp_power,
+                gp_honey: !!raw.gp_honey,
+                gp_speed: !!raw.gp_speed,
+                gp_range: !!raw.gp_range,
+                gp_cap: !!raw.gp_cap,
+                gp_auto: !!raw.gp_auto,
+                trailRewardCursor: raw.trailRewardCursor || 0
+            };
+        }
+
+        state.gamepasses = normalizeGamepassState(state.gamepasses);
+
+        const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+        const getRebirthMultiplier = (count = state.rebirths) => 1 + (count * 0.25);
+        const getTrailHoneyThreshold = (level) => Math.floor(TRAIL_HONEY_BASE * level * level);
+        const getTrailLevelFromHoney = (totalHoney) => clamp(Math.floor(Math.sqrt(Math.max(totalHoney, 0) / TRAIL_HONEY_BASE)), 0, MAX_TRAIL_LEVEL);
+        const getTrailRowForLevel = (level) => Math.floor(Math.max(level - 1, 0) / 100);
+        const getTrailBeeRequirement = (rowIndex) => 8 + (rowIndex * 3);
+
+        function getTrailRank(level) {
+            const importanceIndex = Math.floor(Math.max(level - 1, 0) / 50);
+            const rankName = TRAIL_RANKS[importanceIndex % TRAIL_RANKS.length];
+            const prestige = Math.floor(importanceIndex / TRAIL_RANKS.length) + 1;
+            return `Importância ${importanceIndex + 1} • ${rankName} ${prestige}`;
+        }
+
+        function getTrailLevelInfo() {
+            const totalHoney = state.achTracking.totalHoney || 0;
+            const level = getTrailLevelFromHoney(totalHoney);
+            const currentFloor = getTrailHoneyThreshold(level);
+            const nextLevel = clamp(level + 1, 1, MAX_TRAIL_LEVEL);
+            const nextTarget = getTrailHoneyThreshold(nextLevel);
+            const span = Math.max(nextTarget - currentFloor, 1);
+            const progressToNext = clamp((totalHoney - currentFloor) / span, 0, 1);
+            return {
+                level,
+                nextLevel,
+                totalHoney,
+                currentFloor,
+                nextTarget,
+                progressToNext,
+                currentRow: getTrailRowForLevel(Math.max(level, 1))
+            };
+        }
 
         // =====================================
         // AUDIO SYSTEM ENGINE AVANÇADA
@@ -597,7 +743,26 @@
             }
         });
         
-        // Registrar abelha de evento
+        const eventBeePrefixes = ['Aurora', 'Cometa', 'Solar', 'Lunar', 'Nébula', 'Prisma', 'Tempestade', 'Relâmpago', 'Rubi', 'Safira', 'Esmeralda', 'Ônix'];
+        const eventBeeSuffixes = ['Imperatriz', 'Arcana', 'Ressonante', 'Astral', 'Estelar', 'Rúnica', 'Cromática', 'Dourada', 'Omega', 'Suprema'];
+        const eventBeeIcons = ['⚡', '🌠', '💠', '☄️', '👑', '🧿', '🔥', '❄️', '🌙', '🌞'];
+
+        for(let i = 10; i < 120; i++) {
+            const name = `${eventBeePrefixes[i % eventBeePrefixes.length]} ${eventBeeSuffixes[Math.floor(i / eventBeePrefixes.length) % eventBeeSuffixes.length]}`;
+            BeeTypes[`event_${i}`] = {
+                id: `event_${i}`,
+                category: 'event',
+                name,
+                color: CatStats.event.cols[i % CatStats.event.cols.length],
+                convertSpeed: CatStats.event.minConv + (i * 35),
+                collectPow: CatStats.event.minPow + (i * 40),
+                speed: 25 + (i % 12),
+                icon: eventBeeIcons[i % eventBeeIcons.length],
+                specificCost: 0,
+                lvlBasePrc: CatStats.event.baseLvl + (i * 3000)
+            };
+        }
+
         BeeTypes['event_0'] = { id: 'event_0', category: 'event', name: `Entidade de Evento`, color: CatStats.event.cols[0], convertSpeed: CatStats.event.minConv, collectPow: CatStats.event.minPow, speed: 25, icon: CatStats.event.icon, specificCost: 0, lvlBasePrc: CatStats.event.baseLvl };
 
         // =====================================
@@ -706,7 +871,7 @@
                     }
                     p = existing.data;
                 } else {
-                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], tracking: {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate: Date.now() }, achv: Array(50).fill(0) };
+                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], rebirths: 0, gamepasses: { trailRewardCursor: 0 }, tracking: {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate: Date.now() }, achv: Array(50).fill(0) };
                     const { error: insErr } = await supabase.from('bss_players').insert([{ username: user, password: pass, data: p }]);
                     if (insErr) { showToast("Crie a tabela 'bss_players' (username, password, data jsonb) no Supabase!", "error"); btn.disabled=false; return; }
                     showToast(`Credenciais novas aceitas: ${user}`, "success");
@@ -768,6 +933,7 @@
                 honey: state.honey, pollen: state.pollen, capacity: state.capacity,
                 power: player.power, extraSlots: state.extraSlotsBought,
                 tracking: state.achTracking, achv: state.achProgress,
+                rebirths: state.rebirths, gamepasses: state.gamepasses,
                 bees: bees.map(b => ({ id: b.type.id, index: b.slot.index, level: b.level }))
             };
             await supabase.from('bss_players').update({ data: updatedData }).eq('username', currentUser);
@@ -779,6 +945,8 @@
             state.achTracking = p.tracking || {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate:Date.now()};
             if(!state.achTracking.creationDate) state.achTracking.creationDate = Date.now();
             if(p.achv) state.achProgress = p.achv;
+            state.rebirths = p.rebirths || 0;
+            state.gamepasses = normalizeGamepassState(p.gamepasses || {});
 
             bees.forEach(b => scene.remove(b.group)); bees.length = 0;
             
@@ -798,6 +966,12 @@
             
             // Transportar o jogador nativamente direto para as redondezas da conta dele
             player.group.position.set(hivePos.x, 5, hivePos.z + 20);
+
+            checkTrailRewards(true);
+
+            // Mostrar elementos de Rebirth no HUD após login
+            document.getElementById('btn-rebirth').style.display = 'flex';
+            document.getElementById('rebirth-box').style.display = 'flex';
 
             updateUI(); renderAchievements();
         }
@@ -1172,9 +1346,16 @@
                 this.state = 'follow'; this.animTimer = Math.random() * 10; this.aiTimer = 0; this.targetFlower = null; this.calcStats();
             }
             calcStats() {
+                const maxLvl = state.gamepasses['gp_cap'] ? 200 : 100;
+                if(this.level > maxLvl) this.level = maxLvl;
                 const lvlMulti = 1 + ((this.level - 1) * 0.2);
-                this.curPow = Math.floor(this.type.collectPow * lvlMulti);
-                this.curConv = Math.floor(this.type.convertSpeed * lvlMulti);
+                const powBonus  = state.gamepasses['gp_power'] ? 2.0 : 1.0;
+                const convBonus = state.gamepasses['gp_honey'] ? 2.0 : 1.0;
+                this.curPow  = Math.floor(this.type.collectPow   * lvlMulti * powBonus);
+                this.curConv = Math.floor(this.type.convertSpeed * lvlMulti * convBonus);
+                this.curSpeed     = this.type.speed * (state.gamepasses['gp_speed'] ? 2.0 : 1.0);
+                // collectMulti: 999 = autonomo (gp_auto), 2 = alcance duplo (gp_range), 1 = normal
+                this.collectMulti = state.gamepasses['gp_auto'] ? 999 : (state.gamepasses['gp_range'] ? 2.0 : 1.0);
             }
             update(dt, playerObj) {
                 this.animTimer += dt * 20; this.wing1.rotation.z = Math.sin(this.animTimer); this.wing2.rotation.z = -Math.sin(this.animTimer);
@@ -1190,8 +1371,9 @@
                             if(Math.random() < 0.2) { // 20% de chance constante a cada frame para fluidez
                                 const cnv = Math.min(this.curConv, state.pollen);
                                 if(cnv > 0) { 
-                                    state.pollen -= cnv; state.honey += cnv; state.achTracking.totalHoney += cnv;
-                                    spawnFloatingText(`+${fN(cnv)}`, this.group.position, '#ffd700'); SFX.honey(); updateUI();
+                                    const honeyGained = Math.floor(cnv * (1 + state.rebirths * 0.25));
+                                    state.pollen -= cnv; state.honey += honeyGained; state.achTracking.totalHoney += honeyGained;
+                                    spawnFloatingText(`+${fN(honeyGained)}`, this.group.position, '#ffd700'); SFX.honey(); updateUI();
                                 }
                             }
                         } else {
@@ -1208,14 +1390,14 @@
                         this.aiTimer = 0.5;
                         let insideField = false;
                         for(let f of flowers) {
-                            // Limite mais maleável da distância em campo
-                            if(f.userData.isAnchor && f.position.distanceTo(playerObj.group.position) < 40) { insideField = true; break; }
+                            // collectMulti: 999 = autônomo (sem limite de distância), >1 = alcance ampliado
+                            if(f.userData.isAnchor && f.position.distanceTo(playerObj.group.position) < 40 * Math.min(this.collectMulti, 40)) { insideField = true; break; }
                         }
                         
                         if(insideField) {
                             // Sorteia flor ao redor e pega
                             const rF = flowers[Math.floor(Math.random() * flowers.length)];
-                            if(rF.userData.cap && rF.userData.health > 0 && playerObj.group.position.distanceTo(rF.position) < 45) {
+                            if(rF.userData.cap && rF.userData.health > 0 && playerObj.group.position.distanceTo(rF.position) < 45 * Math.min(this.collectMulti, 40)) {
                                 this.targetFlower = rF; this.state = 'collecting';
                             } else { this.state = 'follow'; }
                         } else {
@@ -1224,12 +1406,12 @@
                     }
 
                     if(this.state === 'collecting' && this.targetFlower) {
-                        if(this.targetFlower.userData.health <= 0 || state.pollen >= state.capacity || playerObj.group.position.distanceTo(this.targetFlower.position) > 55) {
+                        if(this.targetFlower.userData.health <= 0 || state.pollen >= state.capacity || playerObj.group.position.distanceTo(this.targetFlower.position) > 55 * Math.min(this.collectMulti, 40)) {
                             this.state = 'follow'; this.targetFlower = null;
                         } else {
                             tg.copy(this.targetFlower.position); tg.y = this.targetFlower.userData.maxPos + 1.2; 
                             // [CORREÇÃO]: Ignora Eixo Y usando hypot e aumenta a margem do hit!
-                            if(Math.hypot(this.group.position.x - tg.x, this.group.position.z - tg.z) < 4.0) {
+                            if(Math.hypot(this.group.position.x - tg.x, this.group.position.z - tg.z) < 4.0 * Math.min(this.collectMulti, 10)) {
                                 if(Math.random() < 0.1) { 
                                     this.targetFlower.userData.health = 0; this.targetFlower.userData.cap.scale.set(0.1,0.1,0.1);
                                     let amt = Math.min(this.curPow * (this.targetFlower.userData.multi||1), state.capacity - state.pollen);
@@ -1248,7 +1430,7 @@
                         tg.copy(playerObj.group.position).add(new THREE.Vector3(oX, 4 + Math.sin(this.animTimer*0.5 + this.slot.index)*1.5, oZ));
                     }
                 }
-                this.group.position.lerp(tg, dt * this.type.speed * 0.2); const lT = tg.clone(); lT.y = this.group.position.y;
+                this.group.position.lerp(tg, dt * this.curSpeed * 0.2); const lT = tg.clone(); lT.y = this.group.position.y;
                 if(lT.distanceTo(this.group.position) > 0.1) this.bodyMesh.lookAt(lT);
             }
         }
@@ -1335,6 +1517,8 @@
                 document.getElementById('st-shop').innerText = state.achTracking.shopPurchases || 0;
                 document.getElementById('st-chat').innerText = state.achTracking.chatMsgs || 0;
                 document.getElementById('st-bees').innerText = bees.length;
+                document.getElementById('st-rebirths').innerText = state.rebirths;
+                document.getElementById('st-multiplier').innerText = (1 + state.rebirths * 0.25).toFixed(2);
             } else {
                 document.getElementById('st-header').innerText = `Perfil de ${tUser}`;
                 const { data } = await supabase.from('bss_players').select('data').eq('username', tUser).single();
@@ -1349,6 +1533,8 @@
                     document.getElementById('st-shop').innerText = track.shopPurchases || 0;
                     document.getElementById('st-chat').innerText = track.chatMsgs || 0;
                     document.getElementById('st-bees').innerText = numBees;
+                                    document.getElementById('st-rebirths').innerText = td.rebirths || 0;
+                                    document.getElementById('st-multiplier').innerText = (1 + (td.rebirths || 0) * 0.25).toFixed(2);
                 } else {
                     document.getElementById('st-date').innerText = 'Sem dados na Nuvem.';
                 }
@@ -1381,9 +1567,21 @@
         // TABELAS E LÓGICAS DE VENDA/COMPRA MODAL
         // =====================================
         function updateUI() {
+            checkTrailRewards();
             document.getElementById('honey-val').innerText = fN(state.honey); document.getElementById('pollen-val').innerText = `${fN(state.pollen)} / ${fN(state.capacity)}`;
             document.getElementById('pollen-bar').style.width = `${(state.pollen/state.capacity)*100}%`;
             document.getElementById('pollen-bar').style.background = state.pollen>=state.capacity?'#e53935':'linear-gradient(90deg, #8bc34a, #cddc39)';
+            
+            // Rebirth HUD
+            const rMult = getRebirthMultiplier().toFixed(2);
+            const rebirthVal = document.getElementById('rebirth-val');
+            const rebirthMult = document.getElementById('rebirth-mult');
+            const rebirthCountHud = document.getElementById('rebirth-count-hud');
+            if(rebirthVal) rebirthVal.innerText = state.rebirths;
+            if(rebirthMult) rebirthMult.innerText = rMult;
+            if(rebirthCountHud) rebirthCountHud.innerText = state.rebirths;
+
+            if(document.getElementById('tab-gamepasses')?.classList.contains('active')) renderGamepassTab();
             
             if (player.lastCap !== state.capacity || player.lastPow !== player.power) {
                 const eq = attachEquipmentVisuals(player.body, player.armR, state.capacity, player.power, player.packEq, player.toolEq);
@@ -1393,14 +1591,306 @@
         }
 
         window.switchShopTab = (tabId, evt) => {
-            if(tabId === 'tab-achievements') renderAchievements(); 
+            if(tabId === 'tab-achievements') renderAchievements();
+            if(tabId === 'tab-gamepasses') renderGamepassTab();
             document.querySelectorAll('.shop-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.shop-tab').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active'); evt.currentTarget.classList.add('active');
         };
 
+        function ensureRewardSlot() {
+            let emptySlot = hiveSlots.find(slot => !slot.occupied);
+            if(!emptySlot) {
+                state.extraSlotsBought++;
+                addHexSlot(hiveSlots.length);
+                emptySlot = hiveSlots[hiveSlots.length - 1];
+            }
+            return emptySlot;
+        }
+
+        function grantTrailEventBee(beeId) {
+            const beeType = BeeTypes[beeId] || BeeTypes['event_0'];
+            const slot = ensureRewardSlot();
+            bees.push(new Bee(beeType, slot));
+            return beeType.name;
+        }
+
+        function getTrailRewardBundle(level) {
+            const stage = Math.floor(level / 50);
+            const rewards = [];
+            const honeyAmount = 500000000 * Math.max(stage, 1);
+            rewards.push({ type: 'honey', icon: '🍯', label: `${fN(honeyAmount)} Mel`, value: honeyAmount });
+
+            if(stage % 2 === 1) {
+                const powerGain = 250000 + (stage * 125000);
+                rewards.push({ type: 'tool', icon: '⚒️', label: `Coletor +${fN(powerGain)} Poder`, value: powerGain });
+            } else {
+                const capacityGain = 1000000 + (stage * 350000);
+                rewards.push({ type: 'backpack', icon: '🎒', label: `Mochila +${fN(capacityGain)} Cap`, value: capacityGain });
+            }
+
+            const perkSequence = ['gp_power', 'gp_honey', 'gp_speed', 'gp_range', 'gp_cap', 'gp_auto'];
+            if(stage >= 1 && stage <= perkSequence.length) {
+                rewards.push({ type: 'perk', icon: '🎫', label: GAMEPASS_LABELS[perkSequence[stage - 1]], perkId: perkSequence[stage - 1] });
+            } else if(stage % 3 === 0) {
+                const eventId = `event_${10 + (stage % 110)}`;
+                rewards.push({ type: 'eventBee', icon: '⚡', label: BeeTypes[eventId]?.name || 'Abelha de Evento', beeId: eventId });
+            }
+
+            if(stage % 5 === 0) {
+                const eventId = `event_${20 + (stage % 100)}`;
+                rewards.push({ type: 'eventBee', icon: '👑', label: BeeTypes[eventId]?.name || 'Abelha de Evento Prime', beeId: eventId });
+            }
+
+            return rewards.slice(0, 4);
+        }
+
+        function applyTrailReward(level, rewards) {
+            const summaries = [];
+            rewards.forEach(reward => {
+                if(reward.type === 'honey') {
+                    state.honey += reward.value;
+                    summaries.push(reward.label);
+                }
+                if(reward.type === 'tool') {
+                    player.power += reward.value;
+                    summaries.push(reward.label);
+                }
+                if(reward.type === 'backpack') {
+                    state.capacity += reward.value;
+                    summaries.push(reward.label);
+                }
+                if(reward.type === 'perk') {
+                    if(!state.gamepasses[reward.perkId]) {
+                        state.gamepasses[reward.perkId] = true;
+                        summaries.push(`Perk ${reward.label}`);
+                    } else {
+                        const bonusHoney = 150000000 * Math.max(level / 50, 1);
+                        state.honey += bonusHoney;
+                        summaries.push(`${fN(bonusHoney)} Mel extra`);
+                    }
+                }
+                if(reward.type === 'eventBee') {
+                    const beeName = grantTrailEventBee(reward.beeId);
+                    summaries.push(`Abelha ${beeName}`);
+                }
+            });
+            return summaries;
+        }
+
+        function checkTrailRewards(silent = false) {
+            const trailInfo = getTrailLevelInfo();
+            const targetMilestone = Math.floor(trailInfo.level / 50) * 50;
+            let cursor = state.gamepasses.trailRewardCursor || 0;
+            if(targetMilestone <= cursor) return;
+
+            const grantedMilestones = [];
+            while(cursor + 50 <= targetMilestone) {
+                cursor += 50;
+                const rewardBundle = getTrailRewardBundle(cursor);
+                applyTrailReward(cursor, rewardBundle);
+                grantedMilestones.push(cursor);
+            }
+
+            state.gamepasses.trailRewardCursor = cursor;
+            bees.forEach(bee => bee.calcStats());
+
+            if(grantedMilestones.length > 0) {
+                const firstMilestone = grantedMilestones[0];
+                const lastMilestone = grantedMilestones[grantedMilestones.length - 1];
+                const syncLabel = grantedMilestones.length === 1 ? `Nível ${lastMilestone}` : `Níveis ${firstMilestone} até ${lastMilestone}`;
+                showToast(`🌠 Recompensas da trilha sincronizadas: ${syncLabel}.`, silent ? 'info' : 'success');
+            }
+        }
+
+        function renderTrailRow(rowIndex, trailInfo, locked = false) {
+            const rowStart = (rowIndex * 100) + 1;
+            const rowEnd = Math.min(rowStart + 99, MAX_TRAIL_LEVEL);
+            const requirement = getTrailBeeRequirement(rowIndex + 1);
+            const isCurrentRow = trailInfo.currentRow === rowIndex;
+            const rowProgressPct = isCurrentRow ? (((trailInfo.level - rowStart) + trailInfo.progressToNext) / 100) * 100 : (trailInfo.level > rowEnd ? 100 : 0);
+            const milestoneLevels = [rowStart + 49, rowStart + 99].filter(level => level <= rowEnd);
+
+            let nodesHtml = '';
+            milestoneLevels.forEach((level, idx) => {
+                const positionPct = ((level - rowStart + 1) / 100) * 100;
+                const rewards = getTrailRewardBundle(level);
+                const rewardHtml = rewards.map(reward => `<div class="trail-reward">${reward.icon} ${reward.label}</div>`).join('');
+                nodesHtml += `
+                    <div class="trail-node ${idx % 2 === 0 ? 'top' : 'bottom'}" style="left:${positionPct}%;">
+                        <div class="trail-node-card">
+                            <div class="trail-node-level">Nível ${level}</div>
+                            <div class="trail-node-rank">${getTrailRank(level)}</div>
+                            <div class="trail-rewards">${rewardHtml}</div>
+                        </div>
+                        <div class="trail-node-dot"></div>
+                    </div>`;
+            });
+
+            let tickHtml = '';
+            for(let i = 0; i <= 5; i++) {
+                const tickPct = i * 20;
+                tickHtml += `<div class="trail-tick" style="left: calc(35px + (${tickPct}% * ((100% - 70px) / 100)));"></div>`;
+            }
+
+            if(locked) {
+                return `
+                    <div class="trail-row locked">
+                        <div class="trail-row-head">
+                            <div>
+                                <div class="trail-row-title">Linha ${rowIndex + 1} bloqueada</div>
+                                <div class="trail-row-note">Níveis ${rowStart} a ${rowEnd}</div>
+                            </div>
+                        </div>
+                        <div class="trail-row-lock">Você precisa de ${requirement} abelhas totais para visualizar esta próxima linha cronológica.</div>
+                    </div>`;
+            }
+
+            return `
+                <div class="trail-row">
+                    <div class="trail-row-head">
+                        <div>
+                            <div class="trail-row-title">Linha ${rowIndex + 1}: níveis ${rowStart}-${rowEnd}</div>
+                            <div class="trail-row-note">A próxima linha exige ${requirement} abelhas para ficar visível.</div>
+                        </div>
+                        <div class="trail-progress-rank">${getTrailRank(rowEnd)}</div>
+                    </div>
+                    <div class="trail-lane">
+                        <div class="trail-lane-inner">
+                            <div class="trail-center-line"></div>
+                            <div class="trail-center-fill" style="width: calc(${clamp(rowProgressPct, 0, 100)}% - 35px);"></div>
+                            ${tickHtml}
+                            ${nodesHtml}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderGamepassTab() {
+            const trailInfo = getTrailLevelInfo();
+            const currentRank = getTrailRank(Math.max(trailInfo.level, 1));
+            const totalVisibleRows = Math.max(1, getTrailRowForLevel(Math.max(trailInfo.level, 1)) + 1);
+            let unlockedRows = 1;
+            while(unlockedRows < totalVisibleRows + 2 && bees.length >= getTrailBeeRequirement(unlockedRows)) unlockedRows++;
+
+            const startRow = Math.max(0, trailInfo.currentRow - 1);
+            const visibleRows = [];
+            for(let row = startRow; row <= Math.min(startRow + 2, MAX_TRAIL_LEVEL / 100); row++) {
+                if(row < unlockedRows) visibleRows.push(renderTrailRow(row, trailInfo, false));
+                else {
+                    visibleRows.push(renderTrailRow(row, trailInfo, true));
+                    break;
+                }
+            }
+
+            const nextRowBeeReq = getTrailBeeRequirement(trailInfo.currentRow + 1);
+            const perksUnlocked = Object.keys(GAMEPASS_LABELS).filter(key => state.gamepasses[key]).length;
+            const nextRewardMilestone = clamp((Math.floor(trailInfo.level / 50) + 1) * 50, 50, MAX_TRAIL_LEVEL);
+            const nextRewardPreview = getTrailRewardBundle(nextRewardMilestone).map(reward => `${reward.icon} ${reward.label}`).join(' • ');
+
+            document.getElementById('tab-gamepasses').innerHTML = `
+                <div class="trail-shell">
+                    <div class="trail-overview">
+                        <div class="trail-stat">
+                            <span class="trail-stat-label">Nível da Trilha</span>
+                            <span class="trail-stat-value">${fN(trailInfo.level)}</span>
+                            <span class="trail-stat-note">Total de 50.050 níveis disponíveis na cronologia.</span>
+                        </div>
+                        <div class="trail-stat">
+                            <span class="trail-stat-label">Classificação</span>
+                            <span class="trail-stat-value" style="font-size:18px; line-height:1.3;">${currentRank}</span>
+                            <span class="trail-stat-note">A importância sobe automaticamente a cada 50 níveis.</span>
+                        </div>
+                        <div class="trail-stat">
+                            <span class="trail-stat-label">Próxima Linha</span>
+                            <span class="trail-stat-value">${fN(nextRowBeeReq)}</span>
+                            <span class="trail-stat-note">Abelhas exigidas para enxergar a próxima linha cronológica.</span>
+                        </div>
+                        <div class="trail-stat">
+                            <span class="trail-stat-label">Perks Permanentes</span>
+                            <span class="trail-stat-value">${perksUnlocked}/6</span>
+                            <span class="trail-stat-note">Ferrão, mel, velocidade, alcance, limite e autonomia.</span>
+                        </div>
+                    </div>
+
+                    <div class="trail-progress-card">
+                        <div class="trail-progress-top">
+                            <div class="trail-progress-title">Linha central de evolução de mel</div>
+                            <div class="trail-progress-rank">${fN(trailInfo.totalHoney)} / ${fN(trailInfo.nextTarget)} Mel produzido</div>
+                        </div>
+                        <div class="trail-main-progress">
+                            <div class="trail-main-fill" style="width:${(trailInfo.progressToNext * 100).toFixed(2)}%;"></div>
+                        </div>
+                        <div class="trail-progress-meta">
+                            <span>Nível atual: ${fN(trailInfo.level)}</span>
+                            <span>Próximo nível: ${fN(trailInfo.nextLevel)}</span>
+                            <span>Falta: ${fN(Math.max(0, trailInfo.nextTarget - trailInfo.totalHoney))} Mel</span>
+                            <span>Próxima recompensa: ${nextRewardPreview}</span>
+                        </div>
+                    </div>
+
+                    <div class="trail-rows">
+                        ${visibleRows.join('')}
+                    </div>
+                </div>`;
+        }
+
+        // =====================================
+        // SISTEMA DE REBIRTH
+        // =====================================
+        window.openRebirthModal = () => {
+            if(!currentUser) return;
+            const cost = Math.floor(500000 * Math.pow(5, state.rebirths));
+            const currentMult = getRebirthMultiplier().toFixed(2);
+            const nextMult = getRebirthMultiplier(state.rebirths + 1).toFixed(2);
+            const canRebirth = state.honey >= cost;
+
+            document.getElementById('rebirth-current-mult').innerText = currentMult;
+            document.getElementById('rebirth-next-mult').innerText = nextMult;
+            document.getElementById('rebirth-cost-txt').innerText = fN(cost);
+            document.getElementById('rebirth-bees-lost').innerText = bees.length;
+            document.getElementById('rebirth-next-count').innerText = state.rebirths + 1;
+            document.getElementById('rebirth-confirm-btn').disabled = !canRebirth;
+            document.getElementById('rebirth-confirm-btn').innerText = canRebirth ? 'REALIZAR REBIRTH' : 'MEL INSUFICIENTE';
+            document.getElementById('rebirth-modal-wrapper').style.display = 'flex';
+            SFX.click();
+        };
+
+        window.confirmRebirthAction = () => {
+            if(!currentUser) return;
+            const cost = Math.floor(500000 * Math.pow(5, state.rebirths));
+            if(state.honey < cost) {
+                SFX.error();
+                showToast(`Precisa de ${fN(cost)} Mel para fazer Rebirth!`, 'error');
+                return;
+            }
+
+            state.honey -= cost;
+            state.rebirths++;
+
+            const beesSnap = [...bees];
+            beesSnap.forEach(b => {
+                scene.remove(b.group);
+                b.slot.occupied = false; b.slot.beeRef = null;
+                b.slot.hexMesh.material = (Math.floor(b.slot.index / 7) + b.slot.index % 7) % 2 === 0 ? mats.hive.clone() : mats.hiveDark.clone();
+                b.slot.hexMesh.material.transparent = true; b.slot.hexMesh.material.opacity = 0.25;
+            });
+            bees.length = 0;
+
+            spawnStarterBee();
+            bees.forEach(b => b.calcStats());
+
+            closeAllModals();
+            updateUI();
+            SFX.upgrade();
+            showToast(`🔄 Rebirth #${state.rebirths} concluído. Multiplicador atual: ${getRebirthMultiplier().toFixed(2)}x.`, 'success');
+        };
+
+        window.doRebirth = window.openRebirthModal;
+
         window.openShop = () => {
              document.getElementById('slot-price-txt').innerText = fN(state.slotPriceBase * Math.pow(state.slotMultiplier, state.extraSlotsBought));
+             renderGamepassTab();
              document.getElementById('shop-modal-wrapper').style.display = 'flex'; SFX.click();
         };
 
@@ -1416,7 +1906,7 @@
         window.upgradeAllBeesGlobal = () => {
             let upgd = 0; let cstTotal = 0;
             for(let b of bees) {
-                if(b.level >= 100) continue;
+                if(b.level >= (state.gamepasses['gp_cap'] ? 200 : 100)) continue;
                 let uC = Math.floor(b.type.lvlBasePrc * Math.pow(1.5, b.level - 1));
                 if(state.honey >= uC) { state.honey -= uC; b.level++; b.calcStats(); cstTotal += uC; upgd++; }
             }
@@ -1474,12 +1964,13 @@
             document.getElementById('bm-lvl').innerText = b.level; document.getElementById('bm-pow').innerText = fN(b.curPow);
             document.getElementById('bm-conv').innerText = fN(b.curConv);
             const bt = document.getElementById('btn-upgrade');
-            if(b.level >= 100) { bt.innerText = "Limites Genéticos (NV 100)"; bt.disabled=true; bt.style.background="#555"; } 
+            const maxLvlBee = state.gamepasses['gp_cap'] ? 200 : 100;
+            if(b.level >= maxLvlBee) { bt.innerText = `Limites Genéticos (NV ${maxLvlBee})`; bt.disabled=true; bt.style.background="#555"; } 
             else { const c = Math.floor(b.type.lvlBasePrc*Math.pow(1.5, b.level-1)); bt.innerText = `Bombear Nível (-${fN(c)} Mel)`; bt.disabled=false; bt.style.background="#4CAF50"; }
         }
 
         window.confirmUpgradeBee = () => {
-            const b = state.targetBeeRef; if(!b || b.level >= 100) return;
+            const b = state.targetBeeRef; if(!b || b.level >= (state.gamepasses['gp_cap'] ? 200 : 100)) return;
             const cst = Math.floor(b.type.lvlBasePrc * Math.pow(1.5, b.level - 1));
             if(state.honey >= cst) { state.honey -= cst; b.level++; b.calcStats(); SFX.upgrade(); updateUI(); refreshBeeManageModal(); showToast(`Nível Ascendido!`, "success"); spawnFloatingText(`UP!`, b.group.position.clone().add(new THREE.Vector3(0,2,0)), '#4CAF50'); }
             else { SFX.error(); showToast("Necessidade de fundos não suprida!", "error"); }
