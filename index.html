@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐝 Bee</title>
+    <title>Web Swarm Simulator - PRO RPG</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap');
         
@@ -44,6 +44,8 @@
         #floating-texts { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; overflow: hidden; z-index: 5;}
         .dmg-text { position: absolute; font-family: 'Fredoka One', cursive; font-size: 22px; color: #a8ffb2; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; animation: floatUpVanish 1s cubic-bezier(0.2,0.8,0.2,1) forwards; transform: translate(-50%, -50%); }
         @keyframes floatUpVanish { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 20% { transform: translate(-50%, -80%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(1); } }
+        
+        @keyframes chatBubbleAnim { 0% { opacity: 0; transform: scale(0.5); } 5% { opacity: 1; transform: scale(1); } 95% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.5); } }
 
         /* TOAST NOTIFICACOES */
         #toast-container { position: absolute; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; pointer-events: none;}
@@ -160,9 +162,9 @@
             
             <div class="profile-container">
                 <button class="settings-btn" id="btn-settings" onclick="openSettings()">⚙️</button>
-                <div class="profile-group" id="profile-panel">
-                    <div class="profile-name" id="hud-username">Jogador</div>
-                    <button class="logout-btn" onclick="logout()">Sair</button>
+                <div class="profile-group" id="profile-panel" onclick="openStats()">
+                    <div class="profile-name" id="hud-username" style="cursor: pointer;">Jogador</div>
+                    <button class="logout-btn" onclick="event.stopPropagation(); logout()">Sair</button>
                 </div>
             </div>
         </div>
@@ -199,6 +201,21 @@
     </div>
 
     <!-- WRAPPER CONFIGURACOES -->
+    <div id="stats-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 400px; text-align:center;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color:#2196F3;" id="st-header">Estatísticas</h1>
+            <div style="background:#222; padding:15px; border-radius:10px; text-align:left; line-height:1.8; width: 100%;">
+                <p><strong>Nascimento da Conta:</strong> <span id="st-date"></span></p>
+                <p><strong>Tempo Jogado:</strong> <span id="st-time"></span></p>
+                <p><strong>Total Mel Produzido:</strong> <span id="st-honey"></span></p>
+                <p><strong>Compras na Loja:</strong> <span id="st-shop"></span></p>
+                <p><strong>Mensagens no Servidor:</strong> <span id="st-chat"></span></p>
+                <p><strong>Exército Total (Colmeia):</strong> <span id="st-bees" style="color: #ffeb3b;"></span> abelhas</p>
+            </div>
+        </div>
+    </div>
+
     <div id="settings-modal-wrapper" class="modal-wrapper">
         <div class="modal-content" style="width: 450px; text-align:center;">
             <button class="close-btn" onclick="closeAllModals()">X</button>
@@ -214,6 +231,14 @@
                 <input type="range" min="0" max="1" step="0.1" value="0.5" id="vol-slider" onchange="adjustVolume(this.value)">
             </div>
             <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#333; padding:10px; border-radius:8px;">
+                <span style="font-weight:bold;">Ativar Efeitos Sonoros (SFX):</span>
+                <input type="checkbox" checked id="sfx-toggle" onchange="toggleSFX(this.checked)" style="transform: scale(1.5);">
+            </div>
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#333; padding:10px; border-radius:8px;">
+                <span style="font-weight:bold;">Ativar Efeitos Visuais (VFX):<br><span style="font-size:11px;color:#aaa;">(Textos de Coleta/Mel - Desative p/ menos lag)</span></span>
+                <input type="checkbox" checked id="vfx-toggle" onchange="toggleVFX(this.checked)" style="transform: scale(1.5);">
+            </div>
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#333; padding:10px; border-radius:8px;">
                 <span style="font-weight:bold;">Exibir Notificações Pop-up:</span>
                 <input type="checkbox" checked id="notif-toggle" onchange="toggleNotifs(this.checked)" style="transform: scale(1.5);">
             </div>
@@ -224,7 +249,7 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:15px; background:#e65100; padding:10px; border-radius:8px;">
-                <span style="font-weight:bold;">Exibir Abelhas de Terceiros <br><span style="font-size:11px;color:#aaa;">(Pode causar lag)</span></span>
+                <span style="font-weight:bold;">Exibir Abelhas de Terceiros <br><span style="font-size:11px;color:#aaa;">(Sem lag - BETA)</span></span>
                 <input type="checkbox" id="other-bees-toggle" onchange="toggleOtherBeesVisibility(this.checked)" style="transform: scale(1.5);">
             </div>
 
@@ -395,6 +420,14 @@
         let currentUser = null;
         let isGameActive = false;
 
+        function isModalOpen() {
+            let open = false;
+            document.querySelectorAll('.modal-wrapper').forEach(w => {
+                if(w.style.display === 'flex') open = true;
+            });
+            return open;
+        }
+
         const SUPABASE_URL = "https://xjgdtwevqrrnorgzelrz.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZ2R0d2V2cXJybm9yZ3plbHJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMzk3ODAsImV4cCI6MjA4OTYxNTc4MH0.XGmwAxTNWghMRzTDMZvu5IXHmHy_7Xw54RjdPzqa-Dw";
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -407,13 +440,15 @@
             hiveConvertMode: false,
             honeyZoneAnim: null,
             slotPriceBase: 100000,
-            slotMultiplier: 1.005,
+            slotMultiplier: 1.01,
             extraSlotsBought: 0,
             targetBeeRef: null,
-            // Tracking pra 50 Tiers Achievements
-            achTracking: { totalPollen: 0, totalHoney: 0 },
+            // Tracking pra 50 Tiers Achievements e Stats
+            achTracking: { totalPollen: 0, totalHoney: 0, playtime: 0, shopPurchases: 0, chatMsgs: 0, creationDate: Date.now() },
             achProgress: [], 
             volGlobal: 0.5,
+            sfxEnabled: true,
+            vfxEnabled: true,
             notifsEnabled: true,
             showOtherBees: false
         };
@@ -431,7 +466,7 @@
         // =====================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTone(freq, type, duration, volBase=0.1, slideFreq=null) {
-            if(state.volGlobal === 0) return;
+            if(!state.sfxEnabled || state.volGlobal === 0) return;
             if(audioCtx.state === 'suspended') audioCtx.resume();
             
             const osc = audioCtx.createOscillator();
@@ -465,6 +500,8 @@
         window.addEventListener('keydown', () => { if(audioCtx.state === 'suspended') audioCtx.resume(); });
 
         window.adjustVolume = (val) => { state.volGlobal = parseFloat(val); SFX.click(); }
+        window.toggleSFX = (val) => { state.sfxEnabled = val; if(val) SFX.click(); }
+        window.toggleVFX = (val) => { state.vfxEnabled = val; SFX.click(); }
         window.toggleNotifs = (val) => { state.notifsEnabled = val; SFX.click(); }
         
         window.toggleOtherBeesVisibility = (val) => {
@@ -518,13 +555,14 @@
         // =====================================
         // DATA DAS ABELHAS (50 Variantes RNG)
         // =====================================
-        const BeeCategories = ['basic', 'rare', 'epic', 'mythic', 'legendary'];
+        const BeeCategories = ['basic', 'rare', 'epic', 'mythic', 'legendary', 'event'];
         const CatStats = {
             basic:     { minPow: 1, maxPow: 3, minConv: 1, maxConv: 2, cols: [0xFFF176, 0xFFE082, 0xFFCC80], icon: '🐝', cName: 'Básica', cost: 1000, baseLvl: 1000 },
             rare:      { minPow: 5, maxPow: 12, minConv: 4, maxConv: 8, cols: [0x4FC3F7, 0x29B6F6, 0x03A9F4], icon: '🌀', cName: 'Rara Prata', cost: 5000, baseLvl: 2500 },
             epic:      { minPow: 20, maxPow: 45, minConv: 15, maxConv: 30, cols: [0xBA68C8, 0xAB47BC, 0x9C27B0], icon: '🌸', cName: 'Épica Ouro', cost: 25000, baseLvl: 5000 },
             mythic:    { minPow: 80, maxPow: 150, minConv: 60, maxConv: 90, cols: [0x7E57C2, 0x673AB7, 0x512DA8], icon: '🌌', cName: 'Mítica Sagrada', cost: 150000, baseLvl: 15000 },
-            legendary: { minPow: 300, maxPow: 600, minConv: 200, maxConv: 450, cols: [0xFF5722, 0xF44336, 0xD32F2F], icon: '🔥', cName: 'Criatura Lendária', cost: 1000000, baseLvl: 50000 }
+            legendary: { minPow: 300, maxPow: 600, minConv: 200, maxConv: 450, cols: [0xFF5722, 0xF44336, 0xD32F2F], icon: '🔥', cName: 'Criatura Lendária', cost: 1000000, baseLvl: 50000 },
+            event:     { minPow: 1000, maxPow: 2000, minConv: 1000, maxConv: 2000, cols: [0x00FF00, 0x00FFFF], icon: '⚡', cName: 'Anomalia de Evento', cost: 0, baseLvl: 200000 }
         };
 
         const BeeTypes = {};
@@ -544,17 +582,22 @@
                 const bParams = { id: id, category: cat, name: `${NamesDB[i]} ${st.cName}`, color: rColor, convertSpeed: conv, collectPow: pow, speed: 10 + (i*2), icon: st.icon, specificCost: beeCost, lvlBasePrc: st.baseLvl };
                 BeeTypes[id] = bParams;
                 
-                catalogDiv.innerHTML += `
-                    <div class="egg-card" style="border-color:#${bParams.color.toString(16).padStart(6, '0')};">
-                        <div style="font-size:35px;">${bParams.icon}</div>
-                        <h3 style="font-size:12px; margin-top:5px;">${bParams.name}</h3>
-                        <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Poder:${fN(bParams.collectPow)} / Mel:${fN(bParams.convertSpeed)}</div>
-                        <div class="price" style="font-size:11px;">$ ${fN(bParams.specificCost)}</div>
-                        <button onclick="buySpecificBee('${bParams.id}', ${bParams.specificCost})" style="font-size:12px; padding:5px;">Assinar Contrato</button>
-                    </div>
-                `;
+                if (cat !== 'event') {
+                    catalogDiv.innerHTML += `
+                        <div class="egg-card" style="border-color:#${bParams.color.toString(16).padStart(6, '0')};">
+                            <div style="font-size:35px;">${bParams.icon}</div>
+                            <h3 style="font-size:12px; margin-top:5px;">${bParams.name}</h3>
+                            <div style="font-size:10px; color:#aaa; margin-bottom:5px;">Poder:${fN(bParams.collectPow)} / Mel:${fN(bParams.convertSpeed)}</div>
+                            <div class="price" style="font-size:11px;">$ ${fN(bParams.specificCost)}</div>
+                            <button onclick="buySpecificBee('${bParams.id}', ${bParams.specificCost})" style="font-size:12px; padding:5px;">Assinar Contrato</button>
+                        </div>
+                    `;
+                }
             }
         });
+        
+        // Registrar abelha de evento
+        BeeTypes['event_0'] = { id: 'event_0', category: 'event', name: `Entidade de Evento`, color: CatStats.event.cols[0], convertSpeed: CatStats.event.minConv, collectPow: CatStats.event.minPow, speed: 25, icon: CatStats.event.icon, specificCost: 0, lvlBasePrc: CatStats.event.baseLvl };
 
         // =====================================
         // ENGINE DE CONQUISTAS RPG (50 Tiers Complexos)
@@ -598,7 +641,14 @@
                     tierProg++;
                     state.achProgress[index] = tierProg;
                     reqTotal = ach.base * Math.pow(1.5, tierProg);
-                    showToast(`⭐ Conquista Elevada: [${ach.name}] - TIER ${tierProg}!`, 'info');
+                    let honeyReward = tierProg * 5000;
+                    state.honey += honeyReward;
+                    showToast(`⭐ Conquista Elevada: [${ach.name}] - TIER ${tierProg}! (+${fN(honeyReward)} Mel)`, 'success');
+                    
+                    if(tierProg === 10 || tierProg === 20) {
+                         const emp = hiveSlots.find(s => !s.occupied);
+                         if(emp) { bees.push(new Bee(BeeTypes['event_0'], emp)); showToast("🎁 ABELHA DE EVENTO ADQUIRIDA POR CONQUISTA!", "success"); }
+                    }
                     SFX.upgrade();
                 }
 
@@ -655,13 +705,15 @@
                     }
                     p = existing.data;
                 } else {
-                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], tracking: {totalPollen:0, totalHoney:0}, achv: Array(50).fill(0) };
+                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], tracking: {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate: Date.now() }, achv: Array(50).fill(0) };
                     const { error: insErr } = await supabase.from('bss_players').insert([{ username: user, password: pass, data: p }]);
                     if (insErr) { showToast("Crie a tabela 'bss_players' (username, password, data jsonb) no Supabase!", "error"); btn.disabled=false; return; }
                     showToast(`Credenciais novas aceitas: ${user}`, "success");
                 }
 
                 // Gerador de Index Fixo Inteligente para Servidor baseado no Username
+                              
+               
                 let hash = 0;
                 for(let i=0; i<user.length; i++) hash += user.charCodeAt(i);
                 playerHiveIndex = hash % 5; 
@@ -723,7 +775,8 @@
         function applyLoadedData(p) {
             state.honey = p.honey || 0; state.pollen = p.pollen || 0; state.capacity = p.capacity || 200;
             player.power = p.power || 10; state.extraSlotsBought = p.extraSlots || 0;
-            state.achTracking = p.tracking || {totalPollen:0, totalHoney:0};
+            state.achTracking = p.tracking || {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate:Date.now()};
+            if(!state.achTracking.creationDate) state.achTracking.creationDate = Date.now();
             if(p.achv) state.achProgress = p.achv;
 
             bees.forEach(b => scene.remove(b.group)); bees.length = 0;
@@ -777,19 +830,30 @@
         dirLight.shadow.camera.top = 60; dirLight.shadow.camera.bottom = -60;
         scene.add(dirLight);
 
+        const genTex = (c1, c2) => {
+            const cv = document.createElement('canvas'); cv.width=64; cv.height=64;
+            const ctx = cv.getContext('2d');
+            ctx.fillStyle = c1; ctx.fillRect(0,0,64,64);
+            ctx.fillStyle = c2;
+            for(let i=0;i<20;i++) { ctx.fillRect(Math.random()*64, Math.random()*64, 4, 4); }
+            const tex = new THREE.CanvasTexture(cv);
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(10, 10);
+            return tex;
+        };
+
         const mats = {
-            grass: new THREE.MeshStandardMaterial({ color: 0x5cb85c, roughness: 1 }),
+            grass: new THREE.MeshStandardMaterial({ map: genTex('#5cb85c', '#388E3C'), roughness: 1 }),
             hive: new THREE.MeshStandardMaterial({ color: 0xFFCA28, roughness: 0.4 }),
             hiveDark: new THREE.MeshStandardMaterial({ color: 0xFF8F00 }),
             flowerCap: {
-                white: new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.3 }),
-                blue: new THREE.MeshStandardMaterial({ color: 0x4fc3f7, roughness: 0.3 }),
-                red: new THREE.MeshStandardMaterial({ color: 0xe53935, roughness: 0.3 })
+                white: new THREE.MeshStandardMaterial({ map: genTex('#FFFFFF', '#E0E0E0'), roughness: 0.3 }),
+                blue: new THREE.MeshStandardMaterial({ map: genTex('#4fc3f7', '#0288d1'), roughness: 0.3 }),
+                red: new THREE.MeshStandardMaterial({ map: genTex('#e53935', '#c62828'), roughness: 0.3 })
             }
         };
 
         const worldGroup = new THREE.Group(); scene.add(worldGroup);
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(350, 350), mats.grass);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), mats.grass);
         floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; worldGroup.add(floor);
 
         const hivePos = new THREE.Vector3(0, 0, -40);
@@ -838,13 +902,23 @@
         buildHiveBase();
 
         const flowers = [];
-        function buildField(cx, cz, countSq, typeMat) {
+        function buildField(cx, cz, countSq, typeMat, reqBees = 0, fieldMulti = 1) {
             const spacing = 3; const distFromHive = new THREE.Vector2(cx, cz).distanceTo(new THREE.Vector2(0, 0));
-            const fieldMulti = Math.max(1, Math.ceil(distFromHive / 18) - 1);
             const pad = new THREE.Mesh(new THREE.BoxGeometry(countSq*spacing+2, 0.2, countSq*spacing+2), mats.grass);
             pad.position.set(cx, 0.1, cz); const darkFactor = Math.max(0.3, 1.0 - (distFromHive*0.005));
             pad.material = mats.grass.clone(); pad.material.color.setRGB(0.3 * darkFactor, 0.7 * darkFactor, 0.3 * darkFactor);
             pad.receiveShadow = true; worldGroup.add(pad);
+            
+            // Barreira de Nível de Abelhas Fixa
+            if(reqBees > 0) {
+                 pad.userData = { reqBees: reqBees };
+                 const wallMat = new THREE.MeshBasicMaterial({color:0xff0000, wireframe:true, transparent:true, opacity:0.2});
+                 const wall = new THREE.Mesh(new THREE.BoxGeometry(countSq*spacing+2, 10, countSq*spacing+2), wallMat);
+                 wall.position.set(cx, 5, cz);
+                 worldGroup.add(wall);
+                 pad.userData.wall = wall;
+            }
+
             const startX = cx - ((countSq-1) * spacing)/2; const startZ = cz - ((countSq-1) * spacing)/2;
             for(let r=0; r<countSq; r++) {
                 for(let c=0; c<countSq; c++) {
@@ -863,22 +937,38 @@
             dummyAnchor.userData = { isAnchor: true, htmlEl: el, originX: cx, originZ: cz, size: countSq*spacing }; flowers.push(dummyAnchor); 
         }
 
-        const ringRadii = [35, 60, 95, 130]; const fieldsPerRing = [6, 12, 14, 18]; 
         const typeMatsRot = [mats.flowerCap.white, mats.flowerCap.red, mats.flowerCap.blue];
-        buildField(0, 5, 4, typeMatsRot[0]);
-        for(let ri=0; ri<ringRadii.length; ri++) {
-            const rad = ringRadii[ri]; const numF = fieldsPerRing[ri];
-            for(let i=0; i<numF; i++) {
-                const ang = (i / numF) * Math.PI * 2;
-                buildField(Math.cos(ang)*rad, Math.sin(ang)*rad, 3+Math.floor(ri/2), typeMatsRot[(ri+i)%3]);
-            }
-        }
+        
+        // Distribuição Radial (Em anéis ao redor do centro)
+        const mapZones = [
+            { req: 0,   mul: 1,   rad: 0,   ang: 0,   sz: 5,  m: 0 }, // Centro Inicial
+            // Anel 1 (Distância: 45)
+            { req: 10,  mul: 2,   rad: 45,  ang: 0,   sz: 6,  m: 1 },
+            { req: 20,  mul: 4,   rad: 45,  ang: 90,  sz: 6,  m: 2 },
+            { req: 30,  mul: 6,   rad: 45,  ang: 180, sz: 6,  m: 0 },
+            { req: 40,  mul: 8,   rad: 45,  ang: 270, sz: 6,  m: 1 },
+            // Anel 2 (Distância: 95)
+            { req: 50,  mul: 10,  rad: 95,  ang: 45,  sz: 7,  m: 2 },
+            { req: 60,  mul: 20,  rad: 95,  ang: 135, sz: 7,  m: 0 },
+            { req: 70,  mul: 30,  rad: 95,  ang: 225, sz: 7,  m: 1 },
+            { req: 80,  mul: 40,  rad: 95,  ang: 315, sz: 8,  m: 2 },
+            // Anel Máximo (Distância: 155)
+            { req: 90,  mul: 50,  rad: 155, ang: 0,   sz: 8,  m: 0 },
+            { req: 100, mul: 100, rad: 155, ang: 180, sz: 10, m: 1 }
+        ];
+
+        mapZones.forEach(z => {
+            const radAng = z.ang * (Math.PI / 180);
+            const cx = Math.cos(radAng) * z.rad;
+            const cz = Math.sin(radAng) * z.rad + 20; // +20 para ser o eixo central em frente às colmeias
+            buildField(cx, cz, z.sz, typeMatsRot[z.m], z.req, z.mul);
+        });
 
         // =====================================
         // ANIMAÇÕES VISUAIS (TEXTOS FLUTUANTES)
         // =====================================
         function spawnFloatingText(text, pos3D, color) {
-            if(!isGameActive) return;
+            if(!isGameActive || !state.vfxEnabled) return;
             const el = document.createElement('div');
             el.className = 'dmg-text';
             el.innerText = text;
@@ -900,6 +990,68 @@
         // =====================================
         // CLASSES DAS ENTIDADES FÍSICAS (REALISMO)
         // =====================================
+        function attachEquipmentVisuals(tBody, tArm, cap, pow, oldPack, oldTool) {
+            if(oldPack && oldPack.parent) oldPack.parent.remove(oldPack);
+            if(oldTool && oldTool.parent) oldTool.parent.remove(oldTool);
+
+            const pA = new THREE.Group(); pA.position.set(0, 1.5, -0.6); tBody.add(pA);
+            const tG = new THREE.Group(); tG.position.set(0, -0.5, 0.6); tArm.add(tG);
+
+            let pName='Pote', pC=0xaaaaaa, pS='box';
+            if(cap>=2e11){pName='Galáctica';pC=0xce93d8;pS='box';}
+            else if(cap>=5e10){pName='Sifão Est';pC=0x81d4fa;pS='cyl';}
+            else if(cap>=1e10){pName='Vácuo';pC=0xbcaaa4;pS='sphere';}
+            else if(cap>=1e9){pName='M. Insana';pC=0xe91e63;pS='box';}
+            else if(cap>=1e7){pName='Buraco Neg';pC=0x212121;pS='sphere';}
+            else if(cap>=1e5){pName='Quantum';pC=0x00bcd4;pS='cyl';}
+            else if(cap>=10000){pName='Contêiner';pC=0x1976d2;pS='box';}
+            else if(cap>=1500){pName='Barril';pC=0x8b4513;pS='cyl';}
+
+            let tName='Tesoura', tC=0x4caf50;
+            if(pow>=1e9){tName='Divino';tC=0xffd600;}
+            else if(pow>=1e8){tName='Quântica';tC=0x00b0ff;}
+            else if(pow>=1e7){tName='Matéria';tC=0x8e24aa;}
+            else if(pow>=1e6){tName='Feixe';tC=0xff0000;}
+            else if(pow>=1e5){tName='Trator';tC=0xffeb3b;}
+            else if(pow>=5000){tName='Extrator';tC=0xaa00fa;}
+            else if(pow>=1500){tName='Ímã';tC=0xe91e63;}
+            else if(pow>=100){tName='Aspirador';tC=0x2196f3;}
+
+            // Redução de tamanho de +- 75% referente à malha antiga da mochila
+            let pGeo;
+            if(pS==='box') pGeo = new THREE.BoxGeometry(1.4, 1.6, 0.8);
+            else if(pS==='cyl') pGeo = new THREE.CylinderGeometry(0.8, 0.8, 1.6, 16);
+            else pGeo = new THREE.SphereGeometry(0.9, 16, 16);
+
+            const cv=document.createElement('canvas'); cv.width=256; cv.height=256; const cx=cv.getContext('2d');
+            cx.fillStyle='#'+pC.toString(16).padStart(6,'0'); cx.fillRect(0,0,256,256);
+            cx.fillStyle='#fff'; cx.font='bold 35px sans-serif'; cx.textAlign='center'; cx.textBaseline='middle';
+            cx.shadowColor='rgba(0,0,0,0.5)'; cx.shadowBlur=4; cx.fillText(pName,128,128);
+            const pTex=new THREE.CanvasTexture(cv); pTex.generateMipmaps=false;
+
+            const pM = new THREE.Mesh(pGeo, new THREE.MeshStandardMaterial({map:pTex, roughness:0.7}));
+            pM.rotation.y = Math.PI; pM.castShadow=true; pA.add(pM);
+
+            const sM = new THREE.MeshStandardMaterial({color:0x222});
+            const lS = new THREE.Mesh(new THREE.BoxGeometry(0.16,1.6,0.6), sM); lS.position.set(-0.7,0,0.4); pA.add(lS);
+            const rS = new THREE.Mesh(new THREE.BoxGeometry(0.16,1.6,0.6), sM); rS.position.set(0.7,0,0.4); pA.add(rS);
+
+            const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,2.5), new THREE.MeshStandardMaterial({color:0x555}));
+            stick.rotation.x = Math.PI/2; stick.position.z=1; stick.castShadow=true; tG.add(stick);
+
+            let tGeo;
+            if(tName==='Tesoura') { tGeo=new THREE.TorusGeometry(0.2,0.05,8,3); }
+            else if(tName==='Aspirador') { tGeo=new THREE.CylinderGeometry(0.15, 0.3, 0.8,8); }
+            else if(tName==='Ímã') { tGeo=new THREE.TorusGeometry(0.3, 0.1, 8, 16,Math.PI); }
+            else if(tName==='Extrator') { tGeo=new THREE.BoxGeometry(0.4,0.4,0.4); }
+            else tGeo=new THREE.DodecahedronGeometry(0.4, (tName==='Trator'||tName==='Feixe')?0:1);
+            
+            const tHd=new THREE.Mesh(tGeo, new THREE.MeshStandardMaterial({color:tC, emissive:tC, emissiveIntensity:0.2}));
+            tHd.position.z=2.2; tHd.rotation.x=Math.PI/2; tHd.castShadow=true; tG.add(tHd);
+
+            return {pack:pA, tool:tG};
+        }
+
         class Player {
             constructor() {
                 this.group = new THREE.Group(); this.group.position.set(0, 5, 0); scene.add(this.group);
@@ -916,22 +1068,35 @@
                 this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legL.position.set(-0.4, 0.9, 0); this.legL.castShadow = true; this.body.add(this.legL);
                 this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legR.position.set(0.4, 0.9, 0); this.legR.castShadow = true; this.body.add(this.legR);
 
-                const pack = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.8), new THREE.MeshStandardMaterial({color: 0x8D6E63})); pack.position.set(0, 1.5, -0.7); pack.castShadow = true; this.body.add(pack);
-                this.toolGroup = new THREE.Group(); this.toolGroup.position.set(0, -0.5, 0.6); this.armR.add(this.toolGroup);
-                const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1, 2.5), new THREE.MeshStandardMaterial({color:0xbdbdbd})); stick.rotation.x = Math.PI/2; stick.position.z = 1;
-                const shovel = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.2), new THREE.MeshStandardMaterial({color:0x757575})); shovel.position.z = 2.2; shovel.castShadow = true;
-                this.toolGroup.add(stick); this.toolGroup.add(shovel);
+                this.packEq = null; this.toolEq = null;
+                this.lastCap = 0; this.lastPow = 0;
 
                 this.velocity = new THREE.Vector3(); this.speed = 25; this.jumpPwr = 20; this.yVel = 0;
                 this.grounded = false; this.swingTimer = 0; this.stepTimer = 0; this.power = 10; this.walkAnim = 0;
+                
+                // Contêiner de chat exclusivo do próprio jogador
+                this.chatDiv = document.createElement('div');
+                this.chatDiv.style.position = 'absolute';
+                this.chatDiv.style.display = 'flex';
+                this.chatDiv.style.flexDirection = 'column';
+                this.chatDiv.style.alignItems = 'center';
+                this.chatDiv.style.gap = '2px';
+                this.chatDiv.style.pointerEvents = 'none';
+                this.chatDiv.style.transform = 'translate(-50%, 0)';
+                this.chatDiv.style.zIndex = '100'; // Garante sobreposição visual
+                document.getElementById('floating-texts').appendChild(this.chatDiv);
             }
             update(dt, input, camParams) {
                 if(!isGameActive) return;
+                
+                // Track playtime
+                state.achTracking.playtime += dt;
+
                 const fw = new THREE.Vector3(0,0,-1).applyQuaternion(camParams.quaternion); fw.y = 0; fw.normalize();
                 const rt = new THREE.Vector3(1,0,0).applyQuaternion(camParams.quaternion); rt.y = 0; rt.normalize();
                 const mv = new THREE.Vector3(); if(input.w) mv.add(fw); if(input.s) mv.sub(fw); if(input.a) mv.sub(rt); if(input.d) mv.add(rt);
 
-                if(mv.length() > 0) {
+                if(mv.lengthSq() > 0) { // Correção para rodar a animação (lengthSq() verifica a magnitude do vetor no Three.js)
                     mv.normalize();
                     this.body.rotation.y = THREE.MathUtils.lerp(this.body.rotation.y, Math.atan2(mv.x, mv.z), 10 * dt);
                     this.walkAnim += dt * 15;
@@ -955,12 +1120,11 @@
                 this.group.position.x += this.velocity.x; this.group.position.z += this.velocity.z; this.group.position.y += this.yVel * dt;
                 
                 if(this.group.position.y <= 0) { this.group.position.y = 0; this.yVel = 0; this.grounded = true; } else { this.grounded = false; }
-                if(input.space && this.grounded) { this.yVel = this.jumpPwr; this.grounded = false; input.space = false; SFX.jump(); }
+                if(!isModalOpen() && input.space && this.grounded) { this.yVel = this.jumpPwr; this.grounded = false; input.space = false; SFX.jump(); }
 
-                if(state.mouseHold) {
+                if(!isModalOpen() && state.mouseHold) {
                     this.swingTimer += dt * 12; 
                     this.armR.rotation.x = Math.sin(this.swingTimer) * 0.8 - 0.5; // Braço golpeia
-                    
                     // REATIVAÇÃO DA LOGICA DE COLETAR E DANO DAS FLORES P/ JOGADOR
                     this.collectTimer = (this.collectTimer || 0) - dt;
                     if(this.collectTimer <= 0) {
@@ -992,7 +1156,9 @@
         class Bee {
             constructor(typeObj, slotData, level = 1) {
                 this.type = typeObj; this.slot = slotData; this.level = level; slotData.occupied = true; slotData.beeRef = this; 
-                this.slot.hexMesh.material = new THREE.MeshStandardMaterial({ color: this.type.color }); this.slot.hexMesh.material.transparent = false; this.slot.hexMesh.material.opacity = 1;
+                this.slot.hexMesh.material = new THREE.MeshStandardMaterial({ color: this.type.color });
+                if(this.type.category === 'event') this.slot.hexMesh.material.emissive.setHex(this.type.color);
+                this.slot.hexMesh.material.transparent = false; this.slot.hexMesh.material.opacity = 1;
                 this.group = new THREE.Group();
                 const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.8), new THREE.MeshStandardMaterial({color: this.type.color}));
                 body.castShadow = true; body.userData = { isBeeBody: true, parentBee: this }; this.group.add(body); this.bodyMesh = body;
@@ -1107,24 +1273,104 @@
         window.addEventListener('contextmenu', e => e.preventDefault());
         
         let camHeading = 0; let camPitch = 0.5; let camDist = 25; let isDraggingCam = false;
+        let hoveredPeerName = null;
         
-        // CÂMERA PADRÃO RESPONSIVA: O cursor para direita move tudo para direita; para cima sobe ângulo
-        window.addEventListener('mousemove', e => { if(isDraggingCam) { camHeading += e.movementX*0.005; camPitch += e.movementY*0.005; camPitch=Math.max(0.1,Math.min(1.4, camPitch)); } });
+        // CÂMERA PADRÃO RESPONSIVA E HOVER INTERATIVO
+        window.addEventListener('mousemove', e => { 
+            if(isDraggingCam) { camHeading += e.movementX*0.005; camPitch += e.movementY*0.005; camPitch=Math.max(0.1,Math.min(1.4, camPitch)); } 
+            
+            if(isGameActive && !isModalOpen()) {
+                mouse.x = (e.clientX/window.innerWidth)*2-1; mouse.y = -(e.clientY/window.innerHeight)*2+1; 
+                raycaster.setFromCamera(mouse, camera);
+                
+                let hits = raycaster.intersectObjects(otherPlayersGroup.children, true);
+                let hitPeerName = null;
+                
+                if(hits.length > 0 && hits[0].object.userData.isPeer) {
+                    hitPeerName = hits[0].object.userData.username;
+                }
+                
+                // Aplica a silhueta Branca Luminosa de Hover no outro jogador
+                if(hoveredPeerName !== hitPeerName) {
+                    if(hoveredPeerName && peers[hoveredPeerName]) {
+                        peers[hoveredPeerName].group.traverse(child => {
+                            if(child.isMesh && child.material && child.material.emissive) child.material.emissive.setHex(0x000000);
+                        });
+                    }
+                    if(hitPeerName && peers[hitPeerName]) {
+                        peers[hitPeerName].group.traverse(child => {
+                            if(child.isMesh && child.material && child.material.emissive) {
+                                child.material.emissive.setHex(0xffffff);
+                                child.material.emissiveIntensity = 0.3;
+                            }
+                        });
+                    }
+                    hoveredPeerName = hitPeerName;
+                    document.body.style.cursor = hitPeerName ? 'pointer' : 'default';
+                }
+            }
+        });
         
         window.addEventListener('wheel', e => { camDist += e.deltaY * 0.05; camDist = Math.max(10, Math.min(60, camDist)); });
 
         window.closeAllModals = () => { document.querySelectorAll('.modal-wrapper').forEach(el => el.style.display = 'none'); state.targetBeeRef = null; SFX.error(); renderAchievements(); }
         window.addEventListener('click', e => { if(e.target.classList.contains('modal-wrapper')) window.closeAllModals(); });
         window.openSettings = () => { document.getElementById('settings-modal-wrapper').style.display='flex'; SFX.click(); }
+        
+        // Puxa e abre nuvem a depender se o Alvo são outros ou nós mesmos
+        window.openStats = async (tUser = null) => {
+            document.getElementById('stats-modal-wrapper').style.display = 'flex';
+            document.getElementById('st-date').innerText = 'Carregando...'; document.getElementById('st-time').innerText = '...';
+            document.getElementById('st-honey').innerText = '...'; document.getElementById('st-shop').innerText = '...';
+            document.getElementById('st-chat').innerText = '...'; document.getElementById('st-bees').innerText = '...';
+            SFX.click();
+
+            if (!tUser || typeof tUser !== 'string') {
+                document.getElementById('st-header').innerText = 'Suas Estatísticas';
+                document.getElementById('st-date').innerText = new Date(state.achTracking.creationDate).toLocaleDateString('pt-BR');
+                let mins = Math.floor(state.achTracking.playtime / 60);
+                document.getElementById('st-time').innerText = mins > 60 ? `${Math.floor(mins/60)}h ${mins%60}m` : `${mins} minutos`;
+                document.getElementById('st-honey').innerText = fN(state.achTracking.totalHoney);
+                document.getElementById('st-shop').innerText = state.achTracking.shopPurchases || 0;
+                document.getElementById('st-chat').innerText = state.achTracking.chatMsgs || 0;
+                document.getElementById('st-bees').innerText = bees.length;
+            } else {
+                document.getElementById('st-header').innerText = `Perfil de ${tUser}`;
+                const { data } = await supabase.from('bss_players').select('data').eq('username', tUser).single();
+                if (data && data.data) {
+                    let td = data.data; let track = td.tracking || {};
+                    let numBees = peers[tUser] ? peers[tUser].beeData.length : (td.bees ? td.bees.length : 0);
+                    
+                    document.getElementById('st-date').innerText = new Date(track.creationDate || Date.now()).toLocaleDateString('pt-BR');
+                    let mins = Math.floor((track.playtime || 0) / 60);
+                    document.getElementById('st-time').innerText = mins > 60 ? `${Math.floor(mins/60)}h ${mins%60}m` : `${mins} minutos`;
+                    document.getElementById('st-honey').innerText = fN(track.totalHoney || 0);
+                    document.getElementById('st-shop').innerText = track.shopPurchases || 0;
+                    document.getElementById('st-chat').innerText = track.chatMsgs || 0;
+                    document.getElementById('st-bees').innerText = numBees;
+                } else {
+                    document.getElementById('st-date').innerText = 'Sem dados na Nuvem.';
+                }
+            }
+        }
 
         window.addEventListener('click', e => {
             if(!isGameActive) return;
             for(let w of document.querySelectorAll('.modal-wrapper')) { if(w.style.display === 'flex') return; } // Ignora Clicks 3D se UX aberta
             mouse.x = (e.clientX/window.innerWidth)*2-1; mouse.y = -(e.clientY/window.innerHeight)*2+1; raycaster.setFromCamera(mouse, camera);
+            
             const aM = []; bees.forEach(b => aM.push(b.bodyMesh)); hiveSlots.forEach(s => {if(s.occupied) aM.push(s.hexMesh);});
-            let hits = raycaster.intersectObjects(aM);
+            let hits = raycaster.intersectObjects([...aM, ...otherPlayersGroup.children], true); // Adiciona Intersecção de Jogadores
+            
             if(hits.length > 0) {
-                const cb = hits[0].object.userData; let tb = null;
+                const cb = hits[0].object.userData; 
+                
+                if(cb.isPeer) {
+                    window.openStats(cb.username);
+                    return;
+                }
+                
+                let tb = null;
                 if(cb.isBeeBody) tb = cb.parentBee; else if(cb.isHex) tb = hiveSlots[cb.hexIndex].beeRef;
                 if(tb) { state.targetBeeRef = tb; refreshBeeManageModal(); document.getElementById('bee-manage-modal-wrapper').style.display = 'flex'; SFX.click(); }
             }
@@ -1137,6 +1383,12 @@
             document.getElementById('honey-val').innerText = fN(state.honey); document.getElementById('pollen-val').innerText = `${fN(state.pollen)} / ${fN(state.capacity)}`;
             document.getElementById('pollen-bar').style.width = `${(state.pollen/state.capacity)*100}%`;
             document.getElementById('pollen-bar').style.background = state.pollen>=state.capacity?'#e53935':'linear-gradient(90deg, #8bc34a, #cddc39)';
+            
+            if (player.lastCap !== state.capacity || player.lastPow !== player.power) {
+                const eq = attachEquipmentVisuals(player.body, player.armR, state.capacity, player.power, player.packEq, player.toolEq);
+                player.packEq = eq.pack; player.toolEq = eq.tool;
+                player.lastCap = state.capacity; player.lastPow = player.power;
+            }
         }
 
         window.switchShopTab = (tabId, evt) => {
@@ -1174,7 +1426,8 @@
 
         window.buyRandomEgg = (cat, cst) => {
             if(state.honey >= cst) {
-                const emp = hiveSlots.find(s => !s.occupied); if(!emp) return showToast("Sem Espaço. Liberte gavetas na Arquitetura.", "error");
+                const emp = hiveSlots.find(s => !s.occupied); if(!emp) return showToast("Sem Espaço.", "error");
+                state.achTracking.shopPurchases = (state.achTracking.shopPurchases||0)+1;
                 const bId = `${cat}_${Math.floor(Math.random()*10)}`; state.honey -= cst; SFX.buy(); bees.push(new Bee(BeeTypes[bId], emp));
                 updateUI(); showToast(`Sorteio! Chocou um(a) ${BeeTypes[bId].name}!`, "success");
             } else { SFX.error(); showToast("Créditos Carentes...", "error"); }
@@ -1202,6 +1455,7 @@
         };
 
         window.makeHoneyBtn = () => {
+            if(isModalOpen()) return;
             if(player.group.position.distanceTo(hivePos) < 25) { // Escala Generosa
                 if(state.pollen <= 0) {
                     SFX.error(); showToast("Mochila Vazia! Nada de pólen para converter.", "error"); 
@@ -1232,6 +1486,7 @@
 
         window.confirmSellBee = () => {
             const t = state.targetBeeRef; if(!t) return;
+            if(t.type.category === 'event') return showToast("Abelhas de Eventalidade Cósmica não podem ser comercializadas!", "error");
             const rt = Math.floor(t.type.specificCost * 0.2); state.honey += rt; scene.remove(t.group);
             bees.splice(bees.indexOf(t), 1); t.slot.occupied = false; t.slot.beeRef = null;
             t.slot.hexMesh.material = (Math.floor(t.slot.index/7)+t.slot.index%7)%2==0 ? mats.hive.clone() : mats.hiveDark.clone();
@@ -1257,12 +1512,44 @@
         }
 
         window.adminAction = async (tp) => {
-            if(tp==='honey') { state.honey += parseInt(document.getElementById('adm-mel').value)||0;  SFX.upgrade(); }
-            if(tp==='pollen') { state.pollen += parseInt(document.getElementById('adm-polen').value)||0; SFX.upgrade(); }
-            if(tp==='slots') { let am = parseInt(document.getElementById('adm-slots').value)||0; for(let i=0; i<am; i++){state.extraSlotsBought++; addHexSlot(hiveSlots.length);} SFX.upgrade(); }
+            if(tp === 'honey') { 
+                let val = parseInt(document.getElementById('adm-mel').value);
+                if(!isNaN(val)) { state.honey = val; SFX.upgrade(); }
+            }
+            if(tp === 'pollen') { 
+                let val = parseInt(document.getElementById('adm-polen').value);
+                if(!isNaN(val)) { state.pollen = val; SFX.upgrade(); }
+            }
+            if(tp === 'slots') { 
+                let val = parseInt(document.getElementById('adm-slots').value);
+                if(!isNaN(val)) {
+                    state.extraSlotsBought = val;
+                    // Reconstrói visualmente a colmeia para o novo número exato
+                    hiveGroup.clear(); hiveSlots.length = 0;
+                    buildHiveBase();
+                    while(hiveSlots.length < 21 + state.extraSlotsBought) { addHexSlot(hiveSlots.length); }
+                    
+                    // Reposiciona as abelhas nos favos reconstruídos (ou apaga se o favo deixar de existir)
+                    const tempBees = [...bees];
+                    bees.length = 0;
+                    tempBees.forEach(b => {
+                        let s = hiveSlots.find(sl => sl.index === b.slot.index);
+                        if(s) {
+                            b.slot = s; s.occupied = true; s.beeRef = b;
+                            s.hexMesh.material = new THREE.MeshStandardMaterial({ color: b.type.color });
+                            s.hexMesh.material.transparent = false; s.hexMesh.material.opacity = 1;
+                            if(b.type.category === 'event') s.hexMesh.material.emissive.setHex(b.type.color);
+                            bees.push(b);
+                        } else {
+                            scene.remove(b.group);
+                        }
+                    });
+                    SFX.upgrade(); 
+                }
+            }
             updateUI(); await saveGameToLocal(); 
             window.adminLoadUsers(); // Refresh the list
-            showToast("Admin Bypass Executado", "success");
+            showToast("Admin Bypass Executado (Valores Substituídos)", "success");
         }
 
         window.wipePlayer = async (usr) => {
@@ -1315,17 +1602,40 @@
                 if(pr.group) otherPlayersGroup.remove(pr.group);
                 if(pr.hiveGroup) worldGroup.remove(pr.hiveGroup);
                 if(pr.tag && pr.tag.parentNode) pr.tag.parentNode.removeChild(pr.tag);
+                if(pr.chatDiv && pr.chatDiv.parentNode) pr.chatDiv.parentNode.removeChild(pr.chatDiv);
                 delete peers[user];
             }
         }
 
-        // CHAT SYNC
+        // CHAT SYNC E BALÃO
+        window.showChatBubble = (user, text) => {
+            let trg = null;
+            if(user === currentUser) trg = player.chatDiv;
+            else if(peers[user]) trg = peers[user].chatDiv;
+            if(!trg) return;
+
+            const b = document.createElement('div');
+            b.innerText = text;
+            b.style.background = 'rgba(0,0,0,0.8)'; b.style.color = '#fff'; // Mais escuro para contraste
+            b.style.padding = '6px 10px'; b.style.borderRadius = '8px';
+            b.style.fontSize = '14px'; b.style.fontFamily = "'Nunito', sans-serif";
+            b.style.border = '2px solid #555'; b.style.whiteSpace = 'nowrap';
+            b.style.animation = "chatBubbleAnim 5s ease-in-out forwards"; // Ficará por 5 Segundos
+            b.style.transform = "translate(0, 0)"; 
+            b.style.boxShadow = "0 4px 10px rgba(0,0,0,0.5)"; // Mais destaque
+            
+            trg.appendChild(b);
+            setTimeout(() => { if(b.parentNode) b.remove(); }, 5000);
+        }
+
         window.sendChat = () => {
             const inp = document.getElementById('chat-input');
             const txt = inp.value.trim();
             if(!txt || !isGameActive) return;
             inp.value = '';
+            state.achTracking.chatMsgs = (state.achTracking.chatMsgs||0)+1;
             appendChatMessage(currentUser, txt, true);
+            window.showChatBubble(currentUser, txt);
             serverChannel.send({ type: 'broadcast', event: 'chat', payload: { user: currentUser, text: txt } });
             SFX.click();
         }
@@ -1338,6 +1648,7 @@
         serverChannel.on('broadcast', { event: 'chat' }, payload => {
             if(payload.payload.user === currentUser) return;
             appendChatMessage(payload.payload.user, payload.payload.text, false);
+            window.showChatBubble(payload.payload.user, payload.payload.text);
             SFX.step();
         });
 
@@ -1353,8 +1664,14 @@
             
             if(!peers[d.user]) {
                 const pG = new THREE.Group();
-                const m = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.8, 1), new THREE.MeshStandardMaterial({color: 0xE91E63})); m.position.y=1.6; pG.add(m);
-                const h = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); h.position.y=3.2; pG.add(h);
+                const pBody = new THREE.Group(); pG.add(pBody);
+                const m = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.8, 1), new THREE.MeshStandardMaterial({color: 0xE91E63})); m.position.y=1.6; pBody.add(m);
+                const h = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); h.position.y=3.2; pBody.add(h);
+                
+                const pArmR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0xE91E63})); pArmR.position.set(1.1, 1.6, 0); pBody.add(pArmR);
+                const pArmL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0xE91E63})); pArmL.position.set(-1.1, 1.6, 0); pBody.add(pArmL);
+                const pLegR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); pLegR.position.set(0.4, 0.9, 0); pBody.add(pLegR);
+                const pLegL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); pLegL.position.set(-0.4, 0.9, 0); pBody.add(pLegL);
                 
                 // Target UI flutuante dos Rivais
                 const nameDiv = document.createElement('div');
@@ -1362,8 +1679,22 @@
                 nameDiv.style.color = '#E91E63'; nameDiv.style.opacity = '1'; nameDiv.style.animation = 'none';
                 document.getElementById('floating-texts').appendChild(nameDiv);
 
+                const chD = document.createElement('div');
+                chD.style.position = 'absolute'; chD.style.display = 'flex'; chD.style.flexDirection = 'column';
+                chD.style.alignItems = 'center'; chD.style.gap = '2px'; chD.style.pointerEvents = 'none'; chD.style.transform = 'translate(-50%, 0)';
+                chD.style.zIndex = '100'; // Garante sobreposição visual para outros jogadores
+                document.getElementById('floating-texts').appendChild(chD);
+
                 otherPlayersGroup.add(pG);
-                peers[d.user] = { group: pG, targetX: d.x, targetY: d.y, targetZ: d.z, tRY: d.ry, tag: nameDiv, slots: 0, beeData: [], lastSeen: Date.now() };
+                peers[d.user] = { group: pG, bodyMesh: pBody, armR: pArmR, armL: pArmL, legR: pLegR, legL: pLegL, lastCap: 200, lastPow: 10, packEq: null, toolEq: null, targetX: d.x, targetY: d.y, targetZ: d.z, tRY: d.ry, tag: nameDiv, chatDiv: chD, slots: 0, beeData: [], lastSeen: Date.now(), walkAnim: 0 };
+                
+                const eq = attachEquipmentVisuals(pBody, pArmR, 200, 10, null, null);
+                peers[d.user].packEq = eq.pack; peers[d.user].toolEq = eq.tool;
+                
+                // Torna todos os membros do Character clicáveis e hoverable pelo Raycaster
+                pG.traverse(child => {
+                    if (child.isMesh) child.userData = { isPeer: true, username: d.user };
+                });
             } else {
                 // Buffer de interpolação passiva
                 peers[d.user].targetX = d.x; peers[d.user].targetY = d.y; peers[d.user].targetZ = d.z; peers[d.user].tRY = d.ry;
@@ -1388,8 +1719,18 @@
             
             // Dados das abelhas (Só visível se checado nas configurações)
             pr.beeData = d.bees;
-            if(state.showOtherBees) rebuildDummyBees(pr);
-            else if(pr.beesGroup) { pr.beesGroup.clear(); }
+            if(state.showOtherBees) {
+                rebuildDummyBees(pr);
+            } else {
+                if(pr.beesGroup) { pr.beesGroup.clear(); }
+                resetDummyHiveColors(pr);
+            }
+
+            if(d.cap !== undefined && d.pow !== undefined && (pr.lastCap !== d.cap || pr.lastPow !== d.pow)) {
+                pr.lastCap = d.cap; pr.lastPow = d.pow;
+                const eq = attachEquipmentVisuals(pr.bodyMesh, pr.armR, pr.lastCap, pr.lastPow, pr.packEq, pr.toolEq);
+                pr.packEq = eq.pack; pr.toolEq = eq.tool;
+            }
             
             pr.lastSeen = Date.now();
         });
@@ -1401,31 +1742,52 @@
             for(let i=0; i<count; i++) {
                 const c = 7; const r = Math.floor(i / c); const cl = i % c;
                 const xO = (cl * (hexRadius * 1.8)) - (((c-1) * (hexRadius * 1.8)) / 2);
+
                 const yO = 6 + (r * (hexRadius * 1.5));
                 const mat = (r+cl)%2==0 ? mats.hive.clone() : mats.hiveDark.clone();
                 mat.opacity = 0.6; mat.transparent = true;
-                const m = new THREE.Mesh(hexGeo, mat); m.position.set(xO, yO, 0); hg.add(m);
+                const m = new THREE.Mesh(hexGeo, mat); m.position.set(xO, yO, 0); 
+                m.userData.idx = i; m.userData.origMat = mat;
+                hg.add(m);
             }
             return hg;
+        }
+
+
+
+        function updateDummyHiveColors(peer) {
+            if(!peer.hiveGroup || !peer.beeData) return;
+            peer.hiveGroup.children.forEach(m => { if(m.userData.origMat) m.material = m.userData.origMat; });
+            peer.beeData.forEach(b => {
+                let sIdx = typeof b === 'object' ? b.idx : -1;
+                if(sIdx >= 0) {
+                    const m = peer.hiveGroup.children.find(ch => ch.userData.idx === sIdx);
+                    if(m) {
+                        const clr = CatStats[b.cat]?.cols[0] || 0xFFF176;
+                        m.material = new THREE.MeshStandardMaterial({color: clr});
+                        if(b.cat === 'event') m.material.emissive.setHex(clr);
+                    }
+                }
+            });
+        }
+        function resetDummyHiveColors(peer) {
+            if(!peer.hiveGroup) return;
+            peer.hiveGroup.children.forEach(m => { if(m.userData.origMat) m.material = m.userData.origMat; });
         }
 
         function rebuildDummyBees(peer) {
             if(!peer.beesGroup) { peer.beesGroup = new THREE.Group(); peer.group.add(peer.beesGroup); }
             peer.beesGroup.clear();
             if(!peer.beeData) return;
-            peer.beeData.forEach((catId, countIdx) => {
+            peer.beeData.forEach((bData, countIdx) => {
+                const catId = typeof bData === 'string' ? bData : bData.cat;
                 const clr = CatStats[catId]?.cols[0] || 0xFFF176;
                 const bm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.5), new THREE.MeshBasicMaterial({color: clr}));
                 bm.position.set(Math.cos(countIdx)*4, Math.random()*2 + 1, Math.sin(countIdx)*4);
                 bm.userData.idx = countIdx;
                 peer.beesGroup.add(bm);
             });
-        }
-        function updateAllOtherBees() {
-            for(let k in peers) {
-                if(state.showOtherBees) rebuildDummyBees(peers[k]);
-                else if (peers[k].beesGroup) peers[k].beesGroup.clear();
-            }
+            updateDummyHiveColors(peer);
         }
         
         // Emissão Continua de sua Posição Servidor
@@ -1441,7 +1803,7 @@
         setInterval(() => {
             if(isGameActive && currentUser && serverChannel && serverChannel.state === 'joined') {
                 serverChannel.send({ type: 'broadcast', event: 'sync', payload: {
-                    user: currentUser, hiveIndex: playerHiveIndex, slots: hiveSlots.length, bees: bees.map(b => b.type.category)
+                    user: currentUser, hiveIndex: playerHiveIndex, slots: hiveSlots.length, bees: bees.map(b => ({cat: b.type.category, idx: b.slot.index})), cap: state.capacity, pow: player.power
                 }});
             }
         }, 3000);
@@ -1462,6 +1824,20 @@
             // Distancia Expandida Cancelamento Automatico Converta de mel
             if(state.hiveConvertMode && player.group.position.distanceTo(hivePos) > 25) state.hiveConvertMode = false;
 
+            // Restrição de Áreas
+            worldGroup.children.forEach(c => {
+                if(c.userData && c.userData.reqBees) {
+                    const rect = new THREE.Box3().setFromObject(c.userData.wall);
+                    if(rect.containsPoint(player.group.position)) {
+                        if(bees.length < c.userData.reqBees) {
+                            // Empurrar para fora
+                            player.group.position.copy(player.group.position.add(new THREE.Vector3(0,0,10).applyQuaternion(player.body.quaternion).negate()));
+                            showToast(`Área restrita: Requer ${c.userData.reqBees} abelhas!`, 'error');
+                        }
+                    }
+                }
+            });
+
             flowers.forEach(f => {
                 if(f.userData.cap) { 
                     if(f.userData.health < 1.0) { f.userData.health+=dt*0.1; if(f.userData.health>1.0)f.userData.health=1.0; f.userData.cap.scale.set(1, Math.max(0.1, f.userData.health*f.userData.maxScaleY), 1); }
@@ -1472,8 +1848,16 @@
                     } else f.userData.htmlEl.style.display='none';
                 }
             });
+
+            // Reposicionador Local Chat Bubble
+            const lhP = player.group.position.clone().add(new THREE.Vector3(0, 5.5, 0)).project(camera);
+            if(lhP.z < 1) {
+                player.chatDiv.style.left = `${(lhP.x * 0.5 + 0.5) * window.innerWidth}px`;
+                player.chatDiv.style.bottom = `${window.innerHeight - ((lhP.y * -0.5 + 0.5) * window.innerHeight)}px`;
+                player.chatDiv.style.display = 'flex';
+            } else { player.chatDiv.style.display = 'none'; }
             
-            // Multijogador Visual: Interpolação Lerp Assíncrona para não engasgar ping e desenhar nomes
+            // Multijogador Visual: Interpolação Lerp Assíncrona para afastar o Swarm
             for(let key in peers) {
                 let pr = peers[key];
                 
@@ -1486,12 +1870,37 @@
                 pr.group.position.lerp(new THREE.Vector3(pr.targetX, pr.targetY, pr.targetZ), dt*10);
                 pr.group.rotation.y = THREE.MathUtils.lerp(pr.group.rotation.y, pr.tRY, dt*10);
                 
+                // Animação dos membros de players remotos baseada na distância delta andada
+                let dtWalk = new THREE.Vector2(pr.group.position.x, pr.group.position.z).distanceTo(new THREE.Vector2(pr.targetX, pr.targetZ));
+                if(dtWalk > 0.05) {
+                    pr.walkAnim += dt * 15;
+                    pr.legL.rotation.x = Math.sin(pr.walkAnim) * 0.6;
+                    pr.legR.rotation.x = Math.sin(pr.walkAnim + Math.PI) * 0.6;
+                    pr.armL.rotation.x = Math.sin(pr.walkAnim + Math.PI) * 0.5;
+                    pr.armR.rotation.x = Math.sin(pr.walkAnim) * 0.5;
+                } else {
+                    pr.legL.rotation.x = THREE.MathUtils.lerp(pr.legL.rotation.x, 0, dt*10);
+                    pr.legR.rotation.x = THREE.MathUtils.lerp(pr.legR.rotation.x, 0, dt*10);
+                    pr.armL.rotation.x = THREE.MathUtils.lerp(pr.armL.rotation.x, 0, dt*10);
+                    pr.armR.rotation.x = THREE.MathUtils.lerp(pr.armR.rotation.x, 0, dt*10);
+                }
+                
                 const p2 = pr.group.position.clone().add(new THREE.Vector3(0, 4.5, 0)).project(camera);
                 if(p2.z < 1) {
                     pr.tag.style.left = `${(p2.x * 0.5 + 0.5) * window.innerWidth}px`;
                     pr.tag.style.top = `${(p2.y * -0.5 + 0.5) * window.innerHeight}px`;
                     pr.tag.style.display = 'block';
-                } else { pr.tag.style.display = 'none'; }
+                    
+                    if(pr.chatDiv) {
+                         const headChat = pr.group.position.clone().add(new THREE.Vector3(0, 5.5, 0)).project(camera);
+                         pr.chatDiv.style.left = `${(headChat.x * 0.5 + 0.5) * window.innerWidth}px`;
+                         pr.chatDiv.style.bottom = `${window.innerHeight - ((headChat.y * -0.5 + 0.5) * window.innerHeight)}px`;
+                         pr.chatDiv.style.display = 'flex';
+                    }
+                } else { 
+                    pr.tag.style.display = 'none'; 
+                    if(pr.chatDiv) pr.chatDiv.style.display = 'none';
+                }
                 
                 // Animação boba e super leve de voo nas abelhas dummy do jogador remoto, se habilitado
                 if(state.showOtherBees && pr.beesGroup) {
