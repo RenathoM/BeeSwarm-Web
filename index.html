@@ -549,6 +549,19 @@
         const MAX_TRAIL_LEVEL = 50050;
         const TRAIL_HONEY_BASE = 50000;
         const TRAIL_RANKS = ['Broto', 'Pólen', 'Zangão', 'Mel Real', 'Áureo', 'Místico', 'Celestial', 'Hexa Prime', 'Omega', 'Cosmos'];
+        const RANK_ICONS  = ['🌱','🌸','🐝','👑','⭐','🔮','🌌','⚡','🌀','🔱'];
+        const RANK_COLORS = ['#81c784','#f48fb1','#fff176','#ffb74d','#ffee58','#ce93d8','#4fc3f7','#4db6ac','#b0bec5','#f48fb1'];
+        function getTrailRankBadgeHtml(trailLevel) {
+            if(!trailLevel || trailLevel < 1) return `<span>🌱</span> <span style="color:#81c784">Recruta</span>`;
+            const impIdx  = Math.floor((trailLevel - 1) / 50);
+            const rankIdx = impIdx % TRAIL_RANKS.length;
+            const prestige = Math.floor(impIdx / TRAIL_RANKS.length);
+            const icon    = RANK_ICONS[rankIdx];
+            const name    = TRAIL_RANKS[rankIdx];
+            const color   = RANK_COLORS[rankIdx];
+            const pStr    = prestige > 0 ? ` <span style="font-size:10px;opacity:0.8">✦${prestige}</span>` : '';
+            return `<span>${icon}</span> <span style="color:${color}">${name}${pStr}</span>`;
+        }
         const GAMEPASS_LABELS = {
             gp_power: 'Ferrão de Aço',
             gp_honey: 'Néctar Divino',
@@ -1257,6 +1270,11 @@
                 this.chatDiv.style.transform = 'translate(-50%, 0)';
                 this.chatDiv.style.zIndex = '100'; // Garante sobreposição visual
                 document.getElementById('floating-texts').appendChild(this.chatDiv);
+
+                // Badge de rank flutuante acima do personagem
+                this.rankBadge = document.createElement('div');
+                this.rankBadge.style.cssText = 'position:absolute;pointer-events:none;transform:translate(-50%,-100%);z-index:102;font-family:\'Fredoka One\',cursive;font-size:12px;padding:3px 10px;border-radius:20px;white-space:nowrap;background:linear-gradient(135deg,rgba(0,0,0,0.82),rgba(12,22,55,0.92));border:1.5px solid rgba(255,255,255,0.22);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.95);display:none;box-shadow:0 2px 12px rgba(0,0,0,0.5);gap:5px;align-items:center;';
+                document.getElementById('floating-texts').appendChild(this.rankBadge);
             }
             update(dt, input, camParams) {
                 if(!isGameActive) return;
@@ -1266,7 +1284,9 @@
 
                 const fw = new THREE.Vector3(0,0,-1).applyQuaternion(camParams.quaternion); fw.y = 0; fw.normalize();
                 const rt = new THREE.Vector3(1,0,0).applyQuaternion(camParams.quaternion); rt.y = 0; rt.normalize();
-                const mv = new THREE.Vector3(); if(input.w) mv.add(fw); if(input.s) mv.sub(fw); if(input.a) mv.sub(rt); if(input.d) mv.add(rt);
+                const _moBlocked = isModalOpen();
+                if(_moBlocked) { input.w=false; input.a=false; input.s=false; input.d=false; input.space=false; }
+                const mv = new THREE.Vector3(); if(!_moBlocked && input.w) mv.add(fw); if(!_moBlocked && input.s) mv.sub(fw); if(!_moBlocked && input.a) mv.sub(rt); if(!_moBlocked && input.d) mv.add(rt);
 
                 if(mv.lengthSq() > 0) { // Correção para rodar a animação (lengthSq() verifica a magnitude do vetor no Three.js)
                     mv.normalize();
@@ -1442,13 +1462,21 @@
         
         window.addEventListener('keydown', e => {
             if(!isGameActive) return;
+            const aTag = document.activeElement ? document.activeElement.tagName : '';
+            if(aTag === 'INPUT' || aTag === 'TEXTAREA') return;
+            if(isModalOpen()) return;
             let k = e.key.toLowerCase(); if(k==='w') inputState.w=true; if(k==='a') inputState.a=true; if(k==='s') inputState.s=true; if(k==='d') inputState.d=true;
             if(k==='e') window.makeHoneyBtn(); if(e.code==='Space') inputState.space=true;
         });
         window.addEventListener('keyup', e => {
             let k = e.key.toLowerCase(); if(k==='w') inputState.w=false; if(k==='a') inputState.a=false; if(k==='s') inputState.s=false; if(k==='d') inputState.d=false;
+            if(isModalOpen()) { inputState.w=false; inputState.a=false; inputState.s=false; inputState.d=false; inputState.space=false; }
         });
-        window.addEventListener('mousedown', e => { if(e.button===0) state.mouseHold=true; if(e.button===2) isDraggingCam=true; });
+        window.addEventListener('mousedown', e => {
+            if(isModalOpen()) return;
+            if(e.button===0) state.mouseHold=true;
+            if(e.button===2) isDraggingCam=true;
+        });
         window.addEventListener('mouseup', e => { if(e.button===0) state.mouseHold=false; if(e.button===2) isDraggingCam=false; });
         window.addEventListener('contextmenu', e => e.preventDefault());
         
@@ -1578,6 +1606,12 @@
             if(rebirthMult) rebirthMult.innerText = rMult;
             if(rebirthCountHud) rebirthCountHud.innerText = state.rebirths;
 
+            // Badge de rank do próprio jogador
+            if(player && player.rankBadge) {
+                const lvl = getTrailLevelFromHoney(state.achTracking.totalHoney || 0);
+                player.rankBadge.innerHTML = getTrailRankBadgeHtml(lvl);
+            }
+
             if(document.getElementById('tab-gamepasses')?.classList.contains('active')) renderGamepassTab();
             
             if (player.lastCap !== state.capacity || player.lastPow !== player.power) {
@@ -1702,23 +1736,43 @@
 
         // ── Drag-to-scroll para a mega trilha ──────────────────────────────
         let _tdDrag = false, _tdX0 = 0, _tdSL0 = 0;
+        let _trailRecenterTimeout = null;
+        function scheduleTrailRecenter() {
+            clearTimeout(_trailRecenterTimeout);
+            _trailRecenterTimeout = setTimeout(() => {
+                if(document.getElementById('trail-mega-lane')) renderGamepassTab();
+            }, 10000);
+        }
         window.trailDragStart = (e) => {
             if(e.button !== 0) return;
             _tdDrag = true; _tdX0 = e.clientX;
+            clearTimeout(_trailRecenterTimeout);
             const el = document.getElementById('trail-mega-lane');
             if(el) { _tdSL0 = el.scrollLeft; el.classList.add('grabbing'); }
             e.preventDefault();
         };
         window.trailDragEnd = () => {
+            if(!_tdDrag) return;
             _tdDrag = false;
             const el = document.getElementById('trail-mega-lane');
             if(el) el.classList.remove('grabbing');
+            scheduleTrailRecenter();
         };
         window.trailDragMove = (e) => {
             if(!_tdDrag) return;
             const el = document.getElementById('trail-mega-lane');
             if(el) el.scrollLeft = _tdSL0 - (e.clientX - _tdX0);
         };
+        window.trailTouchStart = (e) => {
+            clearTimeout(_trailRecenterTimeout);
+            const el = document.getElementById('trail-mega-lane');
+            if(el) { _tdX0 = e.touches[0].clientX; _tdSL0 = el.scrollLeft; }
+        };
+        window.trailTouchMove = (e) => {
+            const el = document.getElementById('trail-mega-lane');
+            if(el) el.scrollLeft = _tdSL0 - (e.touches[0].clientX - _tdX0);
+        };
+        window.trailTouchEnd = () => { scheduleTrailRecenter(); };
 
         function renderGamepassTab() {
             const trailInfo   = getTrailLevelInfo();
@@ -1733,8 +1787,8 @@
             const nodeCount   = winEnd - winStart + 1;
             const innerW      = nodeCount * NODE_W + PAD * 2;
 
-            // largura do preenchimento até a posição atual
-            const fillW = Math.max(0, (currentMs - winStart + trailInfo.progressToNext) * NODE_W);
+            // Preenchimento exato ao milestone atual — independente de honey
+            const fillW = Math.max(0, (currentMs - winStart + 1) * NODE_W);
 
             let nodesHtml = '';
             let gated     = false;
@@ -1819,17 +1873,16 @@
 
                     <div class="trail-progress-card">
                         <div class="trail-progress-top">
-                            <div class="trail-progress-title">Linha central de evolução de mel</div>
-                            <div class="trail-progress-rank">${fN(trailInfo.totalHoney)} / ${fN(trailInfo.nextTarget)} Mel</div>
+                            <div class="trail-progress-title">⭐ Posição na Linha Cronológica</div>
+                            <div class="trail-progress-rank">${getTrailRankBadgeHtml(trailInfo.level)}</div>
                         </div>
                         <div class="trail-main-progress">
-                            <div class="trail-main-fill" style="width:${(trailInfo.progressToNext * 100).toFixed(2)}%;"></div>
+                            <div class="trail-main-fill" style="width:${Math.min((trailInfo.level / MAX_TRAIL_LEVEL) * 100, 100).toFixed(3)}%;"></div>
                         </div>
                         <div class="trail-progress-meta">
-                            <span>Nível atual: ${fN(trailInfo.level)}</span>
-                            <span>Próximo: ${fN(trailInfo.nextLevel)}</span>
-                            <span>Falta: ${fN(Math.max(0, trailInfo.nextTarget - trailInfo.totalHoney))} Mel</span>
-                            <span>Recompensa: ${nextRewardPrev}</span>
+                            <span>Nível: ${fN(trailInfo.level)} / ${fN(MAX_TRAIL_LEVEL)}</span>
+                            <span>Próxima recompensa: nível ${fN(nextRewardMs)}</span>
+                            <span>${nextRewardPrev}</span>
                         </div>
                     </div>
 
@@ -1838,7 +1891,10 @@
                              onmousedown="trailDragStart(event)"
                              onmousemove="trailDragMove(event)"
                              onmouseup="trailDragEnd()"
-                             onmouseleave="trailDragEnd()">
+                             onmouseleave="trailDragEnd()"
+                             ontouchstart="trailTouchStart(event)"
+                             ontouchmove="trailTouchMove(event);event.preventDefault();"
+                             ontouchend="trailTouchEnd()">
                             <div id="trail-mega-inner" class="trail-mega-inner" style="width:${innerW}px;">
                                 <!-- linha base -->
                                 <div style="position:absolute; left:${PAD}px; right:${PAD}px; top:50%; height:8px; margin-top:-4px; border-radius:999px; background:rgba(255,255,255,0.07);"></div>
@@ -2118,6 +2174,7 @@
                 if(pr.hiveGroup) worldGroup.remove(pr.hiveGroup);
                 if(pr.tag && pr.tag.parentNode) pr.tag.parentNode.removeChild(pr.tag);
                 if(pr.chatDiv && pr.chatDiv.parentNode) pr.chatDiv.parentNode.removeChild(pr.chatDiv);
+                if(pr.rankBadge && pr.rankBadge.parentNode) pr.rankBadge.parentNode.removeChild(pr.rankBadge);
                 delete peers[user];
             }
         }
@@ -2203,6 +2260,10 @@
                 otherPlayersGroup.add(pG);
                 peers[d.user] = { group: pG, bodyMesh: pBody, armR: pArmR, armL: pArmL, legR: pLegR, legL: pLegL, lastCap: 200, lastPow: 10, packEq: null, toolEq: null, targetX: d.x, targetY: d.y, targetZ: d.z, tRY: d.ry, tag: nameDiv, chatDiv: chD, slots: 0, beeData: [], lastSeen: Date.now(), walkAnim: 0 };
                 
+                const rankD = document.createElement('div');
+                rankD.style.cssText = "position:absolute;pointer-events:none;transform:translate(-50%,-100%);z-index:102;font-family:'Fredoka One',cursive;font-size:12px;padding:3px 10px;border-radius:20px;white-space:nowrap;background:linear-gradient(135deg,rgba(0,0,0,0.82),rgba(12,22,55,0.92));border:1.5px solid rgba(255,200,0,0.3);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.95);display:none;box-shadow:0 2px 12px rgba(0,0,0,0.5);";
+                document.getElementById('floating-texts').appendChild(rankD);
+                peers[d.user].rankBadge = rankD;
                 const eq = attachEquipmentVisuals(pBody, pArmR, 200, 10, null, null);
                 peers[d.user].packEq = eq.pack; peers[d.user].toolEq = eq.tool;
                 
@@ -2247,6 +2308,7 @@
                 pr.packEq = eq.pack; pr.toolEq = eq.tool;
             }
             
+            if(d.rank !== undefined && pr.rankBadge) pr.rankBadge.innerHTML = d.rank;
             pr.lastSeen = Date.now();
         });
         serverChannel.subscribe();
@@ -2318,7 +2380,8 @@
         setInterval(() => {
             if(isGameActive && currentUser && serverChannel && serverChannel.state === 'joined') {
                 serverChannel.send({ type: 'broadcast', event: 'sync', payload: {
-                    user: currentUser, hiveIndex: playerHiveIndex, slots: hiveSlots.length, bees: bees.map(b => ({cat: b.type.category, idx: b.slot.index})), cap: state.capacity, pow: player.power
+                    user: currentUser, hiveIndex: playerHiveIndex, slots: hiveSlots.length, bees: bees.map(b => ({cat: b.type.category, idx: b.slot.index})), cap: state.capacity, pow: player.power,
+                    rank: getTrailRankBadgeHtml(getTrailLevelFromHoney(state.achTracking.totalHoney || 0))
                 }});
             }
         }, 3000);
@@ -2371,6 +2434,16 @@
                 player.chatDiv.style.bottom = `${window.innerHeight - ((lhP.y * -0.5 + 0.5) * window.innerHeight)}px`;
                 player.chatDiv.style.display = 'flex';
             } else { player.chatDiv.style.display = 'none'; }
+
+                        // Badge de rank do jogador local
+                        if(player.rankBadge) {
+                            const rkP = player.group.position.clone().add(new THREE.Vector3(0, 7.4, 0)).project(camera);
+                            if(rkP.z < 1) {
+                                player.rankBadge.style.left  = `${(rkP.x * 0.5 + 0.5) * window.innerWidth}px`;
+                                player.rankBadge.style.top   = `${(rkP.y * -0.5 + 0.5) * window.innerHeight}px`;
+                                player.rankBadge.style.display = 'block';
+                            } else { player.rankBadge.style.display = 'none'; }
+                        }
             
             // Multijogador Visual: Interpolação Lerp Assíncrona para afastar o Swarm
             for(let key in peers) {
@@ -2415,6 +2488,15 @@
                 } else { 
                     pr.tag.style.display = 'none'; 
                     if(pr.chatDiv) pr.chatDiv.style.display = 'none';
+                                // Badge de rank de peers
+                                if(pr.rankBadge) {
+                                    if(p2.z < 1) {
+                                        const rkP2 = pr.group.position.clone().add(new THREE.Vector3(0, 6.8, 0)).project(camera);
+                                        pr.rankBadge.style.left  = `${(rkP2.x * 0.5 + 0.5) * window.innerWidth}px`;
+                                        pr.rankBadge.style.top   = `${(rkP2.y * -0.5 + 0.5) * window.innerHeight}px`;
+                                        pr.rankBadge.style.display = 'block';
+                                    } else { pr.rankBadge.style.display = 'none'; }
+                                }
                 }
                 
                 // Animação boba e super leve de voo nas abelhas dummy do jogador remoto, se habilitado
