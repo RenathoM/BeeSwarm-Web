@@ -130,29 +130,25 @@
         .trail-main-progress { position: relative; width: 100%; height: 16px; border-radius: 999px; background: rgba(0,0,0,0.4); overflow: hidden; border: 2px solid rgba(255,255,255,0.08); }
         .trail-main-fill { height: 100%; background: linear-gradient(90deg, #00e5ff, #76ff03, #ffd54f); width: 0%; transition: width 0.25s ease; }
         .trail-progress-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; color: #d7e6f5; font-size: 12px; flex-wrap: wrap; }
-        .trail-rows { display: flex; flex-direction: column; gap: 18px; width: 100%; }
-        .trail-row { width: 100%; background: linear-gradient(180deg, rgba(8,15,30,0.95), rgba(19,25,48,0.92)); border: 2px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 16px 18px 22px; box-sizing: border-box; }
-        .trail-row.locked { border-color: rgba(244,67,54,0.45); }
-        .trail-row-head { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-        .trail-row-title { font-family: 'Fredoka One', cursive; color: #ffca28; font-size: 18px; }
-        .trail-row-note { color: #b0bec5; font-size: 12px; }
-        .trail-lane { position: relative; width: 100%; min-height: 220px; overflow-x: auto; overflow-y: hidden; padding: 8px 0 12px; }
-        .trail-lane-inner { position: relative; width: 1180px; min-height: 200px; }
-        .trail-center-line { position: absolute; left: 35px; right: 35px; top: 96px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.04); }
-        .trail-center-fill { position: absolute; left: 35px; top: 96px; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #00e5ff, #00c853, #ffee58); width: 0%; box-shadow: 0 0 20px rgba(0,229,255,0.35); }
-        .trail-tick { position: absolute; top: 88px; width: 2px; height: 24px; background: rgba(255,255,255,0.22); }
-        .trail-node { position: absolute; width: 170px; transform: translateX(-50%); }
-        .trail-node.top { top: 0; }
-        .trail-node.bottom { top: 108px; }
-        .trail-node-card { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.22)); border: 2px solid rgba(255,255,255,0.14); border-radius: 18px; padding: 12px; min-height: 72px; box-sizing: border-box; }
-        .trail-node-dot { position: absolute; left: 50%; width: 18px; height: 18px; border-radius: 50%; transform: translateX(-50%); border: 3px solid #0b1024; box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
-        .trail-node.top .trail-node-dot { top: 82px; background: #29b6f6; }
-        .trail-node.bottom .trail-node-dot { top: -14px; background: #ff7043; }
-        .trail-node-level { font-family: 'Fredoka One', cursive; color: #fff176; font-size: 14px; margin-bottom: 6px; }
-        .trail-node-rank { font-size: 10px; color: #80deea; margin-bottom: 8px; text-transform: uppercase; }
-        .trail-rewards { display: flex; flex-direction: column; gap: 4px; }
-        .trail-reward { font-size: 11px; color: #eceff1; line-height: 1.35; }
-        .trail-row-lock { width: 100%; background: rgba(244,67,54,0.12); border: 2px dashed rgba(244,67,54,0.4); border-radius: 18px; padding: 14px; color: #ffcdd2; font-size: 13px; text-align: center; box-sizing: border-box; }
+        /* MEGA TRILHA ÚNICA — linha horizontal arrastável */
+        .trail-mega-wrap { width: 100%; background: linear-gradient(180deg, rgba(5,10,25,0.95), rgba(12,22,48,0.92)); border: 2px solid rgba(255,255,255,0.09); border-radius: 22px; overflow: hidden; }
+        .trail-mega-lane { width: 100%; overflow-x: auto; overflow-y: hidden; cursor: grab; height: 326px; user-select: none; padding: 0; box-sizing: border-box; }
+        .trail-mega-lane.grabbing { cursor: grabbing; }
+        .trail-mega-lane::-webkit-scrollbar { height: 5px; }
+        .trail-mega-lane::-webkit-scrollbar-thumb { background: rgba(102,187,255,0.3); border-radius: 3px; }
+        .trail-mega-inner { position: relative; height: 326px; }
+        .trail-m-node { position: absolute; width: 160px; transform: translateX(-50%); }
+        .trail-m-node.top { bottom: calc(50% + 14px); }
+        .trail-m-node.bottom { top: calc(50% + 14px); }
+        .trail-m-card { background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(0,0,0,0.22)); border: 2px solid rgba(255,255,255,0.13); border-radius: 16px; padding: 11px 12px; box-sizing: border-box; position: relative; }
+        .trail-m-card.done { background: linear-gradient(180deg, rgba(46,125,50,0.22), rgba(0,0,0,0.22)); border-color: rgba(76,175,80,0.48); }
+        .trail-m-card.current { border-color: rgba(255,235,59,0.68); box-shadow: 0 0 20px rgba(255,235,59,0.22); }
+        .trail-m-dot { position: absolute; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 50%; border: 3px solid #0b1024; }
+        .trail-m-node.top .trail-m-dot { bottom: -10px; background: #29b6f6; box-shadow: 0 0 10px rgba(41,182,246,0.7); }
+        .trail-m-node.bottom .trail-m-dot { top: -10px; background: #ff7043; box-shadow: 0 0 10px rgba(255,112,67,0.7); }
+        .trail-m-lv { font-family: 'Fredoka One', cursive; color: #fff176; font-size: 13px; margin-bottom: 3px; }
+        .trail-m-rk { font-size: 10px; color: #80deea; margin-bottom: 6px; }
+        .trail-m-rw { font-size: 10.5px; color: #cfd8dc; line-height: 1.4; }
 
         /* CHAT UI */
         #chat-container { position: absolute; bottom: 120px; left: 15px; width: 320px; height: 220px; background: rgba(0,0,0,0.5); border: 2px solid #555; border-radius: 10px; display: flex; flex-direction: column; pointer-events: auto; z-index: 50; overflow: hidden; backdrop-filter: blur(2px);}
@@ -179,8 +175,9 @@
         .mobile-mode .progress-container { width: 280px; }
         .mobile-mode .honey-box { font-size: 24px; padding: 5px 15px; }
         .mobile-mode .trail-overview { grid-template-columns: 1fr 1fr; }
-        .mobile-mode .trail-lane-inner { width: 980px; }
-        .mobile-mode .trail-node { width: 150px; }
+        .mobile-mode .trail-mega-lane { height: 300px; }
+        .mobile-mode .trail-mega-inner { height: 300px; }
+        .mobile-mode .trail-m-node { width: 140px; }
         
         #mobile-controls { display: none; position: absolute; bottom: 90px; left: 0; width: 100%; pointer-events: none; z-index: 6; justify-content: space-between; padding: 0 15px; box-sizing: border-box; }
         .mobile-mode #mobile-controls { display: flex; }
@@ -1703,90 +1700,97 @@
             }
         }
 
-        function renderTrailRow(rowIndex, trailInfo, locked = false) {
-            const rowStart = (rowIndex * 100) + 1;
-            const rowEnd = Math.min(rowStart + 99, MAX_TRAIL_LEVEL);
-            const requirement = getTrailBeeRequirement(rowIndex + 1);
-            const isCurrentRow = trailInfo.currentRow === rowIndex;
-            const rowProgressPct = isCurrentRow ? (((trailInfo.level - rowStart) + trailInfo.progressToNext) / 100) * 100 : (trailInfo.level > rowEnd ? 100 : 0);
-            const milestoneLevels = [rowStart + 49, rowStart + 99].filter(level => level <= rowEnd);
-
-            let nodesHtml = '';
-            milestoneLevels.forEach((level, idx) => {
-                const positionPct = ((level - rowStart + 1) / 100) * 100;
-                const rewards = getTrailRewardBundle(level);
-                const rewardHtml = rewards.map(reward => `<div class="trail-reward">${reward.icon} ${reward.label}</div>`).join('');
-                nodesHtml += `
-                    <div class="trail-node ${idx % 2 === 0 ? 'top' : 'bottom'}" style="left:${positionPct}%;">
-                        <div class="trail-node-card">
-                            <div class="trail-node-level">Nível ${level}</div>
-                            <div class="trail-node-rank">${getTrailRank(level)}</div>
-                            <div class="trail-rewards">${rewardHtml}</div>
-                        </div>
-                        <div class="trail-node-dot"></div>
-                    </div>`;
-            });
-
-            let tickHtml = '';
-            for(let i = 0; i <= 5; i++) {
-                const tickPct = i * 20;
-                tickHtml += `<div class="trail-tick" style="left: calc(35px + (${tickPct}% * ((100% - 70px) / 100)));"></div>`;
-            }
-
-            if(locked) {
-                return `
-                    <div class="trail-row locked">
-                        <div class="trail-row-head">
-                            <div>
-                                <div class="trail-row-title">Linha ${rowIndex + 1} bloqueada</div>
-                                <div class="trail-row-note">Níveis ${rowStart} a ${rowEnd}</div>
-                            </div>
-                        </div>
-                        <div class="trail-row-lock">Você precisa de ${requirement} abelhas totais para visualizar esta próxima linha cronológica.</div>
-                    </div>`;
-            }
-
-            return `
-                <div class="trail-row">
-                    <div class="trail-row-head">
-                        <div>
-                            <div class="trail-row-title">Linha ${rowIndex + 1}: níveis ${rowStart}-${rowEnd}</div>
-                            <div class="trail-row-note">A próxima linha exige ${requirement} abelhas para ficar visível.</div>
-                        </div>
-                        <div class="trail-progress-rank">${getTrailRank(rowEnd)}</div>
-                    </div>
-                    <div class="trail-lane">
-                        <div class="trail-lane-inner">
-                            <div class="trail-center-line"></div>
-                            <div class="trail-center-fill" style="width: calc(${clamp(rowProgressPct, 0, 100)}% - 35px);"></div>
-                            ${tickHtml}
-                            ${nodesHtml}
-                        </div>
-                    </div>
-                </div>`;
-        }
+        // ── Drag-to-scroll para a mega trilha ──────────────────────────────
+        let _tdDrag = false, _tdX0 = 0, _tdSL0 = 0;
+        window.trailDragStart = (e) => {
+            if(e.button !== 0) return;
+            _tdDrag = true; _tdX0 = e.clientX;
+            const el = document.getElementById('trail-mega-lane');
+            if(el) { _tdSL0 = el.scrollLeft; el.classList.add('grabbing'); }
+            e.preventDefault();
+        };
+        window.trailDragEnd = () => {
+            _tdDrag = false;
+            const el = document.getElementById('trail-mega-lane');
+            if(el) el.classList.remove('grabbing');
+        };
+        window.trailDragMove = (e) => {
+            if(!_tdDrag) return;
+            const el = document.getElementById('trail-mega-lane');
+            if(el) el.scrollLeft = _tdSL0 - (e.clientX - _tdX0);
+        };
 
         function renderGamepassTab() {
-            const trailInfo = getTrailLevelInfo();
-            const currentRank = getTrailRank(Math.max(trailInfo.level, 1));
-            const totalVisibleRows = Math.max(1, getTrailRowForLevel(Math.max(trailInfo.level, 1)) + 1);
-            let unlockedRows = 1;
-            while(unlockedRows < totalVisibleRows + 2 && bees.length >= getTrailBeeRequirement(unlockedRows)) unlockedRows++;
+            const trailInfo   = getTrailLevelInfo();
+            const currentMs   = Math.floor(trailInfo.level / 50);  // milestone index at current level
+            const NODE_W      = 224;   // px entre milestones (a cada 50 níveis)
+            const PAD         = 40;    // padding horizontal interno
+            const BEFORE      = 10;    // nodes a mostrar antes do atual
+            const AHEAD       = 35;    // nodes a mostrar à frente
+            const MAX_MS      = Math.floor(MAX_TRAIL_LEVEL / 50);
+            const winStart    = Math.max(0, currentMs - BEFORE);
+            const winEnd      = Math.min(MAX_MS, winStart + BEFORE + AHEAD);
+            const nodeCount   = winEnd - winStart + 1;
+            const innerW      = nodeCount * NODE_W + PAD * 2;
 
-            const startRow = Math.max(0, trailInfo.currentRow - 1);
-            const visibleRows = [];
-            for(let row = startRow; row <= Math.min(startRow + 2, MAX_TRAIL_LEVEL / 100); row++) {
-                if(row < unlockedRows) visibleRows.push(renderTrailRow(row, trailInfo, false));
-                else {
-                    visibleRows.push(renderTrailRow(row, trailInfo, true));
-                    break;
+            // largura do preenchimento até a posição atual
+            const fillW = Math.max(0, (currentMs - winStart + trailInfo.progressToNext) * NODE_W);
+
+            let nodesHtml = '';
+            let gated     = false;
+
+            for(let ms = winStart; ms <= winEnd; ms++) {
+                if(gated) break;
+                const level = ms * 50;
+                if(level < 1 || level > MAX_TRAIL_LEVEL) continue;
+
+                // Verificar portão de bloqueio a cada 100 níveis (ms par e > 0)
+                if(ms % 2 === 0 && ms > 0) {
+                    const rowIdx = Math.floor(ms / 2);
+                    const req    = getTrailBeeRequirement(rowIdx);
+                    if(bees.length < req) {
+                        const gx = (ms - winStart) * NODE_W + PAD;
+                        nodesHtml += `
+                            <div style="position:absolute; left:${gx}px; top:0; bottom:0; width:${NODE_W}px; display:flex; align-items:center; justify-content:center; z-index:3; pointer-events:none;">
+                                <div style="position:absolute; top:0; bottom:0; left:50%; width:3px; transform:translateX(-50%); background:linear-gradient(180deg,transparent 5%,rgba(244,67,54,0.65) 50%,transparent 95%);"></div>
+                                <div style="position:relative; background:rgba(183,28,28,0.38); border:2px dashed rgba(244,67,54,0.65); border-radius:16px; padding:14px 12px; text-align:center; box-sizing:border-box; font-size:11px; color:#ffcdd2; line-height:1.6; width:148px;">
+                                    🔒 <strong style="color:#ff8a80;">Bloqueado</strong><br>
+                                    Nível ${level}<br>
+                                    <span style="color:#ef9a9a; font-size:10px;">${req} 🐝 necessárias</span>
+                                </div>
+                            </div>`;
+                        gated = true;
+                        continue;
+                    }
                 }
+
+                const cx      = (ms - winStart) * NODE_W + NODE_W / 2 + PAD;  // centro do nó em px
+                const isDone  = trailInfo.level >= level;
+                const isCurr  = currentMs === ms;
+                const isTop   = ms % 2 === 1;   // alterna cima/baixo
+
+                const rewards  = getTrailRewardBundle(level);
+                const rwHtml   = rewards.slice(0, 3).map(r => `<div class="trail-m-rw">${r.icon} ${r.label}</div>`).join('');
+                const rankStr  = getTrailRank(level);
+                const cardCls  = `trail-m-card${isDone ? ' done' : ''}${isCurr ? ' current' : ''}`;
+                const prefix   = isDone ? '✅ ' : isCurr ? '⭐ ' : '';
+
+                nodesHtml += `
+                    <div class="trail-m-node ${isTop ? 'top' : 'bottom'}" style="left:${cx}px;">
+                        <div class="${cardCls}">
+                            <div class="trail-m-lv">${prefix}Nv ${level}</div>
+                            <div class="trail-m-rk">${rankStr}</div>
+                            ${rwHtml}
+                            <div class="trail-m-dot"></div>
+                        </div>
+                    </div>`;
             }
 
-            const nextRowBeeReq = getTrailBeeRequirement(trailInfo.currentRow + 1);
-            const perksUnlocked = Object.keys(GAMEPASS_LABELS).filter(key => state.gamepasses[key]).length;
-            const nextRewardMilestone = clamp((Math.floor(trailInfo.level / 50) + 1) * 50, 50, MAX_TRAIL_LEVEL);
-            const nextRewardPreview = getTrailRewardBundle(nextRewardMilestone).map(reward => `${reward.icon} ${reward.label}`).join(' • ');
+            const currentRank      = getTrailRank(Math.max(trailInfo.level, 1));
+            const perksUnlocked    = Object.keys(GAMEPASS_LABELS).filter(k => state.gamepasses[k]).length;
+            const nextRewardMs     = clamp((Math.floor(trailInfo.level / 50) + 1) * 50, 50, MAX_TRAIL_LEVEL);
+            const nextRewardPrev   = getTrailRewardBundle(nextRewardMs).map(r => `${r.icon} ${r.label}`).join(' • ');
+            const nextRowBeeReq    = getTrailBeeRequirement(trailInfo.currentRow + 1);
 
             document.getElementById('tab-gamepasses').innerHTML = `
                 <div class="trail-shell">
@@ -1794,45 +1798,64 @@
                         <div class="trail-stat">
                             <span class="trail-stat-label">Nível da Trilha</span>
                             <span class="trail-stat-value">${fN(trailInfo.level)}</span>
-                            <span class="trail-stat-note">Total de 50.050 níveis disponíveis na cronologia.</span>
+                            <span class="trail-stat-note">Total de 50.050 níveis disponíveis.</span>
                         </div>
                         <div class="trail-stat">
                             <span class="trail-stat-label">Classificação</span>
                             <span class="trail-stat-value" style="font-size:18px; line-height:1.3;">${currentRank}</span>
-                            <span class="trail-stat-note">A importância sobe automaticamente a cada 50 níveis.</span>
+                            <span class="trail-stat-note">Importância sobe a cada 50 níveis.</span>
                         </div>
                         <div class="trail-stat">
                             <span class="trail-stat-label">Próxima Linha</span>
                             <span class="trail-stat-value">${fN(nextRowBeeReq)}</span>
-                            <span class="trail-stat-note">Abelhas exigidas para enxergar a próxima linha cronológica.</span>
+                            <span class="trail-stat-note">Abelhas para avançar na trilha.</span>
                         </div>
                         <div class="trail-stat">
                             <span class="trail-stat-label">Perks Permanentes</span>
                             <span class="trail-stat-value">${perksUnlocked}/6</span>
-                            <span class="trail-stat-note">Ferrão, mel, velocidade, alcance, limite e autonomia.</span>
+                            <span class="trail-stat-note">Ferrão, mel, velocidade, alcance, limite, autonomia.</span>
                         </div>
                     </div>
 
                     <div class="trail-progress-card">
                         <div class="trail-progress-top">
                             <div class="trail-progress-title">Linha central de evolução de mel</div>
-                            <div class="trail-progress-rank">${fN(trailInfo.totalHoney)} / ${fN(trailInfo.nextTarget)} Mel produzido</div>
+                            <div class="trail-progress-rank">${fN(trailInfo.totalHoney)} / ${fN(trailInfo.nextTarget)} Mel</div>
                         </div>
                         <div class="trail-main-progress">
                             <div class="trail-main-fill" style="width:${(trailInfo.progressToNext * 100).toFixed(2)}%;"></div>
                         </div>
                         <div class="trail-progress-meta">
                             <span>Nível atual: ${fN(trailInfo.level)}</span>
-                            <span>Próximo nível: ${fN(trailInfo.nextLevel)}</span>
+                            <span>Próximo: ${fN(trailInfo.nextLevel)}</span>
                             <span>Falta: ${fN(Math.max(0, trailInfo.nextTarget - trailInfo.totalHoney))} Mel</span>
-                            <span>Próxima recompensa: ${nextRewardPreview}</span>
+                            <span>Recompensa: ${nextRewardPrev}</span>
                         </div>
                     </div>
 
-                    <div class="trail-rows">
-                        ${visibleRows.join('')}
+                    <div class="trail-mega-wrap">
+                        <div id="trail-mega-lane" class="trail-mega-lane"
+                             onmousedown="trailDragStart(event)"
+                             onmousemove="trailDragMove(event)"
+                             onmouseup="trailDragEnd()"
+                             onmouseleave="trailDragEnd()">
+                            <div id="trail-mega-inner" class="trail-mega-inner" style="width:${innerW}px;">
+                                <!-- linha base -->
+                                <div style="position:absolute; left:${PAD}px; right:${PAD}px; top:50%; height:8px; margin-top:-4px; border-radius:999px; background:rgba(255,255,255,0.07);"></div>
+                                <!-- preenchimento de progresso -->
+                                <div style="position:absolute; left:${PAD}px; top:50%; height:8px; margin-top:-4px; border-radius:999px; width:${fillW}px; background:linear-gradient(90deg,#00e5ff,#00c853,#ffee58); box-shadow:0 0 20px rgba(0,229,255,0.35); pointer-events:none;"></div>
+                                ${nodesHtml}
+                            </div>
+                        </div>
                     </div>
                 </div>`;
+
+            // Auto-scroll para centralizar no nó atual
+            requestAnimationFrame(() => {
+                const lane = document.getElementById('trail-mega-lane');
+                if(!lane) return;
+                lane.scrollLeft = Math.max(0, fillW - lane.clientWidth / 2 + NODE_W / 2);
+            });
         }
 
         // =====================================
