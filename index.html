@@ -202,7 +202,6 @@
             <input type="text" id="log-user" class="login-input" placeholder="Nome de Jogador" autocomplete="off">
             <input type="password" id="log-pass" class="login-input" placeholder="Sua Senha" autocomplete="off">
             <button class="login-btn" onclick="attemptLogin()">Jogar / Entrar</button>
-            <button class="changelog-btn" onclick="openChangelog()">📝 Notas de Atualização</button>
         </div>
     </div>
 
@@ -1383,7 +1382,7 @@
 
             // Nome e Prompt flutuante
             const pEl = document.createElement('div'); pEl.className = 'dmg-text';
-            pEl.innerHTML = `<span style="color:#ffb300; font-size:18px; font-family:'Fredoka One';">🐻 Urso Pardo</span><br><span style="font-size:12px; color:#fff;">(Clique em Mim)</span>`; 
+            pEl.innerHTML = `<strong style="color:#ffb300; text-shadow:1px 1px 0 #000;">🐻 Urso Pardo</strong><br><span style="font-size:12px; color:#fff;">(Clique em Mim)</span>`; 
             pEl.style.opacity = '1'; pEl.style.animation = 'none'; pEl.style.transform = 'translate(-50%, -50%)';
             pEl.style.textAlign = 'center';
             document.getElementById('floating-texts').appendChild(pEl);
@@ -1620,7 +1619,7 @@
                 this.group.rotation.y += dt * 0.5;
                 const p = this.group.position.clone().add(new THREE.Vector3(0, 4, 0)).project(camera);
                 if(p.z < 1) {
-                    this.hpEl.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
+                    this.hpEl.style.left = `${( p.x * 0.5 + 0.5) * window.innerWidth}px`;
                     this.hpEl.style.top = `${(p.y * -0.5 + 0.5) * window.innerHeight}px`;
                     this.hpEl.style.display = 'block';
                 } else {
@@ -2519,6 +2518,7 @@
                 rewards.push({ type: 'eventBee', icon: '👑', label: BeeTypes[eventId]?.name || 'Abelha de Evento Prime', beeId: eventId });
             }
 
+            return rewards.slice(0, 4);
             return rewards.slice(0, 4);
         }
 
