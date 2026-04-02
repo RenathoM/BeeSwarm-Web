@@ -14,6 +14,8 @@
         /* UI GLOBAL */
         #ui-layer { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 10;}
         
+        #time-box { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: #fff; padding: 5px 20px; border-radius: 20px; font-family: 'Fredoka One', cursive; font-size: 18px; border: 2px solid #555; display: none; text-shadow: 1px 1px 0 #000; transition: border-color 1s; }
+
         /* TOP HUD */
         .top-hud { display: flex; justify-content: space-between; padding: 15px; width: 100%; box-sizing: border-box;}
         
@@ -50,9 +52,10 @@
 
         /* TOAST NOTIFICACOES */
         #toast-container { position: absolute; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; pointer-events: none;}
-        .toast { padding: 12px 20px; border-radius: 10px; color: white; font-family: 'Fredoka One'; font-size: 14px; text-shadow: 1px 1px 0 #000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); animation: slideInToast 0.3s cubic-bezier(0.2,0.8,0.2,1) forwards, fadeOutToast 0.5s 2.5s forwards; border: 2px solid rgba(255,255,255,0.3);}
-        @keyframes slideInToast { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes fadeOutToast { from { opacity: 1; } to { opacity: 0; } }
+        
+        /* BUFFS HUD */
+        #buffs-container { position: absolute; top: 120px; left: 15px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; z-index: 5;}
+        .buff-icon { background: rgba(0,0,0,0.6); border: 2px solid; border-radius: 8px; padding: 5px 10px; color: white; font-family: 'Fredoka One'; font-size: 12px; display: flex; align-items: center; gap: 8px; text-shadow: 1px 1px 0 #000;}
 
         /* TELA DE LOGIN (Autenticação) */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); pointer-events: auto;}
@@ -61,6 +64,7 @@
         .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid #555; background: #222; color: white; font-size: 16px; box-sizing: border-box; outline: none; font-family: 'Nunito';}
         .login-input:focus { border-color: #ffeb3b; }
         .login-btn { width: 100%; background: #4CAF50; border-color: #388E3C; box-shadow: 0 4px 0 #388E3C; padding: 15px; font-size: 18px; margin-top: 10px;}
+        .changelog-btn { width: 100%; background: #2196F3; border-color: #0b7dda; box-shadow: 0 4px 0 #0b7dda; padding: 10px; font-size: 14px; margin-top: 15px; }
 
         /* WRAPPERS DE MODAIS */
         .modal-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; display: none; justify-content: center; align-items: center; pointer-events: auto; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
@@ -101,11 +105,6 @@
         .bee-manage-btns { display: flex; gap: 15px; margin-top: 20px; width: 100%; justify-content: center;}
         .bee-manage-btns button { font-size: 16px; padding: 10px 20px;}
         .stat-line { display: flex; justify-content: space-between; background: #333; padding: 8px; border-radius: 5px; margin: 5px 0;}
-
-        /* PAINEL ADMIN E SETTINGS */
-        .adm-box { background: #222; padding: 15px; border-radius: 8px; width: 100%; margin-bottom: 15px;}
-        .adm-input { width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; border-radius: 5px; outline: none;}
-        .player-row { display: flex; justify-content: space-between; background: #444; padding: 10px; margin-bottom: 5px; border-radius: 5px;}
 
         /* REBIRTH MODAL */
         .rebirth-flow { width: 100%; display: flex; justify-content: center; align-items: center; gap: 18px; margin: 20px 0 16px; flex-wrap: wrap; }
@@ -149,6 +148,14 @@
         .trail-m-lv { font-family: 'Fredoka One', cursive; color: #fff176; font-size: 13px; margin-bottom: 3px; }
         .trail-m-rk { font-size: 10px; color: #80deea; margin-bottom: 6px; }
         .trail-m-rw { font-size: 10.5px; color: #cfd8dc; line-height: 1.4; }
+        
+        /* CHANGELOG */
+        .changelog-box { background: #1a1a2e; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: left; border: 2px solid #555; }
+        .changelog-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; }
+        .changelog-version { color: #ffeb3b; font-family: 'Fredoka One'; font-size: 18px; }
+        .changelog-date { color: #888; font-size: 12px; }
+        .changelog-list { margin: 0; padding-left: 20px; color: #ddd; font-size: 14px; line-height: 1.6; }
+        .changelog-list li { margin-bottom: 5px; }
 
         /* CHAT UI */
         #chat-container { position: absolute; bottom: 120px; left: 15px; width: 320px; height: 220px; background: rgba(0,0,0,0.5); border: 2px solid #555; border-radius: 10px; display: flex; flex-direction: column; pointer-events: auto; z-index: 50; overflow: hidden; backdrop-filter: blur(2px);}
@@ -195,17 +202,26 @@
             <input type="text" id="log-user" class="login-input" placeholder="Nome de Jogador" autocomplete="off">
             <input type="password" id="log-pass" class="login-input" placeholder="Sua Senha" autocomplete="off">
             <button class="login-btn" onclick="attemptLogin()">Jogar / Entrar</button>
+            <button class="changelog-btn" onclick="openChangelog()">📝 Notas de Atualização</button>
         </div>
     </div>
 
     <div id="ui-layer">
+        <div id="time-box">☀️ 08:00</div>
         <div class="top-hud">
             <div class="resource-group">
-                <div class="honey-box">🍯 <span id="honey-val">0</span></div>
+                <div class="honey-box">
+                    🍯 <span id="honey-val">0</span>
+                    <span style="font-size:18px; margin-left:15px; color:#ffea00; display:flex; align-items:center; gap:5px; border-left:2px solid rgba(255,255,255,0.2); padding-left:15px;">🎫 <span id="ticket-val">0</span></span>
+                </div>
                 <div id="rebirth-box" style="display:none; font-family:'Fredoka One',cursive; font-size:16px; color:#ff6b6b; padding:4px 15px; background:rgba(0,0,0,0.55); border-radius:20px; border:2px solid #e53935; margin-top:5px; text-shadow:1px 1px 0 #000;">🔄 <span id="rebirth-val">0</span> Rebirths &bull; <span id="rebirth-mult">1.00</span>x Mel</div>
                 <div class="progress-container">
                     <div class="progress-bar" id="pollen-bar"></div>
                     <div class="progress-text" id="pollen-val">0 / 200</div>
+                </div>
+                <div class="progress-container" style="border-color:#f44336; height: 20px; margin-top: 5px;">
+                    <div class="progress-bar" id="health-bar" style="background: linear-gradient(90deg, #f44336, #d32f2f); width:100%;"></div>
+                    <div class="progress-text" id="health-val" style="font-size:12px;">100 / 100 HP</div>
                 </div>
             </div>
             
@@ -213,15 +229,23 @@
                 <button class="settings-btn" id="btn-settings" onclick="openSettings()">⚙️</button>
                 <div class="profile-group" id="profile-panel" onclick="openStats()">
                     <div class="profile-name" id="hud-username" style="cursor: pointer;">Jogador</div>
+                    <div style="font-size:12px; margin-top:2px;">🍓 <span id="hud-treats">0</span> &nbsp;|&nbsp; 🔮 <span id="hud-jelly">0</span></div>
                     <button class="logout-btn" onclick="event.stopPropagation(); logout()">Sair</button>
                 </div>
             </div>
         </div>
         <div class="bottom-hud">
-            <button class="btn-lead" onclick="openLeaderboard()">🏆 Leaderboard</button>
+            <div id="extra-menu" style="display:none; position:absolute; bottom:80px; right:20px; flex-direction:column; gap:10px; background:rgba(0,0,0,0.8); padding:10px; border:2px solid #555; border-radius:10px; pointer-events:auto; z-index:20;">
+                <button class="btn-lead" onclick="openLeaderboard()">🏆 Leaderboard</button>
+                <button onclick="invokeMeteorShower()" style="background:#f44336; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c;" id="btn-meteor">☄️ Meteoros</button>
+                <button onclick="openCrafting()" style="background:#9c27b0; border-color:#7b1fa2; box-shadow: 0 4px 0 #7b1fa2;">🧪 Misturador</button>
+                <button id="btn-rebirth" onclick="openRebirthModal()" style="display:none; background:#e53935; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c;">🔄 Rebirth (<span id="rebirth-count-hud">0</span>)</button>
+                <button onclick="openChangelog()" style="background:#2196F3; border-color:#0b7dda; box-shadow: 0 4px 0 #0b7dda;">📝 Patch Notes</button>
+            </div>
+            <button onclick="document.getElementById('extra-menu').style.display = document.getElementById('extra-menu').style.display === 'none' ? 'flex' : 'none';" style="background:#555; border-color:#333; box-shadow: 0 4px 0 #333;">➕ Extras</button>
             <button class="btn-shop" onclick="openShop()">🛒 Loja Global</button>
+            <button onclick="placeSprinklerBtn()" style="background:#00BCD4; border-color:#0097A7; box-shadow: 0 4px 0 #0097A7;">💦 Aspersor (R)</button>
             <button onclick="makeHoneyBtn()" style="background:#ff9800; border-color:#f57c00; box-shadow: 0 4px 0 #f57c00;">🐝 Fazer Mel (E)</button>
-            <button id="btn-rebirth" onclick="openRebirthModal()" style="display:none; background:#e53935; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c;">🔄 Rebirth (<span id="rebirth-count-hud">0</span>)</button>
         </div>
     </div>
 
@@ -235,6 +259,7 @@
     </div>
 
     <div id="toast-container"></div>
+    <div id="buffs-container"></div>
     <div id="floating-texts"></div>
     <div id="crosshair"></div>
 
@@ -305,6 +330,15 @@
                 <input type="checkbox" id="other-bees-toggle" onchange="toggleOtherBeesVisibility(this.checked)" style="transform: scale(1.5);">
             </div>
 
+            <!-- SISTEMA DE CÓDIGOS PROMOCIONAIS -->
+            <div style="display:flex; flex-direction:column; width:100%; align-items:center; margin-bottom:15px; background:#1b5e20; padding:15px; border-radius:8px; border: 2px solid #4CAF50;">
+                <span style="font-weight:bold; color:#a8ffb2; margin-bottom: 5px;">Códigos Promocionais (Promo Codes)</span>
+                <div style="display:flex; width:100%; gap: 10px;">
+                    <input type="text" id="promo-code-input" placeholder="Digite o código..." style="flex:1; padding:8px; border-radius:5px; border:none; outline:none; font-family:'Nunito';">
+                    <button style="background:#4CAF50; border:none; padding:8px 15px; border-radius:5px; font-size:14px; box-shadow:none;" onclick="redeemPromoCode()">Resgatar</button>
+                </div>
+            </div>
+
             <hr style="border-color:#555; width:100%; margin:20px 0;">
             <button style="background:#f44336; border-color:#b71c1c; box-shadow: 0 4px 0 #b71c1c; width:100%; font-size:16px;" onclick="hardResetAccount()">🚨 DELETAR MEU SALVAMENTO</button>
         </div>
@@ -322,8 +356,10 @@
                 <button class="shop-tab" onclick="switchShopTab('tab-eggs', event)">Incubadora Surpresa</button>
                 <button class="shop-tab" onclick="switchShopTab('tab-bees', event)">Catálogo Instantâneo</button>
                 <button class="shop-tab" onclick="switchShopTab('tab-hive', event)">Melhorias (Favos/Global)</button>
+                <button class="shop-tab" style="background:#FF9800; color:black;" onclick="switchShopTab('tab-tickets', event)">🎫 Tenda Premium</button>
                 <button class="shop-tab" style="background:#00BCD4; color:#000;" onclick="switchShopTab('tab-gamepasses', event)">🎫 Gamepasses</button>
                 <button class="shop-tab" style="background:#FFD700; color:black;" onclick="switchShopTab('tab-achievements', event)">🏆 Conquistas Totais</button>
+                <button class="shop-tab" style="background:#8BC34A; color:black;" onclick="switchShopTab('tab-inventory', event)">🎒 Mochila de Itens</button>
             </div>
 
             <!-- APANHADORES -->
@@ -371,6 +407,20 @@
                 <div class="egg-card" style="border-color:#ff4500;"><div style="font-size:40px;">🐉</div><h3>Ovo Mestre Lendário</h3><div class="price">500.000 Mel</div><button style="background:#ff4500;" onclick="buyRandomEgg('legendary', 500000)">Comprar Ovo</button></div>
             </div>
 
+            <!-- LOJA DE TICKETS PREMIUM -->
+            <div id="tab-tickets" class="shop-section">
+                <div style="width:100%; text-align:center; margin-bottom:10px;">
+                    <h2 style="color:#ffea00; margin-top:0;">🎫 Mercado Negro de Tickets</h2>
+                    <p style="color:#aaa; font-size:13px;">Gaste Tickets obtidos por derrotar monstros e colher flores raras.</p>
+                </div>
+                <div class="egg-card" style="border-color:#2196F3;"><div style="font-size:40px;">🪂</div><h3>Planador Épico</h3><div class="price" style="color:#ffea00;">100 Tickets</div><button style="background:#2196F3;" onclick="buyWithTickets('glider', 100, 1)">Adquirir</button></div>
+                <div class="egg-card" style="border-color:#9C27B0;"><div style="font-size:40px;">🔮</div><h3>Royal Jelly x5</h3><div class="price" style="color:#ffea00;">50 Tickets</div><button style="background:#9C27B0;" onclick="buyWithTickets('jelly', 50, 5)">Adquirir</button></div>
+                <div class="egg-card" style="border-color:#FFD700;"><div style="font-size:40px;">🌟</div><h3>Ovo Ouro Épico</h3><div class="price" style="color:#ffea00;">150 Tickets</div><button style="background:#FFD700; color:#000;" onclick="buyWithTickets('egg_epic', 150, 1)">Adquirir</button></div>
+                <div class="egg-card" style="border-color:#ff4500;"><div style="font-size:40px;">🐉</div><h3>Ovo Lendário</h3><div class="price" style="color:#ffea00;">500 Tickets</div><button style="background:#ff4500;" onclick="buyWithTickets('egg_legendary', 500, 1)">Adquirir</button></div>
+                <div class="egg-card" style="border-color:#aa00fa;"><div style="font-size:40px;">🌌</div><h3>Ovo Mítico Escuro</h3><div class="price" style="color:#ffea00;">2.500 Tickets</div><button style="background:#aa00fa;" onclick="buyWithTickets('egg_mythic', 2500, 1)">Adquirir</button></div>
+                <div class="egg-card" style="border-color:#00FF00;"><div style="font-size:40px;">⚡</div><h3>Ovo Anomalia de Evento</h3><div class="price" style="color:#ffea00;">10.000 Tickets</div><button style="background:#00FF00; color:#000;" onclick="buyWithTickets('egg_event', 10000, 1)">Adquirir Direto</button></div>
+            </div>
+
             <!-- ABELHAS DIRETAS CENTRALIZADAS -->
             <div id="tab-bees" class="shop-section">
                 <!-- Gerado Via DB Virtual Dinâmico -->
@@ -403,6 +453,11 @@
             <!-- CONQUISTAS RPG -->
             <div id="tab-achievements" class="shop-section">
                 <!-- Preenchimento Automático dos 50 Cards -->
+            </div>
+            
+            <!-- INVENTÁRIO -->
+            <div id="tab-inventory" class="shop-section">
+                <!-- Gerado Dinamicamente -->
             </div>
             
             <div id="tab-admin" class="shop-section" style="flex-direction: column; align-items: center; justify-content: flex-start;">
@@ -465,6 +520,30 @@
                 <button style="background: #4CAF50; width:60%;" onclick="confirmUpgradeBee()" id="btn-upgrade">Eletrizar Nível (+)</button>
                 <button style="background: #f44336; width:40%;" onclick="confirmSellBee()">Aposentar/Venda</button>
             </div>
+            <button style="background: #FF9800; width:100%; padding:10px; margin-top:10px; border-radius:8px; border:2px solid #F57C00; font-family:'Fredoka One'; color:white; cursor:pointer;" onclick="feedBeeTreat()" id="btn-feed">Dar 1 Petisco 🍓 (<span id="bm-treats">0</span>)</button>
+            <button style="background: #9C27B0; width:100%; padding:10px; margin-top:10px; border-radius:8px; border:2px solid #7B1FA2; font-family:'Fredoka One'; color:white; cursor:pointer;" onclick="feedRoyalJelly()" id="btn-jelly">Usar Royal Jelly 🔮 (<span id="bm-jellies">0</span>)</button>
+        </div>
+    </div>
+
+    <!-- QUEST MODAL (URSO) -->
+    <div id="quest-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 450px; border-color:#8b4513; text-align:center;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color:#ffb300;" id="quest-title">Urso Pardo</h1>
+            <p style="color:#ddd; margin-bottom: 20px;" id="quest-desc">"Olá abelhinha! Preciso de uma ajudinha com as flores. Você topa?"</p>
+            
+            <div style="background:#222; padding:15px; border-radius:10px; width:100%; box-sizing:border-box; margin-bottom:15px; text-align:left; border: 2px solid #444;">
+                <strong style="color:#81c784;" id="quest-objective-title">Objetivo Atual:</strong>
+                <p style="margin:5px 0; color:#fff; font-size:14px;" id="quest-objective-text">Nenhuma missão ativa.</p>
+                <div class="ach-bar-bg" style="margin-top:10px; height:15px;"><div class="ach-bar-fill" id="quest-bar-fill" style="width:0%; background: linear-gradient(90deg, #ffca28, #ff9800);"></div></div>
+                <p style="margin:5px 0 0 0; font-size:12px; color:#aaa; text-align:right;" id="quest-progress-text">0 / 0</p>
+            </div>
+
+            <div style="width:100%; text-align:left; margin-bottom:15px;">
+                <strong style="color:#ffeb3b;">Recompensa: </strong> <span id="quest-reward-text" style="color:#fff;">---</span>
+            </div>
+
+            <button id="quest-action-btn" style="width:100%; background:#4CAF50; border-color:#2e7d32; padding:15px; font-size:18px;" onclick="handleQuestAction()">Aceitar Missão</button>
         </div>
     </div>
 
@@ -476,6 +555,76 @@
             <p style="text-align:center; color:#aaa; font-size:12px; margin-top:-10px;">Comunicação em tempo real c/ servidor Nuvem - 10s.</p>
             <div id="lb-content" style="width: 100%; display:flex; flex-direction:column; gap:10px; margin-top:20px; max-height:450px; overflow-y:auto; padding-right:10px;">
                 <!-- Carregado Cloud via Supabase -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MISTURADOR / CRAFTING MODAL -->
+    <div id="crafting-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 600px; border-color:#9c27b0;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color: #ce93d8;">🧪 Misturador Universal</h1>
+            <p style="color:#ccc; text-align:center;">Transforme ingredientes simples em Super Buffs temporários (Duração: 3 Minutos)!</p>
+            <div style="display:flex; gap:15px; width:100%; justify-content:center; flex-wrap:wrap; margin-top:15px;">
+                <div class="egg-card" style="border-color:#f44336; width:160px;">
+                    <div style="font-size:40px;">🩸</div><h3>Extrato Vermelho</h3>
+                    <div style="font-size:11px;color:#aaa;margin-bottom:10px;">+100% Pólen Vermelho</div>
+                    <div class="price" style="color:#fff; font-size:11px;">Custo: 50🍓 + 10 Tickets</div>
+                    <button style="background:#f44336; margin-bottom:5px;" onclick="craftItem('redExtract')">Fabricar</button>
+                    <button style="background:#b71c1c;" onclick="useItem('redExtract')">Usar (<span id="inv-redExtract">0</span>)</button>
+                </div>
+                <div class="egg-card" style="border-color:#2196f3; width:160px;">
+                    <div style="font-size:40px;">💧</div><h3>Extrato Azul</h3>
+                    <div style="font-size:11px;color:#aaa;margin-bottom:10px;">+100% Pólen Azul</div>
+                    <div class="price" style="color:#fff; font-size:11px;">Custo: 50🍓 + 10 Tickets</div>
+                    <button style="background:#2196f3; margin-bottom:5px;" onclick="craftItem('blueExtract')">Fabricar</button>
+                    <button style="background:#0d47a1;" onclick="useItem('blueExtract')">Usar (<span id="inv-blueExtract">0</span>)</button>
+                </div>
+                <div class="egg-card" style="border-color:#ffeb3b; width:160px;">
+                    <div style="font-size:40px;">🧬</div><h3>Enzimas</h3>
+                    <div style="font-size:11px;color:#aaa;margin-bottom:10px;">+50% Mel / Velocidade</div>
+                    <div class="price" style="color:#fff; font-size:11px;">Custo: 100🍓 + 5 Royal Jelly</div>
+                    <button style="background:#fbc02d; color:#000; margin-bottom:5px;" onclick="craftItem('enzymes')">Fabricar</button>
+                    <button style="background:#f57f17; color:#000;" onclick="useItem('enzymes')">Usar (<span id="inv-enzymes">0</span>)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANGELOG MODAL -->
+    <div id="changelog-modal-wrapper" class="modal-wrapper">
+        <div class="modal-content" style="width: 600px; max-height: 80vh;">
+            <button class="close-btn" onclick="closeAllModals()">X</button>
+            <h1 style="color: #2196F3;">📝 Histórico de Atualizações</h1>
+            <div style="width: 100%; overflow-y: auto; padding-right: 10px;">
+                
+                <div class="changelog-box">
+                    <div class="changelog-header">
+                        <span class="changelog-version">v1.4.0 - Expansão RPG & Eventos</span>
+                        <span class="changelog-date">Edição: Hoje</span>
+                    </div>
+                    <ul class="changelog-list">
+                        <li><strong>Ciclo Dia/Noite:</strong> Adicionado sistema global de horário com iluminação dinâmica (Amanhecer, Dia, Pôr do sol e Noite).</li>
+                        <li><strong>Sistema de Brotos (Sprouts):</strong> Plantas mágicas crescem nos campos! Colete pólen perto deles para estourá-los e ganhar recompensas garantidas.</li>
+                        <li><strong>Chuva de Meteoros:</strong> Novo evento invocável no menu Extras gastando 3 Royal Jellies. Desvie dos impactos e colete os itens raros.</li>
+                        <li><strong>Rebirth System:</strong> Resete seu progresso mantendo bônus em multiplicadores globais de mel.</li>
+                        <li><strong>Mega Trilha de Recompensas:</strong> Guias de Level RPG com drops épicos conforme você coleta mel.</li>
+                        <li><strong>Misturador / Buffs:</strong> Fabrique Extratos e Enzimas no menu Extras para dobrar seu ganho de pólen temporariamente.</li>
+                    </ul>
+                </div>
+
+                <div class="changelog-box">
+                    <div class="changelog-header">
+                        <span class="changelog-version">v1.3.0 - Multiplayer & Códigos</span>
+                        <span class="changelog-date">Atualização Anterior</span>
+                    </div>
+                    <ul class="changelog-list">
+                        <li><strong>Sincronização Nuvem:</strong> Jogadores na mesma sala agora podem ver onde os outros colhem (via Supabase).</li>
+                        <li><strong>Promo Codes:</strong> Menu de configurações agora aceita códigos promocionais (ex: BETA, HONEYBOOST).</li>
+                        <li><strong>Novas Abelhas:</strong> Adicionadas categorias Lendárias e de Eventos Puros.</li>
+                    </ul>
+                </div>
+
             </div>
         </div>
     </div>
@@ -535,7 +684,15 @@
             notifsEnabled: true,
             showOtherBees: false,
             rebirths: 0,
-            gamepasses: { trailRewardCursor: 0 }
+            gamepasses: { trailRewardCursor: 0 },
+            questsCompleted: 0,
+            activeQuest: null,
+            playerHealth: 100,
+            playerMaxHealth: 100,
+            inventory: { treats: 0, tickets: 0, royalJellies: 0, hasGlider: false, redExtract: 0, blueExtract: 0, enzymes: 0 },
+            buffs: { redExtract: 0, blueExtract: 0, enzymes: 0 },
+            redeemedCodes: [],
+            activeSprinklers: []
         };
 
         const fN = (n) => {
@@ -649,6 +806,7 @@
             buy: () => playTone(1000, 'triangle', 0.5, 0.1, 2000),
             error: () => playTone(150, 'sawtooth', 0.3, 0.08, 100),
             click: () => playTone(900, 'square', 0.05, 0.04),
+
             upgrade: () => playTone(1200, 'sine', 0.6, 0.1, 3000)
         };
 
@@ -763,7 +921,7 @@
                 id: `event_${i}`,
                 category: 'event',
                 name,
-                color: CatStats.event.cols[i % CatStats.event.cols.length],
+                color: CatStats.event.cols[0],
                 convertSpeed: CatStats.event.minConv + (i * 35),
                 collectPow: CatStats.event.minPow + (i * 40),
                 speed: 25 + (i % 12),
@@ -881,7 +1039,7 @@
                     }
                     p = existing.data;
                 } else {
-                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], rebirths: 0, gamepasses: { trailRewardCursor: 0 }, tracking: {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate: Date.now() }, achv: Array(50).fill(0) };
+                    p = { honey: 0, pollen: 0, capacity: 200, power: 10, extraSlots: 0, bees: [], rebirths: 0, gamepasses: { trailRewardCursor: 0 }, tracking: {totalPollen:0, totalHoney:0, playtime:0, shopPurchases:0, chatMsgs:0, creationDate: Date.now() }, achv: Array(50).fill(0), inventory: { treats: 0, tickets: 0, royalJellies: 0, hasGlider: false } };
                     const { error: insErr } = await supabase.from('bss_players').insert([{ username: user, password: pass, data: p }]);
                     if (insErr) { showToast("Crie a tabela 'bss_players' (username, password, data jsonb) no Supabase!", "error"); btn.disabled=false; return; }
                     showToast(`Credenciais novas aceitas: ${user}`, "success");
@@ -906,6 +1064,8 @@
                     aT.onclick = (e) => switchShopTab('tab-admin', e);
                     document.getElementById('shop-tabs-container').appendChild(aT);
                 }
+
+                document.getElementById('time-box').style.display = 'block';
 
                 applyLoadedData(p);
                 isGameActive = true; SFX.buy(); showToast(`Nuvem Carregada. Preparar turbinas!`);
@@ -944,6 +1104,9 @@
                 power: player.power, extraSlots: state.extraSlotsBought,
                 tracking: state.achTracking, achv: state.achProgress,
                 rebirths: state.rebirths, gamepasses: state.gamepasses,
+                questsCompleted: state.questsCompleted, activeQuest: state.activeQuest,
+                inventory: state.inventory, redeemedCodes: state.redeemedCodes,
+                buffs: state.buffs,
                 bees: bees.map(b => ({ id: b.type.id, index: b.slot.index, level: b.level }))
             };
             await supabase.from('bss_players').update({ data: updatedData }).eq('username', currentUser);
@@ -957,6 +1120,11 @@
             if(p.achv) state.achProgress = p.achv;
             state.rebirths = p.rebirths || 0;
             state.gamepasses = normalizeGamepassState(p.gamepasses || {});
+            state.questsCompleted = p.questsCompleted || 0;
+            state.activeQuest = p.activeQuest || null;
+            state.inventory = p.inventory || { treats: 0, tickets: 0, royalJellies: 0, hasGlider: false, redExtract: 0, blueExtract: 0, enzymes: 0 };
+            state.buffs = p.buffs || { redExtract: 0, blueExtract: 0, enzymes: 0 };
+            state.redeemedCodes = p.redeemedCodes || [];
 
             bees.forEach(b => scene.remove(b.group)); bees.length = 0;
             
@@ -994,7 +1162,7 @@
         }, 10000);
 
         // =====================================
-        // THREE.JS CONFIGURAÇÃO DO MUNDO
+        // THREE.JS CONFIGURAÇÃO DO MUNDO E DIA/NOITE
         // =====================================
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
@@ -1010,10 +1178,82 @@
         const dirLight = new THREE.DirectionalLight(0xffffee, 1.2);
         dirLight.position.set(100, 150, 50); dirLight.castShadow = true;
         dirLight.shadow.mapSize.width = 2048; dirLight.shadow.mapSize.height = 2048;
-        dirLight.shadow.camera.far = 150; dirLight.shadow.camera.near = 0.5;
-        dirLight.shadow.camera.left = -60; dirLight.shadow.camera.right = 60;
-        dirLight.shadow.camera.top = 60; dirLight.shadow.camera.bottom = -60;
+        dirLight.shadow.camera.far = 400; dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.left = -100; dirLight.shadow.camera.right = 100;
+        dirLight.shadow.camera.top = 100; dirLight.shadow.camera.bottom = -100;
         scene.add(dirLight);
+
+        // Lógica Global de Horário
+        let worldTime = 8.0; // Inicia às 8 da manhã (0 a 24)
+        const timeScale = 0.05; // Multiplicador de passagem de tempo (0.05 = 1 hora a cada 20 segundos)
+
+        const timeColors = {
+            daySky: new THREE.Color(0x87CEEB),
+            dayFog: new THREE.Color(0x87CEEB),
+            sunsetSky: new THREE.Color(0xFF7E47),
+            sunsetFog: new THREE.Color(0xDD6055),
+            nightSky: new THREE.Color(0x050C1A),
+            nightFog: new THREE.Color(0x050C1A)
+        };
+
+        function updateEnvironmentLighting(dt) {
+            worldTime += dt * timeScale;
+            if(worldTime >= 24) worldTime = 0;
+
+            const timeBox = document.getElementById('time-box');
+            let hr = Math.floor(worldTime);
+            let mn = Math.floor((worldTime - hr) * 60);
+            
+            // Ciclo de Interpolação Matemática
+            let skyColor = new THREE.Color();
+            let fogColor = new THREE.Color();
+            let dLightIntens = 1.2;
+            let aLightIntens = 0.6;
+            
+            if(worldTime >= 6 && worldTime < 17) { // Dia
+                const t = (worldTime - 6) / 11;
+                skyColor.copy(timeColors.daySky); fogColor.copy(timeColors.dayFog);
+                timeBox.innerText = `☀️ ${hr.toString().padStart(2, '0')}:${mn.toString().padStart(2, '0')}`;
+                timeBox.style.borderColor = '#4CAF50';
+            } else if (worldTime >= 17 && worldTime < 19) { // Por do sol
+                const t = (worldTime - 17) / 2;
+                skyColor.copy(timeColors.daySky).lerp(timeColors.sunsetSky, t);
+                fogColor.copy(timeColors.dayFog).lerp(timeColors.sunsetFog, t);
+                dLightIntens = THREE.MathUtils.lerp(1.2, 0.4, t);
+                aLightIntens = THREE.MathUtils.lerp(0.6, 0.3, t);
+                timeBox.innerText = `🌅 ${hr.toString().padStart(2, '0')}:${mn.toString().padStart(2, '0')}`;
+                timeBox.style.borderColor = '#FF9800';
+            } else if (worldTime >= 19 || worldTime < 5) { // Noite
+                skyColor.copy(timeColors.nightSky); fogColor.copy(timeColors.nightFog);
+                dLightIntens = 0.1; // Luz da lua
+                aLightIntens = 0.15;
+                timeBox.innerText = `🌙 ${hr.toString().padStart(2, '0')}:${mn.toString().padStart(2, '0')}`;
+                timeBox.style.borderColor = '#5c6bc0';
+            } else if (worldTime >= 5 && worldTime < 6) { // Amanhecer
+                const t = (worldTime - 5) / 1;
+                skyColor.copy(timeColors.nightSky).lerp(timeColors.daySky, t);
+                fogColor.copy(timeColors.nightFog).lerp(timeColors.dayFog, t);
+                dLightIntens = THREE.MathUtils.lerp(0.1, 1.2, t);
+                aLightIntens = THREE.MathUtils.lerp(0.15, 0.6, t);
+                timeBox.innerText = `🌄 ${hr.toString().padStart(2, '0')}:${mn.toString().padStart(2, '0')}`;
+                timeBox.style.borderColor = '#ffca28';
+            }
+
+            scene.background.lerp(skyColor, dt);
+            scene.fog.color.lerp(fogColor, dt);
+            dirLight.intensity = THREE.MathUtils.lerp(dirLight.intensity, dLightIntens, dt);
+            ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, aLightIntens, dt);
+
+            // Rotação orbital do Sol baseada no tempo do Mundo
+            const sunAngle = ((worldTime - 6) / 24) * Math.PI * 2;
+            const orbitRadius = 250;
+            // Para as sombras funcionarem perfeitamente, a luz foca onde o jogador tá
+            dirLight.position.x = player.group.position.x + Math.cos(sunAngle) * orbitRadius;
+            dirLight.position.y = Math.sin(sunAngle) * orbitRadius;
+            dirLight.position.z = player.group.position.z + 50; 
+            dirLight.target.position.copy(player.group.position);
+            dirLight.target.updateMatrixWorld();
+        }
 
         const genTex = (c1, c2) => {
             const cv = document.createElement('canvas'); cv.width=64; cv.height=64;
@@ -1032,8 +1272,8 @@
             hiveDark: new THREE.MeshStandardMaterial({ color: 0xFF8F00 }),
             flowerCap: {
                 white: new THREE.MeshStandardMaterial({ map: genTex('#FFFFFF', '#E0E0E0'), roughness: 0.3 }),
-                blue: new THREE.MeshStandardMaterial({ map: genTex('#4fc3f7', '#0288d1'), roughness: 0.3 }),
-                red: new THREE.MeshStandardMaterial({ map: genTex('#e53935', '#c62828'), roughness: 0.3 })
+                blue: new THREE.MeshStandardMaterial({ map: genTex('#4fc3f7', '#0288d1'), roughness: 0.3, emissive: 0x0288d1, emissiveIntensity: 0.1 }),
+                red: new THREE.MeshStandardMaterial({ map: genTex('#e53935', '#c62828'), roughness: 0.3, emissive: 0xc62828, emissiveIntensity: 0.1 })
             }
         };
 
@@ -1111,7 +1351,8 @@
                     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1, 1), new THREE.MeshStandardMaterial({ color: 0x388E3C })); stem.position.y = 0.5;
                     const cap = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.4, 1.5), typeMat); cap.position.y = 1.0; cap.castShadow = true; cap.receiveShadow = true;
                     fw.add(stem); fw.add(cap); fw.position.set(startX + c*spacing + (Math.random()*0.5-0.25), 0, startZ + r*spacing + (Math.random()*0.5-0.25));
-                    fw.userData = { maxScaleY: cap.scale.y, maxPos: cap.position.y, health: 1.0, cap: cap, multi: fieldMulti };
+                    let flowerColorName = 'white'; if(typeMat===mats.flowerCap.red) flowerColorName='red'; else if(typeMat===mats.flowerCap.blue) flowerColorName='blue';
+                    fw.userData = { maxScaleY: cap.scale.y, maxPos: cap.position.y, health: 1.0, cap: cap, multi: fieldMulti, color: flowerColorName };
                     flowers.push(fw); worldGroup.add(fw);
                 }
             }
@@ -1121,121 +1362,521 @@
             document.getElementById('floating-texts').appendChild(el);
             dummyAnchor.userData = { isAnchor: true, htmlEl: el, originX: cx, originZ: cz, size: countSq*spacing }; flowers.push(dummyAnchor); 
         }
-
-        const typeMatsRot = [mats.flowerCap.white, mats.flowerCap.red, mats.flowerCap.blue];
         
-        // Distribuição Radial (Em anéis ao redor do centro)
-        const mapZones = [
-            { req: 0,   mul: 1,   rad: 0,   ang: 0,   sz: 5,  m: 0 }, // Centro Inicial
-            // Anel 1 (Distância: 45)
-            { req: 10,  mul: 2,   rad: 45,  ang: 0,   sz: 6,  m: 1 },
-            { req: 20,  mul: 4,   rad: 45,  ang: 90,  sz: 6,  m: 2 },
-            { req: 30,  mul: 6,   rad: 45,  ang: 180, sz: 6,  m: 0 },
-            { req: 40,  mul: 8,   rad: 45,  ang: 270, sz: 6,  m: 1 },
-            // Anel 2 (Distância: 95)
-            { req: 50,  mul: 10,  rad: 95,  ang: 45,  sz: 7,  m: 2 },
-            { req: 60,  mul: 20,  rad: 95,  ang: 135, sz: 7,  m: 0 },
-            { req: 70,  mul: 30,  rad: 95,  ang: 225, sz: 7,  m: 1 },
-            { req: 80,  mul: 40,  rad: 95,  ang: 315, sz: 8,  m: 2 },
-            // Anel Máximo (Distância: 155)
-            { req: 90,  mul: 50,  rad: 155, ang: 0,   sz: 8,  m: 0 },
-            { req: 100, mul: 100, rad: 155, ang: 180, sz: 10, m: 1 }
-        ];
+        // NPC URSO PARDO E SISTEMA DE MISSÃO
+        const npcGroup = new THREE.Group();
+        function buildNPC() {
+            npcGroup.position.set(40, 2, -20);
+            worldGroup.add(npcGroup);
+            
+            // Corpo Básico do Urso
+            const bMat = new THREE.MeshStandardMaterial({color: 0x8b4513});
+            const bBelly = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 3), bMat); bBelly.position.y = 2.5; bBelly.castShadow = true; npcGroup.add(bBelly);
+            const bHead = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), bMat); bHead.position.set(0, 6, 0.5); bHead.castShadow = true; npcGroup.add(bHead);
+            const snout = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 1), new THREE.MeshStandardMaterial({color: 0xdeb887})); snout.position.set(0, 5.5, 2); npcGroup.add(snout);
+            const earL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.5), bMat); earL.position.set(-1.2, 7.5, 0.5); npcGroup.add(earL);
+            const earR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.5), bMat); earR.position.set(1.2, 7.5, 0.5); npcGroup.add(earR);
+            
+            // Hitbox invisível pra clique
+            const hit = new THREE.Mesh(new THREE.BoxGeometry(5, 7, 5), new THREE.MeshBasicMaterial({visible: false}));
+            hit.position.y = 3.5; hit.userData = { isNpc: true, npcId: 'brown_bear' }; npcGroup.add(hit);
 
-        mapZones.forEach(z => {
-            const radAng = z.ang * (Math.PI / 180);
-            const cx = Math.cos(radAng) * z.rad;
-            const cz = Math.sin(radAng) * z.rad + 20; // +20 para ser o eixo central em frente às colmeias
-            buildField(cx, cz, z.sz, typeMatsRot[z.m], z.req, z.mul);
-        });
+            // Nome e Prompt flutuante
+            const pEl = document.createElement('div'); pEl.className = 'dmg-text';
+            pEl.innerHTML = `<span style="color:#ffb300; font-size:18px; font-family:'Fredoka One';">🐻 Urso Pardo</span><br><span style="font-size:12px; color:#fff;">(Clique em Mim)</span>`; 
+            pEl.style.opacity = '1'; pEl.style.animation = 'none'; pEl.style.transform = 'translate(-50%, -50%)';
+            pEl.style.textAlign = 'center';
+            document.getElementById('floating-texts').appendChild(pEl);
+            npcGroup.userData = { htmlEl: pEl };
+        }
+        buildNPC();
 
         // =====================================
-        // ANIMAÇÕES VISUAIS (TEXTOS FLUTUANTES)
+        // GERAÇÃO DOS CAMPOS DE FLORES (MAPA MUNDI BASE)
+        // Valores: posX, posZ, tamanhoGrade, corMaterial, abelhasNecessárias, multiplicadorDePólen
         // =====================================
-        function spawnFloatingText(text, pos3D, color) {
-            if(!isGameActive || !state.vfxEnabled) return;
+        
+        // Zona Inicial (0 Abelhas)
+        buildField(-30, 20, 6, mats.flowerCap.white, 0, 1.0); // Campo Flor Branca
+        buildField(-10, 45, 5, mats.flowerCap.white, 0, 1.2); // Campo Girassol
+        buildField(15, 40, 5, mats.flowerCap.red, 0, 1.5);    // Campo Cogumelo
+        buildField(35, 15, 5, mats.flowerCap.blue, 0, 1.5);   // Campo Flor Azul
+
+        // Zona Baixa (5 Abelhas)
+        buildField(-55, 60, 6, mats.flowerCap.white, 5, 2.5); // Campo Trevo
+        buildField(-20, 75, 7, mats.flowerCap.red, 5, 3.0);   // Campo Teia de Aranha
+
+        // Zona Média (10 Abelhas)
+        buildField(30, 80, 6, mats.flowerCap.white, 10, 5.0); // Campo Bambu
+        buildField(65, 50, 6, mats.flowerCap.red, 10, 6.0);   // Campo Morango
+
+        // Zona Alta (15 Abelhas)
+        buildField(-60, -10, 7, mats.flowerCap.blue, 15, 10.0); // Campo Pinheiro
+        buildField(60, -15, 6, mats.flowerCap.blue, 15, 12.0);  // Campo Cacto
+
+        function generateQuest() {
+            const num = state.questsCompleted;
+            const diff = 1 + (num * 0.5) + (state.rebirths * 0.5);
+            const isHoney = Math.random() > 0.5;
+            
+            const amt = Math.floor(Math.pow(1000 * diff, 1.1) + 1000);
+            const reward = Math.floor(amt * 0.4);
+            
+            return {
+                id: `quest_${num}`,
+                type: isHoney ? 'honey' : 'pollen',
+                desc: isHoney ? `Converta e faça ${fN(amt)} mel puro para mim!` : `Colete ${fN(amt)} pólen nos campos!`,
+                req: amt,
+                progress: 0,
+                rewardHoney: reward
+            };
+        }
+
+        window.openQuestModal = () => {
+            const m = document.getElementById('quest-modal-wrapper');
+            const bt = document.getElementById('quest-action-btn');
+            const pt = document.getElementById('quest-progress-text');
+            const pf = document.getElementById('quest-bar-fill');
+            const oT = document.getElementById('quest-objective-text');
+            const rT = document.getElementById('quest-reward-text');
+            
+            if(!state.activeQuest) {
+                // Oferecer missão
+                const nq = generateQuest();
+                state.tempQuestOffer = nq;
+                oT.innerText = nq.desc;
+                pt.innerText = `0 / ${fN(nq.req)}`;
+                pf.style.width = `0%`;
+                rT.innerText = `${fN(nq.rewardHoney)} Mel 🍯`;
+                bt.innerText = "Aceitar Missão";
+                bt.style.background = "#4CAF50";
+            } else {
+                const q = state.activeQuest;
+                oT.innerText = q.desc;
+                pt.innerText = `${fN(q.progress)} / ${fN(q.req)}`;
+                let pct = Math.min((q.progress / q.req) * 100, 100);
+                pf.style.width = `${pct}%`;
+                rT.innerText = `${fN(q.rewardHoney)} Mel 🍯`;
+                
+                if(q.progress >= q.req) {
+                    bt.innerText = "Concluir & Resgatar";
+                    bt.style.background = "#E91E63";
+                } else {
+                    bt.innerText = "Missão em Andamento...";
+                    bt.style.background = "#555";
+                }
+            }
+            
+            m.style.display = 'flex';
+            SFX.click();
+        }
+
+        window.handleQuestAction = () => {
+            if(!state.activeQuest && state.tempQuestOffer) {
+                state.activeQuest = state.tempQuestOffer;
+                state.tempQuestOffer = null;
+                showToast("Missão aceita! Mãos à obra.", "success");
+                openQuestModal(); // Atualiza UI
+            } else if(state.activeQuest) {
+                if(state.activeQuest.progress >= state.activeQuest.req) {
+                    const r = state.activeQuest.rewardHoney;
+                    state.honey += r;
+                    state.questsCompleted++;
+                    state.activeQuest = null;
+                    showToast(`Urso Pardo agradece! Você lucrou ${fN(r)} Mel.`, "success");
+                    SFX.upgrade();
+                    closeAllModals();
+                    throttledUpdateUI();
+                } else {
+                    showToast("Você ainda não terminou o objetivo desta missão!", "error");
+                }
+            }
+        }
+
+        function incrementQuestProgress(type, amount) {
+            if(state.activeQuest && state.activeQuest.type === type && state.activeQuest.progress < state.activeQuest.req) {
+                state.activeQuest.progress += amount;
+                if(state.activeQuest.progress >= state.activeQuest.req) {
+                    showToast("Missão Concluída! Volte ao Urso Pardo para resgatar sua recompensa.", "success");
+                    SFX.collectBee();
+                }
+            }
+        }
+
+        // SISTEMA DE TOKENS (DROPS)
+        const tokens = [];
+        const tokenMatTreat = new THREE.MeshStandardMaterial({color: 0xff3333});
+        const tokenMatTicket = new THREE.MeshStandardMaterial({color: 0xffea00});
+        const tokenMatJelly = new THREE.MeshStandardMaterial({color: 0x9c27b0, transparent: true, opacity: 0.8});
+        
+        function spawnToken(type, pos) {
+            const isTicket = type === 'ticket';
+            const isJelly = type === 'royalJelly';
+            const isHoney = type === 'honey';
+            
+            let geo = new THREE.DodecahedronGeometry(0.5, 0);
+            if(isTicket) geo = new THREE.BoxGeometry(0.8, 0.1, 1.2);
+            if(isJelly) geo = new THREE.CylinderGeometry(0.4, 0.4, 0.8, 8);
+
+            const mat = isHoney ? new THREE.MeshStandardMaterial({color: 0xffd700}) : (isTicket ? tokenMatTicket : (isJelly ? tokenMatJelly : tokenMatTreat));
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(pos);
+            mesh.userData = { type: type, life: 30, floatOffset: Math.random() * Math.PI * 2 };
+            worldGroup.add(mesh);
+            tokens.push(mesh);
+        }
+
+        function collectToken(mesh, index) {
+            worldGroup.remove(mesh);
+            tokens.splice(index, 1);
+            mesh.geometry.dispose();
+            SFX.collectBee(); 
+
+            const t = mesh.userData.type;
+            if(t === 'treat') {
+                state.inventory.treats++;
+                spawnDamageText(`+1 Petisco 🍓`, mesh.position, '#ff5555');
+                showToast("Coletado: 1 Petisco 🍓", "info");
+            } else if(t === 'ticket') {
+                state.inventory.tickets++;
+                spawnDamageText(`+1 Ticket 🎫`, mesh.position, '#ffea00');
+                showToast("Coletado: 1 Ticket 🎫", "info");
+            } else if(t === 'royalJelly') {
+                state.inventory.royalJellies++;
+                spawnDamageText(`+1 Royal Jelly 🔮`, mesh.position, '#9c27b0');
+                showToast("Coletado: 1 Royal Jelly 🔮", "info");
+            } else if(t === 'honey') {
+                const hAmt = 500 * getRebirthMultiplier();
+                state.honey += hAmt; state.achTracking.totalHoney += hAmt;
+                spawnDamageText(`+${fN(hAmt)} Mel 🍯`, mesh.position, '#ffd700');
+                showToast(`Coletado: ${fN(hAmt)} Mel 🍯`, "info");
+            }
+            throttledUpdateUI();
+        }
+
+        // =====================================
+        // SISTEMA DE BROTOS (SPROUTS)
+        // =====================================
+        const sprouts = [];
+        class Sprout {
+            constructor(anchor) {
+                this.anchor = anchor;
+                this.maxHealth = 25000 * Math.max(1, state.rebirths * 2);
+                this.health = this.maxHealth;
+                this.group = new THREE.Group();
+                
+                const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 2), new THREE.MeshStandardMaterial({color: 0x8BC34A}));
+                stem.position.y = 1;
+                const head = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5, 0), new THREE.MeshStandardMaterial({color: 0x4CAF50}));
+                head.position.y = 2.5; head.userData.isHead = true;
+                
+                this.group.add(stem); this.group.add(head);
+                this.group.position.set(anchor.userData.originX, 0, anchor.userData.originZ);
+                worldGroup.add(this.group);
+                
+                // UI do Broto
+                this.hpEl = document.createElement('div');
+                this.hpEl.style.position = 'absolute'; this.hpEl.className = 'dmg-text';
+                this.hpEl.style.animation = 'none'; this.hpEl.style.transform = 'translate(-50%, -50%)';
+                this.hpEl.innerHTML = `<strong style="color:#8BC34A; text-shadow:1px 1px 0 #000;">Broto Mágico</strong><br><span style="color:#fff; font-size:14px;">${fN(this.health)}</span>`;
+                document.getElementById('floating-texts').appendChild(this.hpEl);
+                this.head = head;
+            }
+
+            takeDamage(amt) {
+                if(this.health <= 0) return;
+                this.health -= amt;
+                this.head.scale.setScalar(1 + (this.health/this.maxHealth)*0.5);
+                this.hpEl.innerHTML = `<strong style="color:#8BC34A; text-shadow:1px 1px 0 #000;">Broto Mágico</strong><br><span style="color:#fff; font-size:14px;">${fN(Math.max(0, this.health))}</span>`;
+                
+                if(this.health <= 0) {
+                    this.pop();
+                }
+            }
+
+            pop() {
+                showToast("Um Broto Mágico foi estourado!", "success");
+                SFX.upgrade();
+                
+                // Loot explosivo
+                const drops = 15 + Math.floor(Math.random() * 10);
+                for(let i=0; i<drops; i++) {
+                    const rType = Math.random();
+                    let t = 'honey';
+                    if(rType < 0.1) t = 'royalJelly';
+                    else if(rType < 0.3) t = 'ticket';
+                    else if(rType < 0.6) t = 'treat';
+                    
+                    const offset = new THREE.Vector3((Math.random()-0.5)*15, 0, (Math.random()-0.5)*15);
+                    spawnToken(t, this.group.position.clone().add(offset));
+                }
+
+                worldGroup.remove(this.group);
+                if(this.hpEl && this.hpEl.parentNode) this.hpEl.parentNode.removeChild(this.hpEl);
+                sprouts.splice(sprouts.indexOf(this), 1);
+            }
+
+            update(dt) {
+                this.group.rotation.y += dt * 0.5;
+                const p = this.group.position.clone().add(new THREE.Vector3(0, 4, 0)).project(camera);
+                if(p.z < 1) {
+                    this.hpEl.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
+                    this.hpEl.style.top = `${(p.y * -0.5 + 0.5) * window.innerHeight}px`;
+                    this.hpEl.style.display = 'block';
+                } else {
+                    this.hpEl.style.display = 'none';
+                }
+            }
+        }
+
+        // Spawner automático de Brotos (a cada 2-3 minutos)
+        setInterval(() => {
+            if(isGameActive && sprouts.length < 2) {
+                const anchors = flowers.filter(f => f.userData.isAnchor);
+                if(anchors.length > 0) {
+                    const rAnchor = anchors[Math.floor(Math.random() * anchors.length)];
+                    // Verifica se já não tem um broto nesse campo
+                    if(!sprouts.find(s => s.anchor === rAnchor)) {
+                        sprouts.push(new Sprout(rAnchor));
+                        showToast("🌱 Um Broto Mágico cresceu em algum lugar!", "info");
+                    }
+                }
+            }
+        }, 150000);
+
+        // =====================================
+        // EVENTO: CHUVA DE METEOROS
+        // =====================================
+        const meteors = [];
+        window.invokeMeteorShower = () => {
+            if(state.inventory.royalJellies < 3) return showToast("Precisa de 3 Royal Jellies para evocar meteoros!", "error");
+            state.inventory.royalJellies -= 3;
+            throttledUpdateUI();
+            showToast("⚠️ ALERTA: CHUVA DE METEOROS INICIADA!", "error");
+            SFX.error(); // Emitir um som de alarme
+
+            let count = 0;
+            const meteorInterval = setInterval(() => {
+                if(count > 15 || !isGameActive) { clearInterval(meteorInterval); return; }
+                count++;
+                
+                const anchors = flowers.filter(f => f.userData.isAnchor);
+                if(anchors.length > 0) {
+                    const tAnchor = anchors[Math.floor(Math.random() * anchors.length)];
+                    spawnMeteor(new THREE.Vector3(tAnchor.userData.originX + (Math.random()*10 - 5), 0, tAnchor.userData.originZ + (Math.random()*10 - 5)));
+                }
+            }, 600);
+        };
+
+        function spawnMeteor(targetPos) {
+            const mGroup = new THREE.Group();
+            const core = new THREE.Mesh(new THREE.DodecahedronGeometry(2, 1), new THREE.MeshStandardMaterial({color:0xff3300, emissive:0xff3300, emissiveIntensity:0.5}));
+            mGroup.add(core);
+            mGroup.position.set(targetPos.x + (Math.random()*40 - 20), targetPos.y + 60, targetPos.z + (Math.random()*40 - 20));
+            scene.add(mGroup);
+            
+            meteors.push({ mesh: mGroup, target: targetPos, speed: 45 + Math.random()*20 });
+        }
+
+        // =====================================
+        // VFX & EQUIPMENT SYSTEM
+        // =====================================
+        
+        function spawnFloatingText(text, pos, color = '#fff') {
+            if(!state.vfxEnabled) return;
             const el = document.createElement('div');
             el.className = 'dmg-text';
             el.innerText = text;
             el.style.color = color;
             document.getElementById('floating-texts').appendChild(el);
             
-            // Fazer projeção da coordenada 3D do mundo para coordenada 2D da tela visual
-            const p = pos3D.clone().project(camera);
-            if(p.z < 1) {
-                el.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
-                el.style.top = `${(p.y * -0.5 + 0.5) * window.innerHeight}px`;
+            const screenPos = pos.clone().project(camera);
+            if(screenPos.z < 1) {
+                el.style.left = `${(screenPos.x * 0.5 + 0.5) * window.innerWidth}px`;
+                el.style.top = `${(screenPos.y * -0.5 + 0.5) * window.innerHeight}px`;
             } else {
                 el.style.display = 'none';
             }
-            // Auto destruição do elemento HTML após animação de 1s
             setTimeout(() => { if(el.parentNode) el.remove(); }, 1000);
         }
+        const spawnDamageText = spawnFloatingText;
 
-        // =====================================
-        // CLASSES DAS ENTIDADES FÍSICAS (REALISMO)
-        // =====================================
-        function attachEquipmentVisuals(tBody, tArm, cap, pow, oldPack, oldTool) {
-            if(oldPack && oldPack.parent) oldPack.parent.remove(oldPack);
-            if(oldTool && oldTool.parent) oldTool.parent.remove(oldTool);
-
-            const pA = new THREE.Group(); pA.position.set(0, 1.5, -0.6); tBody.add(pA);
-            const tG = new THREE.Group(); tG.position.set(0, -0.5, 0.6); tArm.add(tG);
-
-            let pName='Pote', pC=0xaaaaaa, pS='box';
-            if(cap>=2e11){pName='Galáctica';pC=0xce93d8;pS='box';}
-            else if(cap>=5e10){pName='Sifão Est';pC=0x81d4fa;pS='cyl';}
-            else if(cap>=1e10){pName='Vácuo';pC=0xbcaaa4;pS='sphere';}
-            else if(cap>=1e9){pName='M. Insana';pC=0xe91e63;pS='box';}
-            else if(cap>=1e7){pName='Buraco Neg';pC=0x212121;pS='sphere';}
-            else if(cap>=1e5){pName='Quantum';pC=0x00bcd4;pS='cyl';}
-            else if(cap>=10000){pName='Contêiner';pC=0x1976d2;pS='box';}
-            else if(cap>=1500){pName='Barril';pC=0x8b4513;pS='cyl';}
-
-            let tName='Tesoura', tC=0x4caf50;
-            if(pow>=1e9){tName='Divino';tC=0xffd600;}
-            else if(pow>=1e8){tName='Quântica';tC=0x00b0ff;}
-            else if(pow>=1e7){tName='Matéria';tC=0x8e24aa;}
-            else if(pow>=1e6){tName='Feixe';tC=0xff0000;}
-            else if(pow>=1e5){tName='Trator';tC=0xffeb3b;}
-            else if(pow>=5000){tName='Extrator';tC=0xaa00fa;}
-            else if(pow>=1500){tName='Ímã';tC=0xe91e63;}
-            else if(pow>=100){tName='Aspirador';tC=0x2196f3;}
-
-            // Redução de tamanho de +- 75% referente à malha antiga da mochila
-            let pGeo;
-            if(pS==='box') pGeo = new THREE.BoxGeometry(1.4, 1.6, 0.8);
-            else if(pS==='cyl') pGeo = new THREE.CylinderGeometry(0.8, 0.8, 1.6, 16);
-            else pGeo = new THREE.SphereGeometry(0.9, 16, 16);
-
-            const cv=document.createElement('canvas'); cv.width=256; cv.height=256; const cx=cv.getContext('2d');
-            cx.fillStyle='#'+pC.toString(16).padStart(6,'0'); cx.fillRect(0,0,256,256);
-            cx.fillStyle='#fff'; cx.font='bold 35px sans-serif'; cx.textAlign='center'; cx.textBaseline='middle';
-            cx.shadowColor='rgba(0,0,0,0.5)'; cx.shadowBlur=4; cx.fillText(pName,128,128);
-            const pTex=new THREE.CanvasTexture(cv); pTex.generateMipmaps=false;
-
-            const pM = new THREE.Mesh(pGeo, new THREE.MeshStandardMaterial({map:pTex, roughness:0.7}));
-            pM.rotation.y = Math.PI; pM.castShadow=true; pA.add(pM);
-
-            const sM = new THREE.MeshStandardMaterial({color:0x222});
-            const lS = new THREE.Mesh(new THREE.BoxGeometry(0.16,1.6,0.6), sM); lS.position.set(-0.7,0,0.4); pA.add(lS);
-            const rS = new THREE.Mesh(new THREE.BoxGeometry(0.16,1.6,0.6), sM); rS.position.set(0.7,0,0.4); pA.add(rS);
-
-            const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,2.5), new THREE.MeshStandardMaterial({color:0x555}));
-            stick.rotation.x = Math.PI/2; stick.position.z=1; stick.castShadow=true; tG.add(stick);
-
-            let tGeo;
-            if(tName==='Tesoura') { tGeo=new THREE.TorusGeometry(0.2,0.05,8,3); }
-            else if(tName==='Aspirador') { tGeo=new THREE.CylinderGeometry(0.15, 0.3, 0.8,8); }
-            else if(tName==='Ímã') { tGeo=new THREE.TorusGeometry(0.3, 0.1, 8, 16,Math.PI); }
-            else if(tName==='Extrator') { tGeo=new THREE.BoxGeometry(0.4,0.4,0.4); }
-            else tGeo=new THREE.DodecahedronGeometry(0.4, (tName==='Trator'||tName==='Feixe')?0:1);
-            
-            const tHd=new THREE.Mesh(tGeo, new THREE.MeshStandardMaterial({color:tC, emissive:tC, emissiveIntensity:0.2}));
-            tHd.position.z=2.2; tHd.rotation.x=Math.PI/2; tHd.castShadow=true; tG.add(tHd);
-
-            return {pack:pA, tool:tG};
+        const pollenParticles = [];
+        function spawnPollenParticle(pos, targetObj) {
+            if(!state.vfxEnabled) return;
+            const mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.2, 0), new THREE.MeshBasicMaterial({color: 0xffff00}));
+            mesh.position.copy(pos);
+           
+            worldGroup.add(mesh);
+            pollenParticles.push({ mesh: mesh, target: targetObj, velocity: new THREE.Vector3((Math.random()-0.5)*10, 15, (Math.random()-0.5)*10) });
         }
+
+        function attachEquipmentVisuals(bodyParent, rightArmParent, cap, pow, oldPack, oldTool) {
+            if(oldPack) bodyParent.remove(oldPack);
+            if(oldTool) rightArmParent.remove(oldTool);
+            
+            // Troca visual da mochila baseada na capacidade
+            let packColor = 0xffffff;
+            if(cap >= 1000000000) packColor = 0x000000;
+            else if(cap >= 1000000) packColor = 0xAA00FA;
+            else if(cap >= 50000) packColor = 0xE91E63;
+            else if(cap >= 2500) packColor = 0x2196F3;
+            else if(cap > 200) packColor = 0x4CAF50;
+            
+            const pk = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.5, 0.7), new THREE.MeshStandardMaterial({color: packColor}));
+            pk.position.set(0, 1.6, -0.85); pk.castShadow = true;
+            bodyParent.add(pk);
+            
+            // Troca visual da ferramenta baseada no poder base
+            let toolColor = 0xdddddd;
+            if(pow >= 1000000) toolColor = 0xff0000;
+            else if(pow >= 1500) toolColor = 0xE91E63;
+            else if(pow > 10) toolColor = 0x4CAF50;
+            
+            const tl = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2), new THREE.MeshStandardMaterial({color: toolColor}));
+            tl.rotation.x = Math.PI/2; tl.position.set(0, -0.5, 0.6); tl.castShadow = true;
+            rightArmParent.add(tl);
+            
+            return { pack: pk, tool: tl };
+        }
+
+        // SISTEMA DE MONSTROS
+        const mobs = [];
+        class Mob {
+            constructor(x, z, type) {
+                this.group = new THREE.Group();
+                this.type = type;
+                this.maxHealth = type === 'beetle' ? 50 : 200;
+                this.health = this.maxHealth;
+                this.damage = type === 'beetle' ? 10 : 30;
+                this.speed = type === 'beetle' ? 15 : 20; // Monstros mais rápidos
+                
+                const col = type === 'beetle' ? 0x111111 : 0xff0000;
+                
+                this.mesh = new THREE.Group();
+                const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.5, 3), new THREE.MeshStandardMaterial({color: col, roughness: 0.8}));
+                body.position.y = 0.75; body.castShadow = true; this.mesh.add(body);
+                const eyeMat = new THREE.MeshBasicMaterial({color: 0xff0000});
+                const eye1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), eyeMat); eye1.position.set(-0.6, 1.2, 1.5); this.mesh.add(eye1);
+                const eye2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), eyeMat); eye2.position.set(0.6, 1.2, 1.5); this.mesh.add(eye2);
+
+                this.group.add(this.mesh);
+                
+                this.group.position.set(x, 0, z);
+                this.spawnPos = new THREE.Vector3(x, 0, z);
+                worldGroup.add(this.group);
+                
+                this.state = 'idle'; // idle, chase, returning
+                this.attackTimer = 0;
+                
+                // Barra de Vida do Mob Flutuante
+                this.hpEl = document.createElement('div');
+                this.hpEl.style.position = 'absolute'; this.hpEl.style.width = '40px'; this.hpEl.style.height = '6px';
+                this.hpEl.style.background = '#000'; this.hpEl.style.border = '1px solid #fff'; this.hpEl.style.pointerEvents = 'none';
+                
+                this.hpFill = document.createElement('div');
+                this.hpFill.style.width = '100%'; this.hpFill.style.height = '100%'; this.hpFill.style.background = '#f44336';
+                this.hpEl.appendChild(this.hpFill);
+                document.getElementById('floating-texts').appendChild(this.hpEl);
+                this.hpEl.style.display = 'none'; // Começa invisível
+            }
+            
+            takeDamage(dmg) {
+                this.health -= dmg;
+                spawnDamageText(`-${fN(dmg)}`, this.group.position.clone().add(new THREE.Vector3(0, 2, 0)));
+                this.hpFill.style.width = `${Math.max(0, this.health / this.maxHealth) * 100}%`;
+                
+                if(this.health <= 0) {
+                    this.die();
+                }
+            }
+            
+            die() {
+                const reward = this.type === 'beetle' ? 250 : 1500;
+                state.honey += reward;
+                showToast(`Monstro derrotado! +${fN(reward)} Mel`, 'success');
+                spawnDamageText(`+${fN(reward)}`, this.group.position.clone().add(new THREE.Vector3(0, 3, 0)), '#ffd700');
+                
+                // Drops do Monstro
+                spawnToken('treat', this.group.position.clone().add(new THREE.Vector3((Math.random()-0.5)*2,0,(Math.random()-0.5)*2)));
+                if(Math.random() < 0.5) spawnToken('ticket', this.group.position.clone().add(new THREE.Vector3((Math.random()-0.5)*2,0,(Math.random()-0.5)*2)));
+                if(Math.random() < 0.2) spawnToken('royalJelly', this.group.position.clone().add(new THREE.Vector3((Math.random()-0.5)*2,0,(Math.random()-0.5)*2)));
+                
+                if(this.hpEl.parentNode) this.hpEl.parentNode.removeChild(this.hpEl);
+                worldGroup.remove(this.group);
+                mobs.splice(mobs.indexOf(this), 1);
+                throttledUpdateUI();
+
+                // Sistema de Respawn Automático
+                const respawnX = this.spawnPos.x;
+                const respawnZ = this.spawnPos.z;
+                const respawnType = this.type;
+                setTimeout(() => {
+                    if(isGameActive) mobs.push(new Mob(respawnX, respawnZ, respawnType));
+                }, 30000); // Renasce após 30 segundos
+            }
+
+            update(dt, pObj) {
+                const distToPlayer = this.group.position.distanceTo(pObj.group.position);
+                const distToSpawn = this.group.position.distanceTo(this.spawnPos);
+
+                if(distToPlayer < 25 && distToSpawn < 60) {
+                    this.state = 'chase';
+                } else if(distToSpawn > 60 || distToPlayer >= 25) {
+                    this.state = 'returning';
+                }
+
+                if(this.state === 'chase') {
+                    const dir = pObj.group.position.clone().sub(this.group.position).normalize();
+                    this.group.position.add(dir.multiplyScalar(this.speed * dt));
+                    this.mesh.lookAt(pObj.group.position.x, this.mesh.position.y, pObj.group.position.z);
+                    
+                    // Attack player
+                    if(distToPlayer < 3) {
+                        this.attackTimer -= dt;
+                        if(this.attackTimer <= 0) {
+                            state.playerHealth -= this.damage;
+                            spawnDamageText(`-${this.damage}`, pObj.group.position.clone().add(new THREE.Vector3(0, 3, 0)));
+                            this.attackTimer = 1.0;
+                            SFX.error();
+                            throttledUpdateUI();
+                            
+                            if(state.playerHealth <= 0) {
+                                state.playerHealth = state.playerMaxHealth;
+                                pObj.group.position.set(hivePos.x, 5, hivePos.z + 20);
+                                showToast("Você foi derrotado e voltou para sua colmeia!", "error");
+                                this.state = 'returning';
+                            }
+                        }
+                    }
+                } else if(this.state === 'returning') {
+                    if(distToSpawn > 1) {
+                        const dir = this.spawnPos.clone().sub(this.group.position).normalize();
+                        this.group.position.add(dir.multiplyScalar(this.speed * 0.8 * dt));
+                        this.mesh.lookAt(this.spawnPos.x, this.spawnPos.y, this.spawnPos.z);
+                    } else {
+                        this.state = 'idle';
+                    }
+                }
+
+                // Update UI Pos
+                const p = this.group.position.clone().add(new THREE.Vector3(0, 2.5, 0)).project(camera);
+                if(p.z < 1) {
+                    this.hpEl.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
+                    this.hpEl.style.top = `${(p.y * -0.5 + 0.5) * window.innerHeight}px`;
+                    this.hpEl.style.display = 'block';
+                } else {
+                    this.hpEl.style.display = 'none';
+                }
+            }
+        }
+
+        // Spawn inicial de mobs
+        setTimeout(() => {
+            mobs.push(new Mob(45, 20, 'beetle'));
+            mobs.push(new Mob(0, 65, 'beetle'));
+            mobs.push(new Mob(-45, 20, 'beetle'));
+        }, 3000);
 
         class Player {
             constructor() {
@@ -1246,17 +1887,24 @@
                 const torso = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.8, 1), new THREE.MeshStandardMaterial({color: 0x1976D2})); torso.position.y = 1.6; torso.castShadow = true; this.body.add(torso);
                 const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshStandardMaterial({color: 0xFFE0BD})); head.position.y = 3.2; head.castShadow = true; this.body.add(head);
                 
-                this.armL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0x1976D2})); this.armL.position.set(-1.1, 1.6, 0); this.armL.castShadow = true; this.body.add(this.armL);
-                this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0x1976D2})); this.armR.position.set(1.1, 1.6, 0); this.armR.castShadow = true; this.body.add(this.armR);
+                this.armL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0x1976D2})); this.armL.position.set(-1.1, 1.6, 0); this.body.add(this.armL);
+                this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshStandardMaterial({color: 0x1976D2})); this.armR.position.set(1.1, 1.6, 0); this.body.add(this.armR);
+                this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legR.position.set(0.4, 0.9, 0); this.body.add(this.legR);
+                this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legL.position.set(-0.4, 0.9, 0); this.body.add(this.legL);
                 
-                // Anexar as pernas DIRETAMENTE ao corpo (this.body) para herdar a rotação sem quebrar a posição local
-                this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legL.position.set(-0.4, 0.9, 0); this.legL.castShadow = true; this.body.add(this.legL);
-                this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.8, 0.7), new THREE.MeshStandardMaterial({color: 0x222222})); this.legR.position.set(0.4, 0.9, 0); this.legR.castShadow = true; this.body.add(this.legR);
+                // Visual do Planador Premium
+                this.gliderMesh = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 0.2, 12), new THREE.MeshStandardMaterial({color: 0x2196F3, transparent: true, opacity: 0.8, side: THREE.DoubleSide}));
+                this.gliderMesh.position.y = 4.5; this.gliderMesh.visible = false;
+                this.body.add(this.gliderMesh);
 
                 this.packEq = null; this.toolEq = null;
                 this.lastCap = 0; this.lastPow = 0;
 
-                this.velocity = new THREE.Vector3(); this.speed = 25; this.jumpPwr = 20; this.yVel = 0;
+                this.velocity = new THREE.Vector3(); 
+                this.acceleration = 250; // Mais rápido
+                this.friction = 10; 
+                this.maxSpeed = 65; // Velocidade base aumentada
+                this.jumpPwr = 35; this.yVel = 0;
                 this.grounded = false; this.swingTimer = 0; this.stepTimer = 0; this.power = 10; this.walkAnim = 0;
                 
                 // Contêiner de chat exclusivo do próprio jogador
@@ -1288,18 +1936,24 @@
                 if(_moBlocked) { input.w=false; input.a=false; input.s=false; input.d=false; input.space=false; }
                 const mv = new THREE.Vector3(); if(!_moBlocked && input.w) mv.add(fw); if(!_moBlocked && input.s) mv.sub(fw); if(!_moBlocked && input.a) mv.sub(rt); if(!_moBlocked && input.d) mv.add(rt);
 
-                if(mv.lengthSq() > 0) { // Correção para rodar a animação (lengthSq() verifica a magnitude do vetor no Three.js)
+                if(mv.lengthSq() > 0) {
                     mv.normalize();
                     this.body.rotation.y = THREE.MathUtils.lerp(this.body.rotation.y, Math.atan2(mv.x, mv.z), 10 * dt);
-                    this.walkAnim += dt * 15;
+                    this.walkAnim += dt * (this.velocity.length() * 0.3);
                     
-                    // Animação Procedural dos Membros
-                    this.legL.rotation.x = Math.sin(this.walkAnim) * 0.6;
-                    this.legR.rotation.x = Math.sin(this.walkAnim + Math.PI) * 0.6;
-                    this.armL.rotation.x = Math.sin(this.walkAnim + Math.PI) * 0.5;
-                    if(!state.mouseHold) this.armR.rotation.x = Math.sin(this.walkAnim) * 0.5;
+                    // Aceleração Física
+                    this.velocity.x += mv.x * this.acceleration * dt;
+                    this.velocity.z += mv.z * this.acceleration * dt;
 
                     if(this.grounded) { this.stepTimer -= dt; if(this.stepTimer <= 0) { SFX.step(); this.stepTimer = 0.3; } }
+                }
+
+                const speed = new THREE.Vector2(this.velocity.x, this.velocity.z).length();
+                if (speed > 1) {
+                    this.legL.rotation.x = Math.sin(this.walkAnim) * 0.8;
+                    this.legR.rotation.x = Math.sin(this.walkAnim + Math.PI) * 0.8;
+                    if(!state.mouseHold) this.armR.rotation.x = Math.sin(this.walkAnim) * 0.5;
+                    this.armL.rotation.x = Math.sin(this.walkAnim + Math.PI) * 0.5;
                 } else {
                     this.legL.rotation.x = THREE.MathUtils.lerp(this.legL.rotation.x, 0, dt*10);
                     this.legR.rotation.x = THREE.MathUtils.lerp(this.legR.rotation.x, 0, dt*10);
@@ -1307,12 +1961,35 @@
                     if(!state.mouseHold) this.armR.rotation.x = THREE.MathUtils.lerp(this.armR.rotation.x, 0, dt*10);
                 }
 
-                // RECUPERAR FÍSICA E GRAVIDADE
-                this.velocity.x = mv.x * this.speed * dt; this.velocity.z = mv.z * this.speed * dt; this.yVel -= 60 * dt; 
-                this.group.position.x += this.velocity.x; this.group.position.z += this.velocity.z; this.group.position.y += this.yVel * dt;
+                // Atrito limitador de velocidade
+                if(speed > 0) {
+                    const drop = speed * this.friction * dt;
+                    const newSpeed = Math.max(speed - drop, 0);
+                    const multiplier = Math.min(newSpeed / speed, this.maxSpeed / speed);
+                    this.velocity.x *= multiplier;
+                    this.velocity.z *= multiplier;
+                }
+
+                // RECUPERAR FÍSICA E GRAVIDADE (Com Planador)
+                if (!this.grounded && input.space && state.inventory.hasGlider && this.yVel < 0) {
+                    this.yVel = -12; // Planando suavemente em vez de cair rápido
+                    this.gliderMesh.visible = true;
+                } else {
+                    this.yVel -= 75 * dt; // Gravidade original
+                    this.gliderMesh.visible = false;
+                }
+
+                this.group.position.x += this.velocity.x * dt; 
+                this.group.position.z += this.velocity.z * dt; 
+                this.group.position.y += this.yVel * dt;
                 
                 if(this.group.position.y <= 0) { this.group.position.y = 0; this.yVel = 0; this.grounded = true; } else { this.grounded = false; }
-                if(!isModalOpen() && input.space && this.grounded) { this.yVel = this.jumpPwr; this.grounded = false; input.space = false; SFX.jump(); }
+                if(!isModalOpen() && input.space && this.grounded) { 
+                    this.yVel = this.jumpPwr; 
+                    this.grounded = false; // Impede pulamento infinito forçando o estado pro ar
+                    inputState.space = false; // Consome o input de pulo
+                    SFX.jump(); 
+                }
 
                 if(!isModalOpen() && state.mouseHold) {
                     this.swingTimer += dt * 12; 
@@ -1331,17 +2008,38 @@
             attemptCollect() {
                 if(state.pollen >= state.capacity) return;
                 const cp = this.group.position; let hA = false;
+                let totalPollenGained = 0;
                 for(let f of flowers) {
                     if(!f.userData.cap || f.userData.health <= 0) continue; 
                     if(Math.hypot(f.position.x - cp.x, f.position.z - cp.z) < 6.0) {
                         f.userData.health = 0; f.userData.cap.scale.set(0.1, 0.1, 0.1);
-                        let amt = Math.min(this.power * (f.userData.multi||1), state.capacity - state.pollen);
+                        
+                        let bMultiplier = 1;
+                        if(f.userData.color === 'red' && state.buffs.redExtract > 0) bMultiplier *= 2;
+                        if(f.userData.color === 'blue' && state.buffs.blueExtract > 0) bMultiplier *= 2;
+
+                        let amt = Math.min(this.power * (f.userData.multi||1) * bMultiplier, state.capacity - state.pollen);
                         state.pollen += amt; state.achTracking.totalPollen += amt; hA = true;
+                        totalPollenGained += amt;
+                        incrementQuestProgress('pollen', amt); // NPC Quest
+                        spawnPollenParticle(f.position.clone().add(new THREE.Vector3(0, 1, 0)), this);
                         spawnFloatingText(`+${fN(amt)}`, f.position.clone().add(new THREE.Vector3(0,2,0)), '#a8ffb2');
+                        
+                        // Chance de drop de Petisco da flor
+                        if(Math.random() < 0.02) spawnToken('treat', f.position);
+
                         if (state.pollen >= state.capacity) break;
                     }
                 }
-                if(hA) { SFX.collectPlayer(); updateUI(); }
+                
+                // Dano em área nos Sprouts baseados na coleta
+                if(totalPollenGained > 0) {
+                    for(let s of sprouts) {
+                        if(s.group.position.distanceTo(cp) < 15) s.takeDamage(totalPollenGained * 5); 
+                    }
+                }
+
+                if(hA) { SFX.collectPlayer(); throttledUpdateUI(); } // Usando UI limitadora
             }
         }
 
@@ -1368,9 +2066,10 @@
                 const lvlMulti = 1 + ((this.level - 1) * 0.2);
                 const powBonus  = state.gamepasses['gp_power'] ? 2.0 : 1.0;
                 const convBonus = state.gamepasses['gp_honey'] ? 2.0 : 1.0;
+                const enzymeBonus = state.buffs.enzymes > 0 ? 1.5 : 1.0;
                 this.curPow  = Math.floor(this.type.collectPow   * lvlMulti * powBonus);
-                this.curConv = Math.floor(this.type.convertSpeed * lvlMulti * convBonus);
-                this.curSpeed     = this.type.speed * (state.gamepasses['gp_speed'] ? 2.0 : 1.0);
+                this.curConv = Math.floor(this.type.convertSpeed * lvlMulti * convBonus * enzymeBonus);
+                this.curSpeed     = this.type.speed * (state.gamepasses['gp_speed'] ? 2.0 : 1.0) * enzymeBonus;
                 // collectMulti: 999 = autonomo (gp_auto), 2 = alcance duplo (gp_range), 1 = normal
                 this.collectMulti = state.gamepasses['gp_auto'] ? 999 : (state.gamepasses['gp_range'] ? 2.0 : 1.0);
             }
@@ -1390,6 +2089,7 @@
                                 if(cnv > 0) { 
                                     const honeyGained = Math.floor(cnv * (1 + state.rebirths * 0.25));
                                     state.pollen -= cnv; state.honey += honeyGained; state.achTracking.totalHoney += honeyGained;
+                                    incrementQuestProgress('honey', honeyGained); // NPC Quest
                                     spawnFloatingText(`+${fN(honeyGained)}`, this.group.position, '#ffd700'); SFX.honey(); updateUI();
                                 }
                             }
@@ -1410,7 +2110,7 @@
                             // collectMulti: 999 = autônomo (sem limite de distância), >1 = alcance ampliado
                             if(f.userData.isAnchor && f.position.distanceTo(playerObj.group.position) < 40 * Math.min(this.collectMulti, 40)) { insideField = true; break; }
                         }
-                        
+
                         if(insideField) {
                             // Sorteia flor ao redor e pega
                             const rF = flowers[Math.floor(Math.random() * flowers.length)];
@@ -1421,19 +2121,56 @@
                             this.state = 'follow';
                         }
                     }
+                    
+                    // Lógica de Combate: Se não está coletando, procura mob próximo do jogador para atacar
+                    if(this.state === 'follow') {
+                        for(let m of mobs) {
+                            if(m.group.position.distanceTo(playerObj.group.position) < 30) {
+                                this.state = 'attacking';
+                                this.targetMob = m;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(this.state === 'attacking' && this.targetMob) {
+                        if(this.targetMob.health <= 0 || !mobs.includes(this.targetMob) || this.targetMob.group.position.distanceTo(playerObj.group.position) > 40) {
+                            this.state = 'follow';
+                            this.targetMob = null;
+                        } else {
+                            tg.copy(this.targetMob.group.position); tg.y += 1.5;
+                            if(this.group.position.distanceTo(tg) < 3.0) {
+                                if(Math.random() < 0.1) { // Frequência de acerto
+                                    this.targetMob.takeDamage(this.curPow);
+                                    SFX.step();
+                                }
+                            }
+                        }
+                    }
 
                     if(this.state === 'collecting' && this.targetFlower) {
                         if(this.targetFlower.userData.health <= 0 || state.pollen >= state.capacity || playerObj.group.position.distanceTo(this.targetFlower.position) > 55 * Math.min(this.collectMulti, 40)) {
                             this.state = 'follow'; this.targetFlower = null;
                         } else {
                             tg.copy(this.targetFlower.position); tg.y = this.targetFlower.userData.maxPos + 1.2; 
-                            // [CORREÇÃO]: Ignora Eixo Y usando hypot e aumenta a margem do hit!
                             if(Math.hypot(this.group.position.x - tg.x, this.group.position.z - tg.z) < 4.0 * Math.min(this.collectMulti, 10)) {
                                 if(Math.random() < 0.1) { 
                                     this.targetFlower.userData.health = 0; this.targetFlower.userData.cap.scale.set(0.1,0.1,0.1);
-                                    let amt = Math.min(this.curPow * (this.targetFlower.userData.multi||1), state.capacity - state.pollen);
+                                    
+                                    let bMultiplier = 1;
+                                    if(this.targetFlower.userData.color === 'red' && state.buffs.redExtract > 0) bMultiplier *= 2;
+                                    if(this.targetFlower.userData.color === 'blue' && state.buffs.blueExtract > 0) bMultiplier *= 2;
+
+                                    let amt = Math.min(this.curPow * (this.targetFlower.userData.multi||1) * bMultiplier, state.capacity - state.pollen);
                                     state.pollen += amt; state.achTracking.totalPollen += amt;
+                                    incrementQuestProgress('pollen', amt); // NPC Quest
                                     spawnFloatingText(`+${fN(amt)}`, this.group.position, '#a8ffb2'); SFX.collectBee(); updateUI();
+                                    
+                                    // Dano da abelha no Sprout próximo
+                                    for(let s of sprouts) {
+                                        if(s.group.position.distanceTo(this.targetFlower.position) < 15) s.takeDamage(amt * 5); 
+                                    }
+
                                     this.state = 'follow'; this.targetFlower = null;
                                 }
                             }
@@ -1466,7 +2203,7 @@
             if(aTag === 'INPUT' || aTag === 'TEXTAREA') return;
             if(isModalOpen()) return;
             let k = e.key.toLowerCase(); if(k==='w') inputState.w=true; if(k==='a') inputState.a=true; if(k==='s') inputState.s=true; if(k==='d') inputState.d=true;
-            if(k==='e') window.makeHoneyBtn(); if(e.code==='Space') inputState.space=true;
+            if(k==='e') window.makeHoneyBtn(); if(k==='r') window.placeSprinklerBtn(); if(e.code==='Space') inputState.space=true;
         });
         window.addEventListener('keyup', e => {
             let k = e.key.toLowerCase(); if(k==='w') inputState.w=false; if(k==='a') inputState.a=false; if(k==='s') inputState.s=false; if(k==='d') inputState.d=false;
@@ -1521,11 +2258,50 @@
         
         window.addEventListener('wheel', e => { camDist += e.deltaY * 0.05; camDist = Math.max(10, Math.min(60, camDist)); });
 
+        window.openChangelog = () => { document.getElementById('changelog-modal-wrapper').style.display='flex'; if(typeof SFX !== 'undefined') SFX.click(); };
         window.closeAllModals = () => { document.querySelectorAll('.modal-wrapper').forEach(el => el.style.display = 'none'); state.targetBeeRef = null; SFX.error(); renderAchievements(); }
         window.addEventListener('click', e => { if(e.target.classList.contains('modal-wrapper')) window.closeAllModals(); });
         window.openSettings = () => { document.getElementById('settings-modal-wrapper').style.display='flex'; SFX.click(); }
         
+        // Função de Resgate de Códigos
+        window.redeemPromoCode = () => {
+            const inputEl = document.getElementById('promo-code-input');
+            const code = inputEl.value.trim().toUpperCase();
+            inputEl.value = "";
+            
+            if(!code) return showToast("Nenhum código digitado!", "error");
+            if(state.redeemedCodes.includes(code)) return showToast("Este código já foi resgatado nesta conta!", "error");
+
+            let valid = false;
+            
+            if(code === 'BETA') {
+                state.honey += 500000000;
+                state.inventory.tickets += 25;
+                showToast("Código 'BETA' resgatado! +500M Mel, +25 Tickets", "success");
+                valid = true;
+            } else if (code === 'ABELHAMESTRE') {
+                state.inventory.royalJellies += 25;
+                state.inventory.treats += 300;
+                showToast("Código 'ABELHAMESTRE' resgatado! +25 Royal Jelly, +300 Petiscos", "success");
+                valid = true;
+            } else if (code === 'HONEYBOOST') {
+                state.honey += 250000000;
+                showToast("Código 'HONEYBOOST' resgatado! +250M Mel", "success");
+                valid = true;
+            }
+
+            if(valid) {
+                state.redeemedCodes.push(code);
+                SFX.upgrade();
+                throttledUpdateUI();
+            } else {
+                SFX.error();
+                showToast("Código inválido ou expirado!", "error");
+            }
+        };
+
         // Puxa e abre nuvem a depender se o Alvo são outros ou nós mesmos
+
         window.openStats = async (tUser = null) => {
             document.getElementById('stats-modal-wrapper').style.display = 'flex';
             document.getElementById('st-date').innerText = 'Carregando...'; document.getElementById('st-time').innerText = '...';
@@ -1572,11 +2348,16 @@
             mouse.x = (e.clientX/window.innerWidth)*2-1; mouse.y = -(e.clientY/window.innerHeight)*2+1; raycaster.setFromCamera(mouse, camera);
             
             const aM = []; bees.forEach(b => aM.push(b.bodyMesh)); hiveSlots.forEach(s => {if(s.occupied) aM.push(s.hexMesh);});
-            let hits = raycaster.intersectObjects([...aM, ...otherPlayersGroup.children], true); // Adiciona Intersecção de Jogadores
+            let hits = raycaster.intersectObjects([...aM, ...otherPlayersGroup.children, ...npcGroup.children], true); // Adiciona Intersecção de Jogadores/NPCs
             
             if(hits.length > 0) {
                 const cb = hits[0].object.userData; 
                 
+                if(cb.isNpc) {
+                    window.openQuestModal();
+                    return;
+                }
+
                 if(cb.isPeer) {
                     window.openStats(cb.username);
                     return;
@@ -1591,13 +2372,28 @@
         // =====================================
         // TABELAS E LÓGICAS DE VENDA/COMPRA MODAL
         // =====================================
+        
+        let uiTimeout = false;
+        function throttledUpdateUI() {
+            if(!uiTimeout) {
+                uiTimeout = true;
+                requestAnimationFrame(() => {
+                    updateUI();
+                    uiTimeout = false;
+                });
+            }
+        }
+
         function updateUI() {
             checkTrailRewards();
             document.getElementById('honey-val').innerText = fN(state.honey); document.getElementById('pollen-val').innerText = `${fN(state.pollen)} / ${fN(state.capacity)}`;
             document.getElementById('pollen-bar').style.width = `${(state.pollen/state.capacity)*100}%`;
             document.getElementById('pollen-bar').style.background = state.pollen>=state.capacity?'#e53935':'linear-gradient(90deg, #8bc34a, #cddc39)';
             
-            // Rebirth HUD
+            // HUD Ticket e Rebirth
+            if(document.getElementById('ticket-val')) document.getElementById('ticket-val').innerText = fN(state.inventory.tickets);
+            if(document.getElementById('hud-treats')) document.getElementById('hud-treats').innerText = fN(state.inventory.treats);
+            if(document.getElementById('hud-jelly')) document.getElementById('hud-jelly').innerText = fN(state.inventory.royalJellies);
             const rMult = getRebirthMultiplier().toFixed(2);
             const rebirthVal = document.getElementById('rebirth-val');
             const rebirthMult = document.getElementById('rebirth-mult');
@@ -1619,11 +2415,61 @@
                 player.packEq = eq.pack; player.toolEq = eq.tool;
                 player.lastCap = state.capacity; player.lastPow = player.power;
             }
+
+            // Health UI
+            document.getElementById('health-val').innerText = `${Math.floor(state.playerHealth)} / ${state.playerMaxHealth} HP`;
+            document.getElementById('health-bar').style.width = `${Math.max(0, (state.playerHealth / state.playerMaxHealth)) * 100}%`;
+            
+            if(document.getElementById('inv-redExtract')) {
+                document.getElementById('inv-redExtract').innerText = state.inventory.redExtract || 0;
+                document.getElementById('inv-blueExtract').innerText = state.inventory.blueExtract || 0;
+                document.getElementById('inv-enzymes').innerText = state.inventory.enzymes || 0;
+            }
+            renderBuffsUI();
+        }
+
+        function renderBuffsUI() {
+            const bc = document.getElementById('buffs-container');
+            bc.innerHTML = '';
+            if(state.buffs.redExtract > 0) bc.innerHTML += `<div class="buff-icon" style="border-color:#f44336; color:#ef9a9a;">🩸 Extrato Vermelho: ${Math.ceil(state.buffs.redExtract)}s</div>`;
+            if(state.buffs.blueExtract > 0) bc.innerHTML += `<div class="buff-icon" style="border-color:#2196f3; color:#90caf9;">💧 Extrato Azul: ${Math.ceil(state.buffs.blueExtract)}s</div>`;
+            if(state.buffs.enzymes > 0) bc.innerHTML += `<div class="buff-icon" style="border-color:#ffeb3b; color:#fff59d;">🧬 Enzimas Ativas: ${Math.ceil(state.buffs.enzymes)}s</div>`;
+        }
+
+        window.openCrafting = () => {
+            document.getElementById('crafting-modal-wrapper').style.display = 'flex';
+            throttledUpdateUI();
+            SFX.click();
+        }
+
+        window.craftItem = (type) => {
+            let success = false;
+            let inv = state.inventory;
+            if(type === 'redExtract' || type === 'blueExtract') {
+                if(inv.treats >= 50 && inv.tickets >= 10) { inv.treats-=50; inv.tickets-=10; inv[type] = (inv[type]||0)+1; success = true; }
+            } else if (type === 'enzymes') {
+                if(inv.treats >= 100 && inv.royalJellies >= 5) { inv.treats-=100; inv.royalJellies-=5; inv[type] = (inv[type]||0)+1; success = true; }
+            }
+
+            if(success) { SFX.upgrade(); showToast("Fabricação bem sucedida!", "success"); throttledUpdateUI(); }
+            else { SFX.error(); showToast("Ingredientes insuficientes!", "error"); }
+        }
+
+        window.useItem = (type) => {
+            if(!state.inventory[type]) return showToast("Você não possui este item!", "error");
+            state.inventory[type]--;
+            state.buffs[type] = (state.buffs[type] || 0) + 180; // 3 Minutos
+            
+            if(type === 'enzymes') bees.forEach(b => b.calcStats()); // Recalcula speed
+
+            SFX.collectBee(); showToast("Buff Temporário Ativado (3 Minutos)!", "success");
+            throttledUpdateUI();
         }
 
         window.switchShopTab = (tabId, evt) => {
             if(tabId === 'tab-achievements') renderAchievements();
             if(tabId === 'tab-gamepasses') renderGamepassTab();
+            if(tabId === 'tab-inventory') renderInventoryTab();
             document.querySelectorAll('.shop-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.shop-tab').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active'); evt.currentTarget.classList.add('active');
@@ -1664,12 +2510,12 @@
             if(stage >= 1 && stage <= perkSequence.length) {
                 rewards.push({ type: 'perk', icon: '🎫', label: GAMEPASS_LABELS[perkSequence[stage - 1]], perkId: perkSequence[stage - 1] });
             } else if(stage % 3 === 0) {
-                const eventId = `event_${10 + (stage % 110)}`;
+                const eventId = `event_${20 + (stage % 110)}`;
                 rewards.push({ type: 'eventBee', icon: '⚡', label: BeeTypes[eventId]?.name || 'Abelha de Evento', beeId: eventId });
             }
 
             if(stage % 5 === 0) {
-                const eventId = `event_${20 + (stage % 100)}`;
+                const eventId = `event_${30 + (stage % 100)}`;
                 rewards.push({ type: 'eventBee', icon: '👑', label: BeeTypes[eventId]?.name || 'Abelha de Evento Prime', beeId: eventId });
             }
 
@@ -1774,6 +2620,34 @@
         };
         window.trailTouchEnd = () => { scheduleTrailRecenter(); };
 
+        function renderInventoryTab() {
+            const inv = document.getElementById('tab-inventory');
+            inv.innerHTML = `
+                <div style="width:100%; text-align:center; padding-bottom:15px;">
+                    <h2 style="color:#8BC34A; margin-top:0;">Sua Mochila de Itens</h2>
+                    <p style="color:#ccc; text-align:center;">Itens dropados por monstros e flores.</p>
+                </div>
+                <div class="egg-card" style="border-color:#ff5555;">
+                    <div style="font-size:40px;">🍓</div>
+                    <h3>Petiscos</h3>
+                    <div style="font-size:24px; font-weight:bold; color:#fff;">${state.inventory.treats}</div>
+                    <div style="font-size:11px; color:#aaa; margin-top:10px;">Alimente abelhas para upar de graça.</div>
+                </div>
+                <div class="egg-card" style="border-color:#ffea00;">
+                    <div style="font-size:40px;">🎫</div>
+                    <h3>Tickets</h3>
+                    <div style="font-size:24px, font-weight:bold; color:#fff;">${state.inventory.tickets}</div>
+                    <div style="font-size:11px; color:#aaa; margin-top:10px;">Moeda premium rara.</div>
+                </div>
+                <div class="egg-card" style="border-color:#9C27B0;">
+                    <div style="font-size:40px;">🔮</div>
+                    <h3>Royal Jelly</h3>
+                    <div style="font-size:24px; font-weight:bold; color:#fff;">${state.inventory.royalJellies}</div>
+                    <div style="font-size:11px; color:#aaa; margin-top:10px;">Muta uma abelha para outra aleatória.</div>
+                </div>
+            `;
+        }
+
         function renderGamepassTab() {
             const trailInfo   = getTrailLevelInfo();
             const currentMs   = Math.floor(trailInfo.level / 50);  // milestone index at current level
@@ -1843,7 +2717,7 @@
             const currentRank      = getTrailRank(Math.max(trailInfo.level, 1));
             const perksUnlocked    = Object.keys(GAMEPASS_LABELS).filter(k => state.gamepasses[k]).length;
             const nextRewardMs     = clamp((Math.floor(trailInfo.level / 50) + 1) * 50, 50, MAX_TRAIL_LEVEL);
-            const nextRewardPrev   = getTrailRewardBundle(nextRewardMs).map(r => `${r.icon} ${r.label}`).join(' • ');
+            const nextRewardPrev   = getTrailRewardBundle(nextRewardMs).map(r => `${r.icon} ${r.label}`).join('');
             const nextRowBeeReq    = getTrailBeeRequirement(trailInfo.currentRow + 1);
 
             document.getElementById('tab-gamepasses').innerHTML = `
@@ -1967,6 +2841,7 @@
 
         window.doRebirth = window.openRebirthModal;
 
+
         window.openShop = () => {
              document.getElementById('slot-price-txt').innerText = fN(state.slotPriceBase * Math.pow(state.slotMultiplier, state.extraSlotsBought));
              renderGamepassTab();
@@ -1998,7 +2873,7 @@
             if(state.honey >= cst) {
                 const emp = hiveSlots.find(s => !s.occupied); if(!emp) return showToast("Sem Espaço.", "error");
                 state.achTracking.shopPurchases = (state.achTracking.shopPurchases||0)+1;
-                const bId = `${cat}_${Math.floor(Math.random()*10)}`; state.honey -= cst; SFX.buy(); bees.push(new Bee(BeeTypes[bId], emp));
+                const bId = `${cat}_${Math.floor(Math.random()*10)}`; state.honey -= cst; SFX.buy; bees.push(new Bee(BeeTypes[bId], emp));
                 updateUI(); showToast(`Sorteio! Chocou um(a) ${BeeTypes[bId].name}!`, "success");
             } else { SFX.error(); showToast("Créditos Carentes...", "error"); }
         };
@@ -2024,6 +2899,46 @@
             } else { SFX.error(); showToast("Pobreza Aparente...", "error"); }
         };
 
+        window.buyWithTickets = (item, cost, amount) => {
+            if (state.inventory.tickets >= cost) {
+                if (item === 'glider') {
+                   
+                    if (state.inventory.hasGlider) return showToast("Você já possui um Planador!", "error");
+                    state.inventory.tickets -= cost;
+                    state.inventory.hasGlider = true;
+                    SFX.buy();
+                    updateUI();
+                    return showToast("Planador adquirido! Segure PULO caindo para planar.", "success");
+                }
+
+                const emp = hiveSlots.find(s => !s.occupied);
+                if (item.startsWith('egg_') && !emp) {
+                    SFX.error(); showToast("Sem Casulos vazios na colmeia base!", "error"); return;
+                }
+                
+                state.inventory.tickets -= cost;
+                state.achTracking.shopPurchases = (state.achTracking.shopPurchases||0)+1;
+                SFX.buy();
+
+                if (item === 'jelly') {
+                    state.inventory.royalJellies += amount;
+                    showToast(`Súbito! +${amount}x Mutações de Royal Jelly adquiridas.`, "success");
+                } else if (item.startsWith('egg_')) {
+                    const cat = item.split('_')[1];
+                    let bId = `${cat}_${Math.floor(Math.random() * 10)}`;
+                    
+                    // Tratativa especial para abelha de Evento (Não-Básica do BSS)
+                    if(cat === 'event') bId = `event_${Math.floor(Math.random() * 110) + 10}`;
+                    
+                    bees.push(new Bee(BeeTypes[bId], emp));
+                    showToast(`Eclosão Instantânea Premium: Nascimento de ${BeeTypes[bId].name}!`, "success");
+                }
+                updateUI();
+            } else {
+                SFX.error(); showToast(`Você precisa de ${cost} tickets para isso!`, "error");
+            }
+        };
+
         window.makeHoneyBtn = () => {
             if(isModalOpen()) return;
             if(player.group.position.distanceTo(hivePos) < 25) { // Escala Generosa
@@ -2036,22 +2951,89 @@
             else { SFX.error(); showToast("Chegue mais perto da Colmeia (Base Holográfica)!", "error"); }
         };
 
+        // LÓGICA DO ASPERSOR
+        window.placeSprinklerBtn = () => {
+            if(isModalOpen()) return;
+            const cost = 25000;
+            if(state.honey < cost) return showToast(`Faltam fundos! Custa ${fN(cost)} Mel para plantar um aspersor.`, "error");
+            if(state.activeSprinklers.length >= 2) return showToast("Você atingiu o limite de 2 aspersores simultâneos!", "error");
+            
+            state.honey -= cost;
+            SFX.buy();
+            throttledUpdateUI();
+
+            const spPos = player.group.position.clone();
+            const spMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 2.5), new THREE.MeshStandardMaterial({color: 0x00BCD4}));
+            spMesh.position.copy(spPos);
+            spMesh.position.y = 1.25;
+            worldGroup.add(spMesh);
+            
+            const spObj = { mesh: spMesh, life: 180, pos: spPos }; // Dura 3 minutos (180 seg)
+            state.activeSprinklers.push(spObj);
+            showToast("Aspersor ativado: Regeneração passiva em área ativada (3 Minutos).", "info");
+        };
+
         // ABELHA INDIVIDUAL
         function refreshBeeManageModal() {
             const b = state.targetBeeRef; if(!b) return;
             document.getElementById('bm-title').innerText = b.type.name; document.getElementById('bm-icon').innerText = b.type.icon;
             document.getElementById('bm-lvl').innerText = b.level; document.getElementById('bm-pow').innerText = fN(b.curPow);
             document.getElementById('bm-conv').innerText = fN(b.curConv);
+            document.getElementById('bm-treats').innerText = state.inventory.treats;
+            document.getElementById('bm-jellies').innerText = state.inventory.royalJellies;
             const bt = document.getElementById('btn-upgrade');
             const maxLvlBee = state.gamepasses['gp_cap'] ? 200 : 100;
             if(b.level >= maxLvlBee) { bt.innerText = `Limites Genéticos (NV ${maxLvlBee})`; bt.disabled=true; bt.style.background="#555"; } 
             else { const c = Math.floor(b.type.lvlBasePrc*Math.pow(1.5, b.level-1)); bt.innerText = `Bombear Nível (-${fN(c)} Mel)`; bt.disabled=false; bt.style.background="#4CAF50"; }
         }
 
+        window.feedBeeTreat = () => {
+            const b = state.targetBeeRef; if(!b || b.level >= (state.gamepasses['gp_cap'] ? 200 : 100)) return;
+            if(state.inventory.treats > 0) {
+                state.inventory.treats--;
+                b.level++; b.calcStats();
+                SFX.upgrade(); updateUI(); refreshBeeManageModal();
+                showToast("Abelha comeu o petisco e subiu de nível!", "success");
+                spawnFloatingText(`UP!`, b.group.position.clone().add(new THREE.Vector3(0,2,0)), '#FF9800');
+            } else {
+                SFX.error(); showToast("Você não tem Petiscos!", "error");
+            }
+        };
+
+        window.feedRoyalJelly = () => {
+            const b = state.targetBeeRef; if(!b) return;
+            if(b.type.category === 'event') return showToast("Abelhas de evento não podem sofrer mutação!", "error");
+            if(state.inventory.royalJellies > 0) {
+                state.inventory.royalJellies--;
+                
+                // Sistema de Probabilidades BSS
+                let rng = Math.random();
+                let cat = 'basic';
+                if(rng < 0.01) cat = 'legendary';       // 1%
+                else if(rng < 0.05) cat = 'mythic';     // 4%
+                else if(rng < 0.20) cat = 'epic';       // 15%
+                else if(rng < 0.50) cat = 'rare';       // 30%
+                                                        // Restante 50% Basic
+
+                const bId = `${cat}_${Math.floor(Math.random()*10)}`;
+                b.type = BeeTypes[bId];
+                b.calcStats();
+                
+                b.slot.hexMesh.material.color.setHex(b.type.color);
+                b.bodyMesh.material.color.setHex(b.type.color);
+                
+                SFX.upgrade(); updateUI(); refreshBeeManageModal();
+                showToast(`Mutação bem-sucedida! Transformou-se em: ${b.type.name}`, "success");
+                spawnFloatingText(`✨ MUTAÇÃO!`, b.group.position.clone().add(new THREE.Vector3(0,2,0)), '#9C27B0');
+            } else {
+                SFX.error(); showToast("Você não tem Royal Jellies em sua mochila!", "error");
+            }
+        }
+
         window.confirmUpgradeBee = () => {
             const b = state.targetBeeRef; if(!b || b.level >= (state.gamepasses['gp_cap'] ? 200 : 100)) return;
             const cst = Math.floor(b.type.lvlBasePrc * Math.pow(1.5, b.level - 1));
-            if(state.honey >= cst) { state.honey -= cst; b.level++; b.calcStats(); SFX.upgrade(); updateUI(); refreshBeeManageModal(); showToast(`Nível Ascendido!`, "success"); spawnFloatingText(`UP!`, b.group.position.clone().add(new THREE.Vector3(0,2,0)), '#4CAF50'); }
+            if(state.honey >= cst) { state.honey -= cst; b.level++; b.calcStats(); SFX.upgrade(); updateUI(); refreshBeeManageModal(); showToast(`Nível Ascendido!`, "success"); }
             else { SFX.error(); showToast("Necessidade de fundos não suprida!", "error"); }
         };
 
@@ -2221,7 +3203,6 @@
             if(payload.payload.user === currentUser) return;
             appendChatMessage(payload.payload.user, payload.payload.text, false);
             window.showChatBubble(payload.payload.user, payload.payload.text);
-            SFX.step();
         });
 
         // DESCONEXÃO EXPLICITA SYNC
@@ -2367,11 +3348,22 @@
             updateDummyHiveColors(peer);
         }
         
+        function updateAllOtherBees() {
+            for(let p in peers) {
+                if(state.showOtherBees) {
+                    rebuildDummyBees(peers[p]);
+                } else {
+                    if(peers[p].beesGroup) peers[p].beesGroup.clear();
+                    resetDummyHiveColors(peers[p]);
+                }
+            }
+        }
+
         // Emissão Continua de sua Posição Servidor
         setInterval(() => {
             if(isGameActive && currentUser && serverChannel) {
                 serverChannel.send({ type: 'broadcast', event: 'mv', payload: {
-                    user: currentUser, x: player.group.position.x, y: player.group.position.y, z: player.group.position.z, ry: player.body.rotation.y
+                     user: currentUser, x: player.group.position.x, y: player.group.position.y, z: player.group.position.z, ry: player.body.rotation.y
                 }});
             }
         }, 100);
@@ -2399,6 +3391,59 @@
             player.update(dt, inputState, camera);
             if(state.honeyZoneAnim) state.honeyZoneAnim.rotation.y -= dt * 0.5; 
             
+            // Lógica do Sistema de Partículas Físicas
+            for(let i = pollenParticles.length - 1; i >= 0; i--) {
+                const p = pollenParticles[i];
+                p.velocity.y -= 30 * dt; // Gravidade local da partícula
+                const targetVec = p.target.group.position.clone().add(new THREE.Vector3(0, 1.5, 0)).sub(p.mesh.position);
+                p.velocity.add(targetVec.normalize().multiplyScalar(50 * dt)); // Atração magnética ao player
+                p.mesh.position.add(p.velocity.clone().multiplyScalar(dt));
+                
+                if(p.mesh.position.distanceTo(p.target.group.position) < 2.0 || p.mesh.position.y < 0) {
+                    worldGroup.remove(p.mesh);
+                    p.mesh.geometry.dispose();
+                    pollenParticles.splice(i, 1);
+                }
+            }
+
+            // Lógica dos Meteoros Caindo
+            for(let i = meteors.length - 1; i >= 0; i--) {
+                const mt = meteors[i];
+                const dir = mt.target.clone().sub(mt.mesh.position).normalize();
+                mt.mesh.position.add(dir.multiplyScalar(mt.speed * dt));
+                mt.mesh.rotation.x += dt*10; mt.mesh.rotation.y += dt*10;
+
+                if(mt.mesh.position.distanceTo(mt.target) < 2.0 || mt.mesh.position.y <= 0) {
+                    scene.remove(mt.mesh);
+                    mt.mesh.children[0].geometry.dispose();
+                    meteors.splice(i, 1);
+                    
+                    // Explosão Visual Simples
+                    spawnFloatingText("💥 BOOM", mt.target.clone().add(new THREE.Vector3(0,5,0)), "#ff5500");
+                    SFX.error();
+                    
+                    // Spawnar Tokens Raros do Meteoro
+                    let drops = 3 + Math.floor(Math.random() * 4);
+                    for(let d=0; d<drops; d++) {
+                        let t = Math.random() < 0.3 ? 'ticket' : (Math.random() < 0.5 ? 'royalJelly' : 'treat');
+                        const offset = new THREE.Vector3((Math.random()-0.5)*8, 0, (Math.random()-0.5)*8);
+                        spawnToken(t, mt.target.clone().add(offset));
+                    }
+                }
+            }
+
+            updateEnvironmentLighting(dt);
+
+            // Gerenciador de Tempo dos Buffs
+            let updatedBuffs = false;
+            if(state.buffs.redExtract > 0) { state.buffs.redExtract -= dt; updatedBuffs = true; }
+            if(state.buffs.blueExtract > 0) { state.buffs.blueExtract -= dt; updatedBuffs = true; }
+            if(state.buffs.enzymes > 0) { 
+                state.buffs.enzymes -= dt; updatedBuffs = true; 
+                if(state.buffs.enzymes <= 0) bees.forEach(b => b.calcStats()); // Remove buff de speed
+            }
+            if(updatedBuffs && Math.random() < 0.1) renderBuffsUI();
+
             // Distancia Expandida Cancelamento Automatico Converta de mel
             if(state.hiveConvertMode && player.group.position.distanceTo(hivePos) > 25) state.hiveConvertMode = false;
 
@@ -2416,6 +3461,54 @@
                 }
             });
 
+            // Atualiza Mobs e Sprouts
+            mobs.forEach(m => m.update(dt, player));
+            sprouts.forEach(s => s.update(dt));
+            
+            // Lógica de Aspersores (Regeneração passiva de Flores e Efeito giro)
+            for(let i = state.activeSprinklers.length - 1; i >= 0; i--) {
+                const sp = state.activeSprinklers[i];
+                sp.life -= dt;
+                sp.mesh.rotation.y += dt * 5;
+                if(sp.life <= 0) {
+                    worldGroup.remove(sp.mesh); sp.mesh.geometry.dispose();
+                    state.activeSprinklers.splice(i, 1);
+                } else {
+                    // Regenera flores próximas (raio 25)
+                    flowers.forEach(f => {
+                        if(f.userData.cap && f.userData.health < 1.0 && f.position.distanceTo(sp.pos) < 25) {
+                            f.userData.health += dt * 0.5; // Regeneração 5x mais rápida com o aspersor
+                            if(f.userData.health > 1.0) f.userData.health = 1.0;
+                        }
+                    });
+                }
+            }
+
+            // Coleta de Tokens Físicos (Drops no chão)
+            for(let i = tokens.length - 1; i >= 0; i--) {
+                const t = tokens[i];
+                t.userData.life -= dt;
+                
+                // Animação de flutuação e rotação
+                t.position.y = 1 + Math.sin(Date.now() * 0.005 + t.userData.floatOffset) * 0.3;
+                t.rotation.y += dt;
+                
+                if(t.position.distanceTo(player.group.position) < 3.5) {
+                    collectToken(t, i);
+                } else if(t.userData.life <= 0) {
+                    worldGroup.remove(t);
+                    t.geometry.dispose();
+                    tokens.splice(i, 1);
+                }
+            }
+
+            // Regeneração de Vida Lenta do Jogador
+            if(state.playerHealth < state.playerMaxHealth) {
+                state.playerHealth += dt * 2;
+                if(state.playerHealth > state.playerMaxHealth) state.playerHealth = state.playerMaxHealth;
+                if(Math.floor(Date.now()/500)%2===0) throttledUpdateUI(); // Atualiza UI de forma não intensiva
+            }
+
             flowers.forEach(f => {
                 if(f.userData.cap) { 
                     if(f.userData.health < 1.0) { f.userData.health+=dt*0.1; if(f.userData.health>1.0)f.userData.health=1.0; f.userData.cap.scale.set(1, Math.max(0.1, f.userData.health*f.userData.maxScaleY), 1); }
@@ -2427,6 +3520,16 @@
                 }
             });
 
+            // Atualiza Label 2D do NPC
+            if(npcGroup.userData.htmlEl) {
+                const npcPos = npcGroup.position.clone().add(new THREE.Vector3(0, 8, 0)).project(camera);
+                if(npcPos.z < 1 && npcGroup.position.distanceTo(player.group.position) < 100) {
+                    npcGroup.userData.htmlEl.style.left = `${(npcPos.x * 0.5 + 0.5) * window.innerWidth}px`;
+                    npcGroup.userData.htmlEl.style.top = `${(npcPos.y * -0.5 + 0.5) * window.innerHeight}px`;
+                    npcGroup.userData.htmlEl.style.display = 'block';
+                } else { npcGroup.userData.htmlEl.style.display = 'none'; }
+            }
+
             // Reposicionador Local Chat Bubble
             const lhP = player.group.position.clone().add(new THREE.Vector3(0, 5.5, 0)).project(camera);
             if(lhP.z < 1) {
@@ -2437,7 +3540,7 @@
 
                         // Badge de rank do jogador local
                         if(player.rankBadge) {
-                            const rkP = player.group.position.clone().add(new THREE.Vector3(0, 7.4, 0)).project(camera);
+                            const rkP = player.group.position.clone().add(new THREE.Vector3(0, 6.8, 0)).project(camera);
                             if(rkP.z < 1) {
                                 player.rankBadge.style.left  = `${(rkP.x * 0.5 + 0.5) * window.innerWidth}px`;
                                 player.rankBadge.style.top   = `${(rkP.y * -0.5 + 0.5) * window.innerHeight}px`;
@@ -2482,7 +3585,7 @@
                     if(pr.chatDiv) {
                          const headChat = pr.group.position.clone().add(new THREE.Vector3(0, 5.5, 0)).project(camera);
                          pr.chatDiv.style.left = `${(headChat.x * 0.5 + 0.5) * window.innerWidth}px`;
-                         pr.chatDiv.style.bottom = `${window.innerHeight - ((headChat.y * -0.5 + 0.5) * window.innerHeight)}px`;
+                         pr.chatDiv.style.bottom = `${window.innerHeight - ((headChat.y * -0.5 + 0.5) * window.innerHeight)}px`;    
                          pr.chatDiv.style.display = 'flex';
                     }
                 } else { 
@@ -2502,7 +3605,7 @@
                 // Animação boba e super leve de voo nas abelhas dummy do jogador remoto, se habilitado
                 if(state.showOtherBees && pr.beesGroup) {
                     pr.beesGroup.children.forEach(b => {
-                        b.position.y = Math.sin(Date.now()*0.005 + b.userData.idx) * 1.5 + 2;
+                        b.position.y = Math.sin(Date.now() * 0.005 + b.userData.idx) * 1.5 + 2;
                         b.rotation.y += dt*2;
                     });
                 }
